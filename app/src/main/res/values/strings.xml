@@ -17,4 +17,15 @@
         <item>January</item>
         <item>February</item>
     </string-array>
+    <string name="title_activity_show_profile">ShowProfileActivity</string>
+
+
+    <string name="app_name">App Name</string>
+
+    <string name="editSave">Save</string>
+
+    <string name="nameProfile">Name:</string>
+    <string name="mailProfile">Mail:</string>
+    <string name="bioProfile">Short bio:</string>
+    <string name="title_activity_edit_profile">EditProfileActivity</string>
 </resources>
