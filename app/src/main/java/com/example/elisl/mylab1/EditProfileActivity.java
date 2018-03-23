@@ -110,6 +110,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 editor.commit();
 
+                //create activity show profile
                 Intent intent = new Intent(getApplicationContext(), ShowProfileActivity.class);
                 startActivity(intent);
             }
