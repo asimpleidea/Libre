@@ -8,9 +8,11 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -39,8 +41,11 @@ public class EditProfileActivity extends AppCompatActivity {
 
     Bitmap newProfileImage = null;
 
+    Uri uri = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i("state", "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
@@ -108,11 +113,14 @@ public class EditProfileActivity extends AppCompatActivity {
                 if(newProfileImage != null)
                     editor.putString("profileImage", pathProfileImage);
 
+                Log.i("state", "content saved");
+
                 editor.commit();
 
-                //create activity show profile
+                /*//create activity show profile
                 Intent intent = new Intent(getApplicationContext(), ShowProfileActivity.class);
-                startActivity(intent);
+                startActivity(intent);*/
+                finish();
             }
         });
 
@@ -120,8 +128,7 @@ public class EditProfileActivity extends AppCompatActivity {
         cancelImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ShowProfileActivity.class);
-                startActivity(intent);
+                finish();
             }
         });
 
@@ -140,12 +147,60 @@ public class EditProfileActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onStart() {
+        Log.i("state", "onStart");
+
+
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i("state", "onResume");
+
+        super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.i("state", "onSaveInstanceState");
+        super.onSaveInstanceState(outState);
+
+        outState.putString("profileName", name.getText().toString());
+        outState.putString("profileEmail", mail.getText().toString());
+        outState.putString("profileBio", bio.getText().toString());
+        if(uri != null)
+            outState.putString("profileImageURI", uri.toString());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.i("state", "onRestoreInstanceState");
+        super.onRestoreInstanceState(savedInstanceState);
+
+        name.setText(savedInstanceState.getString("profileName"));
+        mail.setText(savedInstanceState.getString("profileEmail"));
+        bio.setText(savedInstanceState.getString("profileBio"));
+
+        uri = Uri.parse(savedInstanceState.getString("profileImageURI"));
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+            newProfileImage = bitmap;
+            imageProfile.setImageBitmap(bitmap);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i("state", "onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-            Uri uri = data.getData();
+            uri = data.getData();
 
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);

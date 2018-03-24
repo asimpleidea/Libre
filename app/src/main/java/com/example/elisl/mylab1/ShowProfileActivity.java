@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -44,6 +45,27 @@ public class ShowProfileActivity extends AppCompatActivity {
         mail = (TextView) findViewById(R.id.showMail);
         bio = (TextView) findViewById(R.id.showBio);
 
+        //listener onClick for editing
+        editImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), EditProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i("state", "OnResume - show");
         //get preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
 
@@ -67,6 +89,7 @@ public class ShowProfileActivity extends AppCompatActivity {
 
         //get image profile if already inserted
         str = prefs.getString("profileImage", null);
+        Log.i("state", "show: "+str);
         if (str != null) {
             imageProfile.setImageURI(Uri.fromFile(new File(str)) );
         } else {
@@ -75,15 +98,5 @@ public class ShowProfileActivity extends AppCompatActivity {
             imageProfile.setImageDrawable(d);
         }
 
-        //listener onClick for editing
-        editImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), EditProfileActivity.class);
-                startActivity(intent);
-            }
-        });
-
     }
-
 }
