@@ -2,14 +2,16 @@ package com.example.elisl.mylab1;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -23,14 +25,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class EditProfileActivity extends AppCompatActivity {
-    private int PICK_IMAGE_REQUEST = 1;
+    private int REQUEST_CAMERA = 1;
+    private int PICK_IMAGE_REQUEST = 2;
 
     Toolbar toolbar;
 
     TextView saveText;
     ImageView cancelImage;
 
-    ImageView imageProfile;
+    de.hdodenhof.circleimageview.CircleImageView imageProfile;
 
     EditText name;
     EditText mail;
@@ -43,6 +46,8 @@ public class EditProfileActivity extends AppCompatActivity {
 
     Uri uri = null;
 
+    private String userChoosenTask;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i("state", "onCreate");
@@ -53,7 +58,7 @@ public class EditProfileActivity extends AppCompatActivity {
         cancelImage = (ImageView) findViewById(R.id.cancelEdit);
 
         //image profile
-        imageProfile = (ImageView) findViewById(R.id.editImageProfile);
+        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.editImageProfile);
 
         //get edit fields
         name = (EditText) findViewById(R.id.editName);
@@ -85,10 +90,12 @@ public class EditProfileActivity extends AppCompatActivity {
         str = prefs.getString("profileImage", null);
         if (str != null) {
             imageProfile.setImageURI(Uri.fromFile(new File(str)) );
+            uri = Uri.parse(str);
         } else {
             //default image
             Drawable d = getResources().getDrawable(R.drawable.unknown_user);
             imageProfile.setImageDrawable(d);
+            uri = Uri.parse("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png");
         }
 
         //save changes if "Save" is pressed and load showProfile
@@ -103,15 +110,26 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 //store new image profile
                 String pathProfileImage = new String();
-                if(newProfileImage != null)
+                if(newProfileImage != null) {
                     pathProfileImage = saveToInternalStorage(newProfileImage);
+                }
 
                 // Save strings in SharedPref
                 editor.putString("profileName", newName);
                 editor.putString("profileMail", newMail);
                 editor.putString("profileBio", newBio);
-                if(newProfileImage != null)
+                if(newProfileImage != null) {
+                    String oldImage = prefs.getString("profileImage", null);
+
                     editor.putString("profileImage", pathProfileImage);
+
+                    //delete the previous profile image
+                    if(oldImage != null) {
+                        File file = new File(oldImage);
+                        boolean deleted = file.delete();
+                        Log.i("state", "Old profile image deleted: " + deleted);
+                    }
+                }
 
                 Log.i("state", "content saved");
 
@@ -136,12 +154,7 @@ public class EditProfileActivity extends AppCompatActivity {
         imageProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                // Show only images, no videos or anything else
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                // Always show the chooser (if there are multiple options available)
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+                selectImage();
             }
 
         });
@@ -198,23 +211,38 @@ public class EditProfileActivity extends AppCompatActivity {
         Log.i("state", "onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
 
+        //if image profile is taken by gallery
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
             uri = data.getData();
 
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
+
                 newProfileImage = bitmap;
                 imageProfile.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+
+        //if image profile is shot by the camera
+        if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
+            if(data.getExtras() == null || data.getExtras().get("data") == null)
+                return;
+
+            //thumbnail is the shot photo
+            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+
+            //set new profile image = shot photo
+            newProfileImage = thumbnail;
+            imageProfile.setImageBitmap(thumbnail);
+        }
     }
 
-    private String saveToInternalStorage(Bitmap bitmapImage){
-        String imageName = "profile.jpg";
+    private String saveToInternalStorage(Bitmap bitmapImage) {
+        String imageName = Long.toString(System.currentTimeMillis() );
+        //String imageName = "profile.jpg";
 
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
         // path to /data/data/yourapp/app_data/imageDir
@@ -237,5 +265,102 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         }
         return directory.getAbsolutePath() +"/"+ imageName;
+    }
+
+    private void selectImage() {
+        //get string for AlertDialog options
+        final String optionCamera = getResources().getString(R.string.dialog_camera);
+        final String optionLibrary = getResources().getString(R.string.dialog_library);
+        final String optionCancel = getResources().getString(R.string.dialog_cancel);
+
+        final CharSequence[] items = {optionCamera, optionLibrary, optionCancel};
+
+        //create the AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(EditProfileActivity.this);
+        //builder.setTitle("Add Photo!");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+
+                if (items[item].equals(optionCamera)) {
+                    boolean permissionCamera = PermissionManager.checkPermissionCamera(EditProfileActivity.this);
+
+                    userChoosenTask ="Take Photo";
+                    if(permissionCamera)
+                        cameraIntent();
+                } else if (items[item].equals(optionLibrary)) {
+                    boolean permissionRead = PermissionManager.checkPermissionRead(EditProfileActivity.this);
+
+                    userChoosenTask ="Choose from Library";
+                    if(permissionRead)
+                        galleryIntent();
+                } else if (items[item].equals(optionCancel)) {
+                    userChoosenTask ="Cancel";
+                    dialog.dismiss();
+                }
+
+            }
+        });
+
+        //show the AlertDialog on the screen
+        builder.show();
+    }
+
+    //intent to access the camera
+    private void cameraIntent() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        //intent.putExtra("android.intent.extras.CAMERA_FACING", 1);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, REQUEST_CAMERA);
+        }
+    }
+
+    //intent to access the gallery
+    private void galleryIntent() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        // Show only images, no videos or anything else
+        intent.setType("image/*");
+        // Always show the chooser (if there are multiple options available)
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        Log.i("state", "onRequestPermissionResult");
+
+        switch (requestCode) {
+            case PermissionManager.PERMISSION_READ_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if(userChoosenTask.equals("Take Photo"))
+                        cameraIntent();
+                    else if(userChoosenTask.equals("Choose from Library"))
+                        galleryIntent();
+                } else {
+                    //TODO code for deny
+                }
+                break;
+
+            case PermissionManager.PERMISSION_WRITE_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if(userChoosenTask.equals("Take Photo"))
+                        cameraIntent();
+                    else if(userChoosenTask.equals("Choose from Library"))
+                        galleryIntent();
+                } else {
+                    //TODO code for deny
+                }
+                break;
+
+            case PermissionManager.PERMISSION_REQUEST_CAMERA:
+                // Request for camera permission.
+                if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    cameraIntent();
+                } else {
+                    //TODO code for deny
+                }
+                break;
+
+        }
+
     }
 }

@@ -20,7 +20,7 @@ public class ShowProfileActivity extends AppCompatActivity {
 
     ImageView editImage;
 
-    ImageView imageProfile;
+    de.hdodenhof.circleimageview.CircleImageView imageProfile;
 
     TextView name;
     TextView mail;
@@ -38,7 +38,7 @@ public class ShowProfileActivity extends AppCompatActivity {
         editImage = (ImageView) findViewById(R.id.imageEdit);
 
         //image profile
-        imageProfile = (ImageView) findViewById(R.id.showImageProfile);
+        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.showImageProfile);
 
         //get edit fields
         name = (TextView) findViewById(R.id.showName);

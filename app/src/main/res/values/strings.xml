@@ -26,4 +26,9 @@
     <string name="mailProfile">Mail:</string>
     <string name="bioProfile">Short bio:</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
+
+    //strings for AlertDialog to select between camera or gallery
+    <string name="dialog_camera">Take Photo</string>
+    <string name="dialog_library">Photo Library</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>
