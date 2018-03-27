@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,8 +21,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -47,6 +51,7 @@ public class EditProfileActivity extends AppCompatActivity {
     Uri uri = null;
 
     private String userChoosenTask;
+    private boolean isPhoto = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,12 +95,14 @@ public class EditProfileActivity extends AppCompatActivity {
         str = prefs.getString("profileImage", null);
         if (str != null) {
             imageProfile.setImageURI(Uri.fromFile(new File(str)) );
-            uri = Uri.parse(str);
+            if(uri == null)
+                uri = Uri.parse(str);
         } else {
             //default image
             Drawable d = getResources().getDrawable(R.drawable.unknown_user);
             imageProfile.setImageDrawable(d);
-            uri = Uri.parse("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png");
+            if(uri == null)
+                uri = Uri.parse("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png");
         }
 
         //save changes if "Save" is pressed and load showProfile
@@ -185,6 +192,8 @@ public class EditProfileActivity extends AppCompatActivity {
         outState.putString("profileBio", bio.getText().toString());
         if(uri != null)
             outState.putString("profileImageURI", uri.toString());
+
+        outState.putBoolean("isPhoto", isPhoto);
     }
 
     @Override
@@ -195,12 +204,20 @@ public class EditProfileActivity extends AppCompatActivity {
         name.setText(savedInstanceState.getString("profileName"));
         mail.setText(savedInstanceState.getString("profileEmail"));
         bio.setText(savedInstanceState.getString("profileBio"));
+        isPhoto = savedInstanceState.getBoolean("isPhoto");
 
         uri = Uri.parse(savedInstanceState.getString("profileImageURI"));
+
         try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-            newProfileImage = bitmap;
-            imageProfile.setImageBitmap(bitmap);
+            if(isPhoto) {
+                Bitmap mBitmap = BitmapFactory.decodeFile(uri.toString());
+                newProfileImage = mBitmap;
+                imageProfile.setImageBitmap(mBitmap);
+            } else {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                newProfileImage = bitmap;
+                imageProfile.setImageBitmap(bitmap);
+            }
         }catch (IOException e) {
             e.printStackTrace();
         }
@@ -214,13 +231,14 @@ public class EditProfileActivity extends AppCompatActivity {
         //if image profile is taken by gallery
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-            uri = data.getData();
-
             try {
+                uri = data.getData();
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
 
                 newProfileImage = bitmap;
                 imageProfile.setImageBitmap(bitmap);
+
+                isPhoto = false;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -228,15 +246,23 @@ public class EditProfileActivity extends AppCompatActivity {
 
         //if image profile is shot by the camera
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
-            if(data.getExtras() == null || data.getExtras().get("data") == null)
-                return;
+            File out = new File(getFilesDir(), "newImage.jpg");
 
-            //thumbnail is the shot photo
-            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+            if(!out.exists()) {
+                Toast.makeText(getBaseContext(),
+                        R.string.error_camera, Toast.LENGTH_LONG)
+                        .show();
+                return;
+            }
+
+            Bitmap mBitmap = BitmapFactory.decodeFile(out.getAbsolutePath());
 
             //set new profile image = shot photo
-            newProfileImage = thumbnail;
-            imageProfile.setImageBitmap(thumbnail);
+            newProfileImage = mBitmap;
+            imageProfile.setImageBitmap(mBitmap);
+
+            uri = Uri.parse(out.getAbsolutePath());
+            isPhoto = true;
         }
     }
 
@@ -309,7 +335,10 @@ public class EditProfileActivity extends AppCompatActivity {
     //intent to access the camera
     private void cameraIntent() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        //intent.putExtra("android.intent.extras.CAMERA_FACING", 1);
+
+        //save photo on MyFileProvider.CONTENT_URI
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, MyFileContentProvider.CONTENT_URI);
+
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, REQUEST_CAMERA);
         }
@@ -336,18 +365,9 @@ public class EditProfileActivity extends AppCompatActivity {
                     else if(userChoosenTask.equals("Choose from Library"))
                         galleryIntent();
                 } else {
-                    //TODO code for deny
-                }
-                break;
-
-            case PermissionManager.PERMISSION_WRITE_EXTERNAL_STORAGE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if(userChoosenTask.equals("Take Photo"))
-                        cameraIntent();
-                    else if(userChoosenTask.equals("Choose from Library"))
-                        galleryIntent();
-                } else {
-                    //TODO code for deny
+                    Toast.makeText(getBaseContext(),
+                        R.string.deny_permission_read, Toast.LENGTH_LONG)
+                        .show();
                 }
                 break;
 
@@ -356,7 +376,9 @@ public class EditProfileActivity extends AppCompatActivity {
                 if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     cameraIntent();
                 } else {
-                    //TODO code for deny
+                    Toast.makeText(getBaseContext(),
+                        R.string.deny_permission_camera, Toast.LENGTH_LONG)
+                        .show();
                 }
                 break;
 

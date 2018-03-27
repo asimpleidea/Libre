@@ -31,4 +31,11 @@
     <string name="dialog_camera">Take Photo</string>
     <string name="dialog_library">Photo Library</string>
     <string name="dialog_cancel">Cancel</string>
+
+    <string name="error_camera">Error while capturing image</string>
+    <string name="permission_necessary">Permission necessary</string>
+    <string name="deny_permission_read">External storage read permission is necessary</string>
+    <string name="deny_permission_camera">Camera permission is necessary</string>
+
+
 </resources>

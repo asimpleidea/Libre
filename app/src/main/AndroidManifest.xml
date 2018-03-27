@@ -28,6 +28,11 @@
             android:label="@string/title_activity_edit_profile"
             android:theme="@style/AppTheme">
         </activity>
+        <provider
+            android:name=".MyFileContentProvider"
+            android:authorities="com.example.camerademo"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>

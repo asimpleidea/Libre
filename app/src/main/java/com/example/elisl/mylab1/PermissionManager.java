@@ -27,8 +27,8 @@ public class PermissionManager {
                 if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
                     alertBuilder.setCancelable(true);
-                    alertBuilder.setTitle("Permission necessary");
-                    alertBuilder.setMessage("External storage read permission is necessary");
+                    alertBuilder.setTitle(R.string.permission_necessary);
+                    alertBuilder.setMessage(R.string.deny_permission_read);
                     alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
                         public void onClick(DialogInterface dialog, int which) {
@@ -59,8 +59,8 @@ public class PermissionManager {
                 if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.CAMERA)) {
                     AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
                     alertBuilder.setCancelable(true);
-                    alertBuilder.setTitle("Permission necessary");
-                    alertBuilder.setMessage("Camera permission is necessary");
+                    alertBuilder.setTitle(R.string.permission_necessary);
+                    alertBuilder.setMessage(R.string.deny_permission_camera);
                     alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
                         public void onClick(DialogInterface dialog, int which) {
@@ -82,8 +82,9 @@ public class PermissionManager {
         }
     }
 
-    //check if read on external storage permission is granted
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+    //useless for now
+    //check if write on external storage permission is granted
+    /*@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
     public static boolean checkPermissionWrite(final Context context) {
         int currentAPIVersion = Build.VERSION.SDK_INT;
         if(currentAPIVersion>= Build.VERSION_CODES.M) {
@@ -91,7 +92,7 @@ public class PermissionManager {
                 if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
                     alertBuilder.setCancelable(true);
-                    alertBuilder.setTitle("Permission necessary");
+                    alertBuilder.setTitle(R.string.permission_necessary);
                     alertBuilder.setMessage("External storage write permission is necessary");
                     alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
@@ -112,7 +113,7 @@ public class PermissionManager {
         } else {
             return true;
         }
-    }
+    }*/
 
 }
 
