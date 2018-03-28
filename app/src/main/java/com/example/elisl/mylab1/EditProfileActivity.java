@@ -109,6 +109,10 @@ public class EditProfileActivity extends AppCompatActivity {
         saveText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Log.i("saving", "Saving...");
+                Toast.makeText(getApplicationContext(), "Saving...", Toast.LENGTH_SHORT).show();
+
                 editor = prefs.edit();
 
                 String newName = name.getText().toString();
@@ -141,6 +145,10 @@ public class EditProfileActivity extends AppCompatActivity {
                 Log.i("state", "content saved");
 
                 editor.commit();
+
+
+                Log.i("saving", "Saved");
+                Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
 
                 /*//create activity show profile
                 Intent intent = new Intent(getApplicationContext(), ShowProfileActivity.class);
@@ -280,7 +288,7 @@ public class EditProfileActivity extends AppCompatActivity {
         try {
             fos = new FileOutputStream(mypath);
             // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
