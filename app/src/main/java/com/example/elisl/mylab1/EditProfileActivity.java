@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -27,6 +28,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class EditProfileActivity extends AppCompatActivity {
     private int REQUEST_CAMERA = 1;
@@ -106,12 +108,12 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         //save changes if "Save" is pressed and load showProfile
-        saveText.setOnClickListener(new View.OnClickListener() {
+        saveText.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) {
+            public void onClick(View v){
 
-                Log.i("saving", "Saving...");
-                Toast.makeText(getApplicationContext(), "Saving...", Toast.LENGTH_SHORT).show();
+//                Log.i("saving", "Saving...");
+//                Toast.makeText(getApplicationContext(), "Saving...", Toast.LENGTH_SHORT).show();
 
                 editor = prefs.edit();
 
@@ -122,7 +124,15 @@ public class EditProfileActivity extends AppCompatActivity {
                 //store new image profile
                 String pathProfileImage = new String();
                 if(newProfileImage != null) {
-                    pathProfileImage = saveToInternalStorage(newProfileImage);
+
+                    try {
+                        pathProfileImage = new SaveToInternalStorage(getApplicationContext()).execute(newProfileImage).get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                    /*pathProfileImage = saveToInternalStorage(newProfileImage);*/
                 }
 
                 // Save strings in SharedPref
@@ -147,8 +157,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 editor.commit();
 
 
-                Log.i("saving", "Saved");
-                Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
+//                Log.i("saving", "Saved");
+//                Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
 
                 /*//create activity show profile
                 Intent intent = new Intent(getApplicationContext(), ShowProfileActivity.class);
@@ -288,7 +298,7 @@ public class EditProfileActivity extends AppCompatActivity {
         try {
             fos = new FileOutputStream(mypath);
             // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 85, fos);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
