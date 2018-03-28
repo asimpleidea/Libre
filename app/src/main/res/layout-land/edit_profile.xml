@@ -7,6 +7,8 @@
     android:theme="@style/Profile"
     android:paddingLeft="@dimen/paddingLeftRight"
     android:paddingRight="@dimen/paddingLeftRight"
+    android:clickable="true"
+    android:focusableInTouchMode="true"
     >
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -47,7 +49,7 @@
                 android:id="@+id/editName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapSentences|textAutoCorrect" />
+                android:inputType="textCapSentences|textAutoCorrect|textEmailAddress" />
         </LinearLayout>
 
         <LinearLayout

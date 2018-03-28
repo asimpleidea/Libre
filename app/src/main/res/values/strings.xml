@@ -21,6 +21,7 @@
 
 
     <string name="editSave">Save</string>
+    <string name="editCancel">Cancel</string>
 
     <string name="nameProfile">Name:</string>
     <string name="mailProfile">Mail:</string>

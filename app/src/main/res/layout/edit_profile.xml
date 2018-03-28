@@ -63,8 +63,7 @@
             android:id="@+id/editMail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:contentDescription="Insert your name"
-            android:inputType="textCapSentences|textAutoCorrect" />
+            android:inputType="textCapSentences|textAutoCorrect|textEmailAddress" />
 
     </LinearLayout>
 
@@ -88,7 +87,6 @@
             android:id="@+id/editBio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:contentDescription="Insert your name"
             android:inputType="textCapSentences|textAutoCorrect" />
 
     </LinearLayout>

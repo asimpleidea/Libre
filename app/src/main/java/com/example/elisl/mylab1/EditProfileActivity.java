@@ -1,5 +1,6 @@
 package com.example.elisl.mylab1;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
@@ -16,8 +17,12 @@ import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,7 +40,7 @@ public class EditProfileActivity extends AppCompatActivity {
     Toolbar toolbar;
 
     TextView saveText;
-    ImageView cancelImage;
+    TextView cancelImage;
 
     de.hdodenhof.circleimageview.CircleImageView imageProfile;
 
@@ -60,7 +65,7 @@ public class EditProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile);
 
         saveText = (TextView) findViewById(R.id.saveEdit);
-        cancelImage = (ImageView) findViewById(R.id.cancelEdit);
+        cancelImage = (TextView) findViewById(R.id.cancelEdit);
 
         //image profile
         imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.editImageProfile);
@@ -173,6 +178,51 @@ public class EditProfileActivity extends AppCompatActivity {
             }
 
         });
+
+        //hide keyboard if you click away
+        name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    hideKeyboard(v);
+                }
+            }
+        });
+
+        //hide keyboard if you click away
+        mail.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    hideKeyboard(v);
+                }
+            }
+        });
+
+        //hide keyboard if you click away
+        bio.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    hideKeyboard(v);
+                }
+            }
+        });
+
+        //validate email input
+        /*mail.setFilters(new InputFilter[] { new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                //String regex = "a-z~@#$%^&*:;<>.,/}{+";
+                //!dest.toString().contains(" ")||
+                if(!Patterns.EMAIL_ADDRESS.matcher(source).matches()){
+                    return null;
+                }
+                return "";
+            }
+
+        } });*/
     }
 
     @Override
@@ -392,5 +442,11 @@ public class EditProfileActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    //method to hide keyboard when you click away on the screen
+    public void hideKeyboard(View view) {
+        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }
