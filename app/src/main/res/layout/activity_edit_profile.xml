@@ -4,6 +4,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#ffffff"
+    android:clickable="true"
+    android:focusableInTouchMode="true"
     >
 
     <include layout="@layout/edit_toolbar"
