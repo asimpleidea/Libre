@@ -34,6 +34,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class EditProfileActivity extends AppCompatActivity {
     private int REQUEST_CAMERA = 1;
@@ -117,58 +119,69 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v){
 
-//                Log.i("saving", "Saving...");
-//                Toast.makeText(getApplicationContext(), "Saving...", Toast.LENGTH_SHORT).show();
+                if(!isValidEmailAddress(mail.getText().toString())) {
+                    new AlertDialog.Builder(EditProfileActivity.this)
+                            .setTitle("E-mail not valid!")
+                            .setMessage("Please insert a valid email address")
+                            .setNeutralButton("ok",new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .show();
+                }else {
 
-                editor = prefs.edit();
+                    editor = prefs.edit();
 
-                String newName = name.getText().toString();
-                String newMail = mail.getText().toString();
-                String newBio = bio.getText().toString();
+                    String newName = name.getText().toString();
+                    String newMail = mail.getText().toString();
+                    String newBio = bio.getText().toString();
 
-                //store new image profile
-                String pathProfileImage = new String();
-                if(newProfileImage != null) {
+                    //store new image profile
+                    String pathProfileImage = new String();
+                    if (newProfileImage != null) {
 
-                    try {
-                        pathProfileImage = new SaveToInternalStorage(getApplicationContext()).execute(newProfileImage).get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
+                        try {
+                            pathProfileImage = new SaveToInternalStorage(getApplicationContext()).execute(newProfileImage).get();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                        /*pathProfileImage = saveToInternalStorage(newProfileImage);*/
                     }
-                    /*pathProfileImage = saveToInternalStorage(newProfileImage);*/
-                }
 
-                // Save strings in SharedPref
-                editor.putString("profileName", newName);
-                editor.putString("profileMail", newMail);
-                editor.putString("profileBio", newBio);
-                if(newProfileImage != null) {
-                    String oldImage = prefs.getString("profileImage", null);
+                    // Save strings in SharedPref
+                    editor.putString("profileName", newName);
+                    editor.putString("profileMail", newMail);
+                    editor.putString("profileBio", newBio);
+                    if (newProfileImage != null) {
+                        String oldImage = prefs.getString("profileImage", null);
 
-                    editor.putString("profileImage", pathProfileImage);
+                        editor.putString("profileImage", pathProfileImage);
 
-                    //delete the previous profile image
-                    if(oldImage != null) {
-                        File file = new File(oldImage);
-                        boolean deleted = file.delete();
-                        Log.i("state", "Old profile image deleted: " + deleted);
+                        //delete the previous profile image
+                        if (oldImage != null) {
+                            File file = new File(oldImage);
+                            boolean deleted = file.delete();
+                            Log.i("state", "Old profile image deleted: " + deleted);
+                        }
                     }
+
+                    Log.i("state", "content saved");
+
+                    editor.commit();
+
+
+                    //                Log.i("saving", "Saved");
+                    //                Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
+
+                    /*//create activity show profile
+                    Intent intent = new Intent(getApplicationContext(), ShowProfileActivity.class);
+                    startActivity(intent);*/
+                    finish();
                 }
-
-                Log.i("state", "content saved");
-
-                editor.commit();
-
-
-//                Log.i("saving", "Saved");
-//                Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
-
-                /*//create activity show profile
-                Intent intent = new Intent(getApplicationContext(), ShowProfileActivity.class);
-                startActivity(intent);*/
-                finish();
             }
         });
 
@@ -233,6 +246,14 @@ public class EditProfileActivity extends AppCompatActivity {
             }
 
         } });*/
+    }
+
+    private boolean isValidEmailAddress(String emailAddress) {
+        String  expression="^[\\w\\-]([\\.\\w])+[\\w]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+        CharSequence inputStr = emailAddress;
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+        return matcher.matches();
     }
 
     @Override
