@@ -58,11 +58,11 @@ public class SaveToInternalStorage extends AsyncTask<Bitmap, Integer, String> {
         progressDialog.setCancelable(false);
         progressDialog.setIndeterminate(true);
         progressDialog.show();*/
-        Toast.makeText(applicationContext, "Saving...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(applicationContext, R.string.saving, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     protected void onPostExecute(String s) {
-        Toast.makeText(applicationContext, "Saved!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(applicationContext, R.string.saved, Toast.LENGTH_SHORT).show();
     }
 }

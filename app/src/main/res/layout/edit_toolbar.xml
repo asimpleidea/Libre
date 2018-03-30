@@ -25,6 +25,7 @@
             android:paddingRight="12dp"
             android:textSize="20dp"
             android:text="@string/editCancel"
+            android:background="?android:attr/selectableItemBackground"
             />
 
         <TextView
@@ -36,6 +37,7 @@
             android:layout_centerVertical="true"
             android:paddingRight="16dp"
             android:text="@string/editSave"
+            android:background="?android:attr/selectableItemBackground"
             />
 
     </RelativeLayout>

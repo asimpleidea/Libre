@@ -41,7 +41,10 @@
             android:id="@+id/editName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences|textAutoCorrect" />
+            android:inputType="textCapSentences|textAutoCorrect"
+            android:maxLength ="70"
+            />
+
     </LinearLayout>
 
     <LinearLayout
@@ -63,7 +66,9 @@
             android:id="@+id/editMail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences|textAutoCorrect|textEmailAddress" />
+            android:inputType="textCapSentences|textAutoCorrect|textEmailAddress"
+            android:maxLength ="70"
+            />
 
     </LinearLayout>
 
@@ -87,7 +92,9 @@
             android:id="@+id/editBio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences|textAutoCorrect" />
+            android:inputType="textCapSentences|textAutoCorrect"
+            android:maxLength ="300"
+            />
 
     </LinearLayout>
 

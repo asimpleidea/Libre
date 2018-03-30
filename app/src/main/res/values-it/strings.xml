@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MyLab1</string>
+
+    <string name="editSave">Salva</string>
+    <string name="editCancel">Annulla</string>
+
+    <string name="nameProfile">Nome:</string>
+    <string name="mailProfile">Mail:</string>
+    <string name="bioProfile">Biografia:</string>
+    <string name="title_activity_edit_profile">EditProfileActivity</string>
+
+    //strings for AlertDialog to select between camera or gallery
+    <string name="dialog_camera">Scatta foto</string>
+    <string name="dialog_library">Scegli foto</string>
+    <string name="dialog_cancel">Annulla</string>
+
+    //string for errors
+    <string name="error_camera">Errore acquisendo l\'immagine</string>
+    <string name="permission_necessary">Permesso necessario</string>
+    <string name="deny_permission_read">Permesso di lettura necessario</string>
+    <string name="deny_permission_camera">Permesso della fotocamera necessario</string>
+
+    //string for savings
+    <string name="saving">Salvataggio...</string>
+    <string name="saved">Salvato!</string>
+
+    //string for email error
+    <string name="mail_not_valid">E-mail non valida!</string>
+    <string name="insert_valid_mail">Inserisci un indirizzo email valido</string>
+    <string name="ok">ok</string>
+
+</resources>

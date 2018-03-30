@@ -121,9 +121,9 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 if(!isValidEmailAddress(mail.getText().toString())) {
                     new AlertDialog.Builder(EditProfileActivity.this)
-                            .setTitle("E-mail not valid!")
-                            .setMessage("Please insert a valid email address")
-                            .setNeutralButton("ok",new DialogInterface.OnClickListener() {
+                            .setTitle(R.string.mail_not_valid)
+                            .setMessage(R.string.insert_valid_mail)
+                            .setNeutralButton(R.string.ok,new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
