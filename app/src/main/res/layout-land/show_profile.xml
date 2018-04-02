@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:theme="@style/Profile"
     android:paddingLeft="@dimen/paddingLeftRight"
-    android:paddingRight="@dimen/paddingLeftRight"
+
     >
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -13,89 +13,123 @@
         android:id="@+id/showImageProfile"
         android:layout_width="120dp"
         android:layout_height="120dp"
+        android:paddingRight="@dimen/paddingLeftRight"
         app:civ_border_width="1dp"
         app:civ_border_color="@android:color/black"
         android:layout_gravity="center_vertical"
         />
 
-    <LinearLayout
-        android:orientation="vertical"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="12dp"
+        android:orientation="horizontal"
+        android:theme="@style/Profile"
+        android:fillViewport="true"
         >
 
-        <LinearLayout
-            android:orientation="vertical"
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
+            android:stretchColumns="1"
+            android:clickable="true"
+            android:focusableInTouchMode="true"
+            android:paddingRight="@dimen/paddingLeftRight"
             >
 
-            <TextView
-                android:id="@+id/nameProfile"
-                android:textSize="@dimen/profile_description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/nameProfile"
-                android:textColor="@android:color/darker_gray"
-                />
-
-            <TextView
-                android:id="@+id/showName"
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
-        </LinearLayout>
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                >
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            >
-            <TextView
-                android:id="@+id/mailProfile"
-                android:textSize="@dimen/profile_description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/mailProfile"
-                android:textColor="@android:color/darker_gray"
-                />
+                <TextView
+                    android:id="@+id/nameProfile"
+                    android:textSize="@dimen/profile_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nameProfile"
+                    android:textColor="@android:color/darker_gray"
+                    />
 
-            <TextView
-                android:id="@+id/showMail"
+                <TextView
+                    android:id="@+id/showName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
+                android:paddingBottom="10dp"
+                >
+                <TextView
+                    android:id="@+id/mailProfile"
+                    android:textSize="@dimen/profile_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mailProfile"
+                    android:textColor="@android:color/darker_gray"
+                    />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/showMail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            >
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/bioProfile"
-                android:textSize="@dimen/profile_description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/bioProfile"
-                android:textColor="@android:color/darker_gray"
-                />
-
-            <TextView
-                android:id="@+id/showBio"
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
+                android:paddingBottom="10dp"
+                >
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/bioProfile"
+                    android:textSize="@dimen/profile_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bioProfile"
+                    android:textColor="@android:color/darker_gray"
+                    />
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/showBio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                >
+
+                <TextView
+                    android:id="@+id/cityProfile"
+                    android:textSize="@dimen/profile_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cityProfile"
+                    android:textColor="@android:color/darker_gray"
+                    />
+
+                <TextView
+                    android:id="@+id/showCity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+
+            </LinearLayout>
+        </TableLayout>
+    </ScrollView>
 </LinearLayout>

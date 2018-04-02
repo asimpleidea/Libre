@@ -11,33 +11,41 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.InputFilter;
-import android.text.Spanned;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class EditProfileActivity extends AppCompatActivity {
+public class EditProfileActivity extends AppCompatActivity implements
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks {
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
 
@@ -51,6 +59,7 @@ public class EditProfileActivity extends AppCompatActivity {
     EditText name;
     EditText mail;
     EditText bio;
+    AutoCompleteTextView city;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -61,6 +70,14 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private String userChoosenTask;
     private boolean isPhoto = false;
+
+    private static final String LOG_TAG = "EditProfileActivity";
+    private static final int GOOGLE_API_CLIENT_ID = 0;
+    private AutoCompleteTextView mAutocompleteTextView;
+    private GoogleApiClient mGoogleApiClient;
+    private PlaceArrayAdapter mPlaceArrayAdapter;
+    private static final LatLngBounds BOUNDS_MOUNTAIN_VIEW = new LatLngBounds(
+            new LatLng(37.398160, -122.180831), new LatLng(37.430610, -121.972090));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +95,7 @@ public class EditProfileActivity extends AppCompatActivity {
         name = (EditText) findViewById(R.id.editName);
         mail = (EditText) findViewById(R.id.editMail);
         bio = (EditText) findViewById(R.id.editBio);
+        city = (AutoCompleteTextView) findViewById(R.id.autoCompleteCity);
 
         //get preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
@@ -98,6 +116,12 @@ public class EditProfileActivity extends AppCompatActivity {
         str = prefs.getString("profileBio", null);
         if (str != null) {
             bio.setText(str);
+        }
+
+        //get city if already inserted
+        str = prefs.getString("profileCity", null);
+        if (str != null) {
+            city.setText(str);
         }
 
         //get image profile if already inserted
@@ -137,6 +161,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     String newName = name.getText().toString();
                     String newMail = mail.getText().toString();
                     String newBio = bio.getText().toString();
+                    String newCity = city.getText().toString();
 
                     //store new image profile
                     String pathProfileImage = new String();
@@ -156,6 +181,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     editor.putString("profileName", newName);
                     editor.putString("profileMail", newMail);
                     editor.putString("profileBio", newBio);
+                    editor.putString("profileCity", newCity);
                     if (newProfileImage != null) {
                         String oldImage = prefs.getString("profileImage", null);
 
@@ -177,9 +203,6 @@ public class EditProfileActivity extends AppCompatActivity {
                     //                Log.i("saving", "Saved");
                     //                Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
 
-                    /*//create activity show profile
-                    Intent intent = new Intent(getApplicationContext(), ShowProfileActivity.class);
-                    startActivity(intent);*/
                     finish();
                 }
             }
@@ -232,20 +255,31 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
-        //validate email input
-        /*mail.setFilters(new InputFilter[] { new InputFilter() {
+        //hide keyboard if you click away
+        city.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public CharSequence filter(CharSequence source, int start, int end,
-                                       Spanned dest, int dstart, int dend) {
-                //String regex = "a-z~@#$%^&*:;<>.,/}{+";
-                //!dest.toString().contains(" ")||
-                if(!Patterns.EMAIL_ADDRESS.matcher(source).matches()){
-                    return null;
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    hideKeyboard(v);
                 }
-                return "";
             }
+        });
 
-        } });*/
+        //enable city suggestions
+        mGoogleApiClient = new GoogleApiClient.Builder(EditProfileActivity.this)
+                .addApi(Places.GEO_DATA_API)
+                .enableAutoManage(this, GOOGLE_API_CLIENT_ID, this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+        city.setThreshold(3);
+
+        city.setOnItemClickListener(mAutocompleteClickListener);
+        mPlaceArrayAdapter = new PlaceArrayAdapter(this, android.R.layout.simple_list_item_1,
+                BOUNDS_MOUNTAIN_VIEW,
+                new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES).build());
+        city.setAdapter(mPlaceArrayAdapter);
     }
 
     private boolean isValidEmailAddress(String emailAddress) {
@@ -265,6 +299,14 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        Log.i("state", "onStop");
+
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
     protected void onResume() {
         Log.i("state", "onResume");
 
@@ -279,6 +321,7 @@ public class EditProfileActivity extends AppCompatActivity {
         outState.putString("profileName", name.getText().toString());
         outState.putString("profileEmail", mail.getText().toString());
         outState.putString("profileBio", bio.getText().toString());
+        outState.putString("profileCity", city.getText().toString());
         if(uri != null)
             outState.putString("profileImageURI", uri.toString());
 
@@ -293,6 +336,7 @@ public class EditProfileActivity extends AppCompatActivity {
         name.setText(savedInstanceState.getString("profileName"));
         mail.setText(savedInstanceState.getString("profileEmail"));
         bio.setText(savedInstanceState.getString("profileBio"));
+        city.setText(savedInstanceState.getString("profileCity"));
         isPhoto = savedInstanceState.getBoolean("isPhoto");
 
         uri = Uri.parse(savedInstanceState.getString("profileImageURI"));
@@ -303,9 +347,13 @@ public class EditProfileActivity extends AppCompatActivity {
                 newProfileImage = mBitmap;
                 imageProfile.setImageBitmap(mBitmap);
             } else {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                newProfileImage = bitmap;
-                imageProfile.setImageBitmap(bitmap);
+                File f = new File(uri.toString());
+                if(!f.exists() ) {
+                    //if image is saved on gallery (new image)
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                    newProfileImage = bitmap;
+                    imageProfile.setImageBitmap(bitmap);
+                }
             }
         }catch (IOException e) {
             e.printStackTrace();
@@ -480,4 +528,60 @@ public class EditProfileActivity extends AppCompatActivity {
         InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
+    private AdapterView.OnItemClickListener mAutocompleteClickListener
+            = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            final PlaceArrayAdapter.PlaceAutocomplete item = mPlaceArrayAdapter.getItem(position);
+            final String placeId = String.valueOf(item.placeId);
+            Log.i(LOG_TAG, "Selected: " + item.description);
+            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                    .getPlaceById(mGoogleApiClient, placeId);
+            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+            Log.i(LOG_TAG, "Fetching details for ID: " + item.placeId);
+        }
+    };
+
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+                @Override
+                public void onResult(PlaceBuffer places) {
+                    if (!places.getStatus().isSuccess()) {
+                        Log.e(LOG_TAG, "Place query did not complete. Error: " +
+                                places.getStatus().toString());
+                        return;
+                    }
+                    // Selecting the first object buffer.
+                    final Place place = places.get(0);
+                    CharSequence attributions = places.getAttributions();
+
+                    if (attributions != null) {
+
+                    }
+                }
+            };
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mPlaceArrayAdapter.setGoogleApiClient(mGoogleApiClient);
+        Log.i(LOG_TAG, "Google Places API connected.");
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e(LOG_TAG, "Google Places API connection failed with error code: "
+                + connectionResult.getErrorCode());
+
+        Toast.makeText(this, R.string.google_connection_failed, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mPlaceArrayAdapter.setGoogleApiClient(null);
+        Log.e(LOG_TAG, "Google Places API connection suspended.");
+    }
+
 }
+

@@ -25,6 +25,7 @@ public class ShowProfileActivity extends AppCompatActivity {
     TextView name;
     TextView mail;
     TextView bio;
+    TextView city;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -44,6 +45,7 @@ public class ShowProfileActivity extends AppCompatActivity {
         name = (TextView) findViewById(R.id.showName);
         mail = (TextView) findViewById(R.id.showMail);
         bio = (TextView) findViewById(R.id.showBio);
+        city = (TextView) findViewById(R.id.showCity);
 
         //listener onClick for editing
         editImage.setOnClickListener(new View.OnClickListener() {
@@ -85,6 +87,12 @@ public class ShowProfileActivity extends AppCompatActivity {
         str = prefs.getString("profileBio", null);
         if (str != null) {
             bio.setText(str);
+        }
+
+        //get city if already inserted
+        str = prefs.getString("profileCity", null);
+        if (str != null) {
+            city.setText(str);
         }
 
         //get image profile if already inserted

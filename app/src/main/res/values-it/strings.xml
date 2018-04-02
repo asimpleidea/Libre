@@ -8,6 +8,7 @@
     <string name="nameProfile">Nome:</string>
     <string name="mailProfile">Mail:</string>
     <string name="bioProfile">Biografia:</string>
+    <string name="cityProfile">Città:</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
 
     //strings for AlertDialog to select between camera or gallery
@@ -29,5 +30,8 @@
     <string name="mail_not_valid">E-mail non valida!</string>
     <string name="insert_valid_mail">Inserisci un indirizzo email valido</string>
     <string name="ok">ok</string>
+
+    //string for google api error
+    <string name="google_connection_failed">Connessione fallita con Google Places API</string>
 
 </resources>
