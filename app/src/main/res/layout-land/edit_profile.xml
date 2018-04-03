@@ -65,6 +65,34 @@
 
                 </LinearLayout>
 
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                >
+
+                <TextView
+                    android:id="@+id/phoneProfile"
+                    android:textSize="@dimen/profile_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/phoneProfile"
+                    android:textColor="@android:color/darker_gray"
+                    />
+
+                <EditText
+                    android:id="@+id/editPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="flagNoExtractUi"
+                    android:inputType="phone"
+                    android:maxLength ="70"
+                    />
+
+            </LinearLayout>
+
                 <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="match_parent"

@@ -63,6 +63,6 @@ public class SaveToInternalStorage extends AsyncTask<Bitmap, Integer, String> {
 
     @Override
     protected void onPostExecute(String s) {
-        Toast.makeText(applicationContext, R.string.saved, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(applicationContext, R.string.saved, Toast.LENGTH_SHORT).show();
     }
 }

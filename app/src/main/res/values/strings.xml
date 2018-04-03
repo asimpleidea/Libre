@@ -5,6 +5,7 @@
     <string name="editCancel">Cancel</string>
 
     <string name="nameProfile">Name:</string>
+    <string name="phoneProfile">Phone:</string>
     <string name="mailProfile">Mail:</string>
     <string name="bioProfile">Short bio:</string>
     <string name="cityProfile">City:</string>

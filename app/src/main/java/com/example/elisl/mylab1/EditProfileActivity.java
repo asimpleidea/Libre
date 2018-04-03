@@ -56,10 +56,11 @@ public class EditProfileActivity extends AppCompatActivity implements
 
     de.hdodenhof.circleimageview.CircleImageView imageProfile;
 
-    EditText name;
-    EditText mail;
-    EditText bio;
-    AutoCompleteTextView city;
+    private EditText name;
+    private EditText phone;
+    private EditText mail;
+    private EditText bio;
+    private AutoCompleteTextView city;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -93,6 +94,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
         //get edit fields
         name = (EditText) findViewById(R.id.editName);
+        phone = (EditText) findViewById(R.id.editPhone);
         mail = (EditText) findViewById(R.id.editMail);
         bio = (EditText) findViewById(R.id.editBio);
         city = (AutoCompleteTextView) findViewById(R.id.autoCompleteCity);
@@ -102,27 +104,28 @@ public class EditProfileActivity extends AppCompatActivity implements
 
         //get name if already inserted
         String str = prefs.getString("profileName", null);
-        if (str != null) {
+        if (str != null)
             name.setText(str);
-        }
+
+        //get phone if already inserted
+        str = prefs.getString("profilePhone", null);
+        if(str != null)
+            phone.setText(str);
 
         //get mail if already inserted
         str = prefs.getString("profileMail", null);
-        if (str != null) {
+        if (str != null)
             mail.setText(str);
-        }
 
         //get bio if already inserted
         str = prefs.getString("profileBio", null);
-        if (str != null) {
+        if (str != null)
             bio.setText(str);
-        }
 
         //get city if already inserted
         str = prefs.getString("profileCity", null);
-        if (str != null) {
+        if (str != null)
             city.setText(str);
-        }
 
         //get image profile if already inserted
         str = prefs.getString("profileImage", null);
@@ -159,6 +162,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                     editor = prefs.edit();
 
                     String newName = name.getText().toString();
+                    String newPhone = phone.getText().toString();
                     String newMail = mail.getText().toString();
                     String newBio = bio.getText().toString();
                     String newCity = city.getText().toString();
@@ -179,6 +183,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
                     // Save strings in SharedPref
                     editor.putString("profileName", newName);
+                    editor.putString("profilePhone", newPhone);
                     editor.putString("profileMail", newMail);
                     editor.putString("profileBio", newBio);
                     editor.putString("profileCity", newCity);
@@ -199,9 +204,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
                     editor.commit();
 
-
-                    //                Log.i("saving", "Saved");
-                    //                Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.saved, Toast.LENGTH_SHORT).show();
 
                     finish();
                 }
@@ -230,6 +233,15 @@ public class EditProfileActivity extends AppCompatActivity implements
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
+                    hideKeyboard(v);
+                }
+            }
+        });
+
+        phone.setOnFocusChangeListener(new View.OnFocusChangeListener(){
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus){
                     hideKeyboard(v);
                 }
             }
@@ -319,6 +331,7 @@ public class EditProfileActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
 
         outState.putString("profileName", name.getText().toString());
+        outState.putString("profilePhone", phone.getText().toString());
         outState.putString("profileEmail", mail.getText().toString());
         outState.putString("profileBio", bio.getText().toString());
         outState.putString("profileCity", city.getText().toString());
@@ -334,6 +347,7 @@ public class EditProfileActivity extends AppCompatActivity implements
         super.onRestoreInstanceState(savedInstanceState);
 
         name.setText(savedInstanceState.getString("profileName"));
+        phone.setText(savedInstanceState.getString("profilePhone"));
         mail.setText(savedInstanceState.getString("profileEmail"));
         bio.setText(savedInstanceState.getString("profileBio"));
         city.setText(savedInstanceState.getString("profileCity"));
@@ -403,7 +417,7 @@ public class EditProfileActivity extends AppCompatActivity implements
         }
     }
 
-    private String saveToInternalStorage(Bitmap bitmapImage) {
+    /*private String saveToInternalStorage(Bitmap bitmapImage) {
         String imageName = Long.toString(System.currentTimeMillis() );
         //String imageName = "profile.jpg";
 
@@ -428,7 +442,7 @@ public class EditProfileActivity extends AppCompatActivity implements
             }
         }
         return directory.getAbsolutePath() +"/"+ imageName;
-    }
+    }*/
 
     private void selectImage() {
         //get string for AlertDialog options

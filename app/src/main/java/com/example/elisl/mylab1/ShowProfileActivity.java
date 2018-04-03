@@ -22,10 +22,11 @@ public class ShowProfileActivity extends AppCompatActivity {
 
     de.hdodenhof.circleimageview.CircleImageView imageProfile;
 
-    TextView name;
-    TextView mail;
-    TextView bio;
-    TextView city;
+    private TextView name;
+    private TextView phone;
+    private TextView mail;
+    private TextView bio;
+    private TextView city;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -43,6 +44,7 @@ public class ShowProfileActivity extends AppCompatActivity {
 
         //get edit fields
         name = (TextView) findViewById(R.id.showName);
+        phone = (TextView) findViewById(R.id.showPhone);
         mail = (TextView) findViewById(R.id.showMail);
         bio = (TextView) findViewById(R.id.showBio);
         city = (TextView) findViewById(R.id.showCity);
@@ -73,27 +75,27 @@ public class ShowProfileActivity extends AppCompatActivity {
 
         //get name if already inserted
         String str = prefs.getString("profileName", null);
-        if (str != null) {
+        if (str != null)
             name.setText(str);
-        }
+
+        str = prefs.getString("profilePhone", null);
+        if(str != null)
+            phone.setText(str);
 
         //get mail if already inserted
         str = prefs.getString("profileMail", null);
-        if (str != null) {
+        if (str != null)
             mail.setText(str);
-        }
 
         //get bio if already inserted
         str = prefs.getString("profileBio", null);
-        if (str != null) {
+        if (str != null)
             bio.setText(str);
-        }
 
         //get city if already inserted
         str = prefs.getString("profileCity", null);
-        if (str != null) {
+        if (str != null)
             city.setText(str);
-        }
 
         //get image profile if already inserted
         str = prefs.getString("profileImage", null);

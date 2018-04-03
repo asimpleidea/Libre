@@ -6,6 +6,7 @@
     <string name="editCancel">Annulla</string>
 
     <string name="nameProfile">Nome:</string>
+    <string name="phoneProfile">Telefono:</string>
     <string name="mailProfile">Mail:</string>
     <string name="bioProfile">Biografia:</string>
     <string name="cityProfile">Città:</string>
