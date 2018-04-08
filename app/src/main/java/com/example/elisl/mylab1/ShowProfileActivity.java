@@ -12,9 +12,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class ShowProfileActivity extends AppCompatActivity {
 
@@ -27,6 +29,9 @@ public class ShowProfileActivity extends AppCompatActivity {
     private TextView mail;
     private TextView bio;
     private TextView city;
+
+    private String[] genresList;
+    private LinearLayout genres;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -48,6 +53,9 @@ public class ShowProfileActivity extends AppCompatActivity {
         mail = (TextView) findViewById(R.id.showMail);
         bio = (TextView) findViewById(R.id.showBio);
         city = (TextView) findViewById(R.id.showCity);
+
+        genres = (LinearLayout) findViewById(R.id.show_favourite_genres_list);
+        genresList = getResources().getStringArray(R.array.genres);
 
         //listener onClick for editing
         editImage.setOnClickListener(new View.OnClickListener() {
@@ -108,5 +116,27 @@ public class ShowProfileActivity extends AppCompatActivity {
             imageProfile.setImageDrawable(d);
         }
 
+        //get saved selectedItems
+        str = prefs.getString("profileGenres", null);
+        genres.removeAllViews();
+
+        if(str != null && !str.isEmpty()) {
+            String[] strArray = str.split(",");
+
+            for(int i = 0; i < strArray.length; i++) {
+                genres.addView(BuildGenreLayout(genresList[Integer.parseInt(strArray[i])] ) );
+            }
+        }
+
     }
+
+    private TextView BuildGenreLayout(final String name) {
+        TextView genre = new TextView(getApplicationContext());
+        genre.setText(name);
+        genre.setTextSize(this.getResources().getDimension(R.dimen.genre_item));
+        genre.setTextColor(this.getResources().getColor(R.color.black));
+
+        return genre;
+    }
+
 }

@@ -17,11 +17,17 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +45,9 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,6 +70,14 @@ public class EditProfileActivity extends AppCompatActivity implements
     private EditText mail;
     private EditText bio;
     private AutoCompleteTextView city;
+    private LinearLayout genres;
+
+    private Button btnGenre;
+    private String[] genresList;                                    //all genres list
+    boolean[] checkedItems;                                         //checked genres
+    ArrayList<Integer> selectedGenres = new ArrayList<Integer>();   //favourite genres
+
+
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -98,6 +115,12 @@ public class EditProfileActivity extends AppCompatActivity implements
         mail = (EditText) findViewById(R.id.editMail);
         bio = (EditText) findViewById(R.id.editBio);
         city = (AutoCompleteTextView) findViewById(R.id.autoCompleteCity);
+
+        //manage genres
+        genres = (LinearLayout) findViewById(R.id.edit_favourite_genres_list);
+        btnGenre = (Button) findViewById(R.id.buttonGenre);
+        genresList = getResources().getStringArray(R.array.genres);
+        checkedItems = new boolean[genresList.length];
 
         //get preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
@@ -141,12 +164,27 @@ public class EditProfileActivity extends AppCompatActivity implements
                 uri = Uri.parse("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png");
         }
 
+        //get saved selectedItems
+        str = prefs.getString("profileGenres", null);
+        genres.removeAllViews();
+        selectedGenres = new ArrayList<Integer>();
+
+        if(str != null && !str.isEmpty()) {
+            Log.i("state", "onCreate GENRES: " +str);
+            String[] strArray = str.split(",");
+
+            for(int i = 0; i < strArray.length; i++) {
+                selectedGenres.add(Integer.parseInt(strArray[i]) );
+                checkedItems[Integer.parseInt(strArray[i])] = true;
+                genres.addView(BuildGenreLayout(genresList[Integer.parseInt(strArray[i])] ) );
+            }
+        }
+
         //save changes if "Save" is pressed and load showProfile
         saveText.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-
-                if(!isValidEmailAddress(mail.getText().toString())) {
+                if(!mail.getText().toString().isEmpty() && !isValidEmailAddress(mail.getText().toString())) {
                     new AlertDialog.Builder(EditProfileActivity.this)
                             .setTitle(R.string.mail_not_valid)
                             .setMessage(R.string.insert_valid_mail)
@@ -157,7 +195,18 @@ public class EditProfileActivity extends AppCompatActivity implements
                                 }
                             })
                             .show();
-                }else {
+                } else if(!phone.getText().toString().isEmpty() && !isValidPhoneNumber(phone.getText().toString())) {
+                    new AlertDialog.Builder(EditProfileActivity.this)
+                            .setTitle(R.string.phone_not_valid)
+                            .setMessage(R.string.insert_valid_phone)
+                            .setNeutralButton(R.string.ok,new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .show();
+                } else {
 
                     editor = prefs.edit();
 
@@ -200,6 +249,18 @@ public class EditProfileActivity extends AppCompatActivity implements
                         }
                     }
 
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < selectedGenres.size()-1; i++) {
+                        sb.append(selectedGenres.get(i).toString() ).append(",");
+                    }
+
+                    if(selectedGenres.size() > 0) {
+                        sb.append(selectedGenres.get(selectedGenres.size() - 1).toString());
+                        editor.putString("profileGenres", sb.toString());
+                    } else
+                        editor.remove("profileGenres");
+
+                    Log.i("state", "save button GENRES: "+sb.toString());
                     Log.i("state", "content saved");
 
                     editor.commit();
@@ -277,6 +338,9 @@ public class EditProfileActivity extends AppCompatActivity implements
             }
         });
 
+        //set listener for genre button
+        manageButtonGenre();
+
         //enable city suggestions
         mGoogleApiClient = new GoogleApiClient.Builder(EditProfileActivity.this)
                 .addApi(Places.GEO_DATA_API)
@@ -297,6 +361,14 @@ public class EditProfileActivity extends AppCompatActivity implements
     private boolean isValidEmailAddress(String emailAddress) {
         String  expression="^[\\w\\-]([\\.\\w])+[\\w]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
         CharSequence inputStr = emailAddress;
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+        return matcher.matches();
+    }
+
+    private boolean isValidPhoneNumber(String phoneNumber) {
+        String expression="^(\\+([0-9]{2,3})\\s)?[0-9\\s]{4,13}$";
+        CharSequence inputStr = phoneNumber;
         Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(inputStr);
         return matcher.matches();
@@ -338,6 +410,20 @@ public class EditProfileActivity extends AppCompatActivity implements
         if(uri != null)
             outState.putString("profileImageURI", uri.toString());
 
+        //save selected genres
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < selectedGenres.size()-1; i++) {
+            sb.append(selectedGenres.get(i).toString() ).append(",");
+        }
+
+        if(selectedGenres.size() > 0) {
+            sb.append(selectedGenres.get(selectedGenres.size() - 1).toString());
+            outState.putString("profileGenres", sb.toString());
+        } else
+            outState.remove("profileGenres");
+
+        Log.i("state", "onSaveInstanceState GENRES: "+sb.toString());
+
         outState.putBoolean("isPhoto", isPhoto);
     }
 
@@ -371,6 +457,29 @@ public class EditProfileActivity extends AppCompatActivity implements
             }
         }catch (IOException e) {
             e.printStackTrace();
+        }
+
+        //get saved selectedItems
+        String str = savedInstanceState.getString("profileGenres", null);
+        genres.removeAllViews();
+        selectedGenres = new ArrayList<Integer>();
+        checkedItems = new boolean[genresList.length];
+
+        if(str != null) {
+            if(str.isEmpty()) {
+                genres.addView(BuildGenreLayout("") );
+            } else {
+                Log.i("state", "onRestoreInstanceState GENRES: "+str);
+                String[] strArray = str.split(",");
+                selectedGenres = new ArrayList<Integer>();
+
+
+                for (int i = 0; i < strArray.length; i++) {
+                    selectedGenres.add(Integer.parseInt(strArray[i]));
+                    checkedItems[Integer.parseInt(strArray[i])] = true;
+                    genres.addView(BuildGenreLayout(genresList[Integer.parseInt(strArray[i])]));
+                }
+            }
         }
     }
 
@@ -597,5 +706,81 @@ public class EditProfileActivity extends AppCompatActivity implements
         Log.e(LOG_TAG, "Google Places API connection suspended.");
     }
 
+    private TextView BuildGenreLayout(final String name) {
+        TextView genre = new TextView(getApplicationContext());
+        genre.setText(name);
+        genre.setTextSize(this.getResources().getDimension(R.dimen.genre_item));
+        genre.setTextColor(this.getResources().getColor(R.color.black));
+
+        return genre;
+    }
+
+    private void manageButtonGenre() {
+        btnGenre.setOnClickListener(new View.OnClickListener() {
+            ArrayList<Integer> oldSelectedGenres = new ArrayList<Integer>();
+
+            @Override
+            public void onClick(View view) {
+                oldSelectedGenres = new ArrayList<Integer>();
+
+                for(int i=0; i < genresList.length; i++) {
+                    if(checkedItems[i] == true)
+                        oldSelectedGenres.add(i);
+                }
+
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(EditProfileActivity.this);
+                mBuilder.setTitle(R.string.title_genre_alertdialog);
+                mBuilder.setMultiChoiceItems(genresList, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    //called every time you click a checkbox
+                    public void onClick(DialogInterface dialogInterface, int position, boolean isChecked) {
+                        if (isChecked) {
+                            if(!selectedGenres.contains(position))
+                                selectedGenres.add(position);
+                        } else {
+                            selectedGenres.remove((Integer.valueOf(position)));
+                        }
+                    }
+                });
+
+                mBuilder.setCancelable(false);
+
+                //called when you click "ok" button
+                mBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        genres.removeAllViews();
+
+                        for (int i = 0; i < selectedGenres.size(); i++) {
+                            String item = genresList[selectedGenres.get(i)];
+
+                            genres.addView(BuildGenreLayout(item));
+                        }
+                    }
+                });
+
+                mBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        for (int i=0; i < genresList.length; i++) {
+                            checkedItems[i] = false;
+                        }
+
+                        for(int i=0; i < oldSelectedGenres.size(); i++) {
+                            checkedItems[oldSelectedGenres.get(i)] = true;
+                        }
+
+                        selectedGenres = new ArrayList<Integer>(oldSelectedGenres);
+
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                final AlertDialog mDialog = mBuilder.create();
+
+                mDialog.show();
+            }
+        });
+    }
 }
 

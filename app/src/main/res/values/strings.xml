@@ -9,7 +9,16 @@
     <string name="mailProfile">Mail:</string>
     <string name="bioProfile">Short bio:</string>
     <string name="cityProfile">City:</string>
+    <string name="genreProfile">Favourite book genres:</string>
+    <string name="buttonGenreProfile">Add or remove genres</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
+
+    //strings for placeholders on EditActivity
+    <string name="namePlaceholder">Insert your name</string>
+    <string name="phonePlaceholder">Insert your phone number</string>
+    <string name="mailPlaceholder">Insert your mail</string>
+    <string name="bioPlaceholder">Insert your bio</string>
+    <string name="cityPlaceholder">Insert your city</string>
 
     //strings for AlertDialog to select between camera or gallery
     <string name="dialog_camera">Take Photo</string>
@@ -29,9 +38,38 @@
     //string for email error
     <string name="mail_not_valid">E-mail not valid!</string>
     <string name="insert_valid_mail">Please insert a valid email address</string>
-    <string name="ok">ok</string>
+
+    //strings for phone number error
+    <string name="phone_not_valid">Phone number not valid!</string>
+    <string name="insert_valid_phone">Please insert a valid phone number</string>
 
     //string for google api error
     <string name="google_connection_failed">Google Places API connection failed</string>
+
+    //utils
+    <string name="ok">ok</string>
+    <string name="cancel">cancel</string>
+
+    <string name="title_genre_alertdialog">Choose your favourite genres</string>
+
+    <string-array name="genres">
+        <item>Action and Adventure</item>
+        <item>Art</item>
+        <item>Biography</item>
+        <item>Cookbook</item>
+        <item>Drama</item>
+        <item>Fantasy</item>
+        <item>Guide</item>
+        <item>History</item>
+        <item>Horror</item>
+        <item>Kids</item>
+        <item>Mystery</item>
+        <item>Other</item>
+        <item>Romance</item>
+        <item>Science</item>
+        <item>Science fiction</item>
+        <item>School</item>
+        <item>Travel</item>
+    </string-array>
 
 </resources>

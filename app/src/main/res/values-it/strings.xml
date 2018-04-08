@@ -10,7 +10,16 @@
     <string name="mailProfile">Mail:</string>
     <string name="bioProfile">Biografia:</string>
     <string name="cityProfile">Città:</string>
+    <string name="genreProfile">Generi preferiti:</string>
+    <string name="buttonGenreProfile">Aggiungi o rimuovi generi</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
+
+    //strings for placeholders on EditActivity
+    <string name="namePlaceholder">Aggiungi il tuo nome</string>
+    <string name="phonePlaceholder">Aggiungi il tuo numero di telefono</string>
+    <string name="mailPlaceholder">Aggiungi la tua mail</string>
+    <string name="bioPlaceholder">Aggiungi la tua biografia</string>
+    <string name="cityPlaceholder">Aggiungi la tua città</string>
 
     //strings for AlertDialog to select between camera or gallery
     <string name="dialog_camera">Scatta foto</string>
@@ -30,9 +39,38 @@
     //string for email error
     <string name="mail_not_valid">E-mail non valida!</string>
     <string name="insert_valid_mail">Inserisci un indirizzo email valido</string>
-    <string name="ok">ok</string>
+
+    //strings for phone number error
+    <string name="phone_not_valid">Numero di telefono non valido!</string>
+    <string name="insert_valid_phone">Inserisci un numero di telefono valido</string>
 
     //string for google api error
     <string name="google_connection_failed">Connessione fallita con Google Places API</string>
+
+    //utils
+    <string name="ok">ok</string>
+    <string name="cancel">annulla</string>
+
+    <string name="title_genre_alertdialog">Scegli i tuoi generi preferiti</string>
+
+    <string-array name="genres">
+        <item>Azione e avventura</item>
+        <item>Arte</item>
+        <item>Biografia</item>
+        <item>Cucina</item>
+        <item>Tragedia</item>
+        <item>Fantasy</item>
+        <item>Manuali</item>
+        <item>Storia</item>
+        <item>Horror</item>
+        <item>Per bambini</item>
+        <item>Mistero</item>
+        <item>Altro</item>
+        <item>Romanzo</item>
+        <item>Scienza</item>
+        <item>Fantascienza</item>
+        <item>Scuola</item>
+        <item>Viaggi</item>
+    </string-array>
 
 </resources>
