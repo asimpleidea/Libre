@@ -1,26 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/Profile"
     android:paddingLeft="@dimen/paddingLeftRight"
     android:clickable="true"
-    android:focusableInTouchMode="true"
-    >
+    android:focusableInTouchMode="true">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/editImageProfile"
+    <RelativeLayout
         android:layout_width="120dp"
         android:layout_height="120dp"
-        app:civ_border_width="1dp"
-        app:civ_border_color="@android:color/black"
         android:layout_gravity="center_vertical"
-        android:paddingRight="@dimen/paddingLeftRight"
-        />
+        android:layout_marginRight="10dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/editImageProfile"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:paddingRight="@dimen/paddingLeftRight"
+            app:civ_border_width="1dp"
+            app:civ_border_color="@android:color/black"
+            android:layout_gravity="center_vertical"
+            />
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:clickable="true"
+            android:src="@drawable/ic_photo_camera_black"
+            app:backgroundTint="@android:color/background_light"
+            app:fabSize="mini"
+            android:layout_alignParentRight="true"
+            />
+    </RelativeLayout>
 
     <ScrollView
         android:layout_width="match_parent"
