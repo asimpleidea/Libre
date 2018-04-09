@@ -29,7 +29,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDI-s1kInkq07sXnu8haNisg-ZLlGW9IoE"/>
 
-        <activity android:name=".ShowProfileActivity">
+        <activity android:name=".ShowProfileActivity"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

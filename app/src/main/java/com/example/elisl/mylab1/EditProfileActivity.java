@@ -77,8 +77,6 @@ public class EditProfileActivity extends AppCompatActivity implements
     boolean[] checkedItems;                                         //checked genres
     ArrayList<Integer> selectedGenres = new ArrayList<Integer>();   //favourite genres
 
-
-
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
 
