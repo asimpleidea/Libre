@@ -18,6 +18,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -365,12 +366,9 @@ public class EditProfileActivity extends AppCompatActivity implements
         city.setAdapter(mPlaceArrayAdapter);
     }
 
-    private boolean isValidEmailAddress(String emailAddress) {
-        String  expression="^[\\w\\-]([\\.\\w])+[\\w]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
-        CharSequence inputStr = emailAddress;
-        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(inputStr);
-        return matcher.matches();
+    private boolean isValidEmailAddress(String emailAddress)
+    {
+        return Patterns.EMAIL_ADDRESS.matcher(emailAddress).matches();
     }
 
     private boolean isValidPhoneNumber(String phoneNumber) {
