@@ -38,7 +38,7 @@
             android:padding="12dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_mode_edit_white_24dp"
-            android:background="?android:attr/selectableItemBackground"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
             />
 
     </RelativeLayout>

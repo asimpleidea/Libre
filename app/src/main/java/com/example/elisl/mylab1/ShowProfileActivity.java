@@ -12,19 +12,26 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class ShowProfileActivity extends AppCompatActivity {
 
     ImageView editImage;
 
-    ImageView imageProfile;
+    de.hdodenhof.circleimageview.CircleImageView imageProfile;
 
-    TextView name;
-    TextView mail;
-    TextView bio;
+    private TextView name;
+    private TextView phone;
+    private TextView mail;
+    private TextView bio;
+    private TextView city;
+
+    private String[] genresList;
+    private LinearLayout genres;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -38,12 +45,17 @@ public class ShowProfileActivity extends AppCompatActivity {
         editImage = (ImageView) findViewById(R.id.imageEdit);
 
         //image profile
-        imageProfile = (ImageView) findViewById(R.id.showImageProfile);
+        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.showImageProfile);
 
         //get edit fields
         name = (TextView) findViewById(R.id.showName);
+        phone = (TextView) findViewById(R.id.showPhone);
         mail = (TextView) findViewById(R.id.showMail);
         bio = (TextView) findViewById(R.id.showBio);
+        city = (TextView) findViewById(R.id.showCity);
+
+        genres = (LinearLayout) findViewById(R.id.show_favourite_genres_list);
+        genresList = getResources().getStringArray(R.array.genres);
 
         //listener onClick for editing
         editImage.setOnClickListener(new View.OnClickListener() {
@@ -71,21 +83,27 @@ public class ShowProfileActivity extends AppCompatActivity {
 
         //get name if already inserted
         String str = prefs.getString("profileName", null);
-        if (str != null) {
+        if (str != null)
             name.setText(str);
-        }
+
+        str = prefs.getString("profilePhone", null);
+        if(str != null)
+            phone.setText(str);
 
         //get mail if already inserted
         str = prefs.getString("profileMail", null);
-        if (str != null) {
+        if (str != null)
             mail.setText(str);
-        }
 
         //get bio if already inserted
         str = prefs.getString("profileBio", null);
-        if (str != null) {
+        if (str != null)
             bio.setText(str);
-        }
+
+        //get city if already inserted
+        str = prefs.getString("profileCity", null);
+        if (str != null)
+            city.setText(str);
 
         //get image profile if already inserted
         str = prefs.getString("profileImage", null);
@@ -98,5 +116,27 @@ public class ShowProfileActivity extends AppCompatActivity {
             imageProfile.setImageDrawable(d);
         }
 
+        //get saved selectedItems
+        str = prefs.getString("profileGenres", null);
+        genres.removeAllViews();
+
+        if(str != null && !str.isEmpty()) {
+            String[] strArray = str.split(",");
+
+            for(int i = 0; i < strArray.length; i++) {
+                genres.addView(BuildGenreLayout(genresList[Integer.parseInt(strArray[i])] ) );
+            }
+        }
+
     }
+
+    private TextView BuildGenreLayout(final String name) {
+        TextView genre = new TextView(getApplicationContext());
+        genre.setText(name);
+        genre.setTextSize(this.getResources().getDimension(R.dimen.genre_item));
+        genre.setTextColor(this.getResources().getColor(R.color.black));
+
+        return genre;
+    }
+
 }

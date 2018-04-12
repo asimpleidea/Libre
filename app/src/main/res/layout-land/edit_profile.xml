@@ -1,101 +1,249 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/Profile"
     android:paddingLeft="@dimen/paddingLeftRight"
-    android:paddingRight="@dimen/paddingLeftRight"
-    >
+    android:clickable="true"
+    android:focusableInTouchMode="true">
 
-    <ImageView
-        android:id="@+id/editImageProfile"
+    <RelativeLayout
         android:layout_width="120dp"
-        android:layout_height="match_parent"
+        android:layout_height="120dp"
         android:layout_gravity="center_vertical"
-        />
+        android:layout_marginRight="10dp">
 
-    <LinearLayout
-        android:orientation="vertical"
+        <de.hdodenhof.circleimageview.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/editImageProfile"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:paddingRight="@dimen/paddingLeftRight"
+            app:civ_border_width="1dp"
+            app:civ_border_color="@android:color/black"
+            android:layout_gravity="center_vertical"
+            />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/photoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:clickable="true"
+            android:src="@drawable/ic_photo_camera_black"
+            app:backgroundTint="@android:color/background_light"
+            app:fabSize="mini"
+            android:layout_alignParentRight="true"
+            />
+    </RelativeLayout>
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="12dp"
+        android:orientation="vertical"
+        android:fillViewport="true"
         >
 
-        <LinearLayout
-            android:orientation="vertical"
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            >
+            android:stretchColumns="1"
+            android:paddingRight="@dimen/paddingLeftRight"
+            android:clickable="true"
+            android:focusableInTouchMode="true">
 
-            <TextView
-                android:id="@+id/nameProfile"
-                android:textSize="@dimen/profile_description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/nameProfile"
-                android:textColor="@android:color/darker_gray"
-                />
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="10dp"
+                    android:paddingTop="10dp"
+                    >
 
-            <EditText
-                android:id="@+id/editName"
+                    <TextView
+                        android:id="@+id/nameProfile"
+                        android:textSize="@dimen/profile_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nameProfile"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorToolbar"
+                        />
+
+                    <EditText
+                        android:id="@+id/editName"
+                        android:hint="@string/namePlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="textCapSentences|textAutoCorrect"
+                        android:maxLength ="70"
+                        />
+
+                </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapSentences|textAutoCorrect" />
-        </LinearLayout>
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                >
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            >
-            <TextView
-                android:id="@+id/mailProfile"
-                android:textSize="@dimen/profile_description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/mailProfile"
-                android:textColor="@android:color/darker_gray"
-                />
+                <TextView
+                    android:id="@+id/phoneProfile"
+                    android:textSize="@dimen/profile_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/phoneProfile"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorToolbar"
+                    />
 
-            <EditText
-                android:id="@+id/editMail"
+                <EditText
+                    android:id="@+id/editPhone"
+                    android:hint="@string/phonePlaceholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="flagNoExtractUi"
+                    android:inputType="phone"
+                    android:maxLength ="18"
+                    />
+
+            </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="10dp"
+                    >
+                    <TextView
+                        android:id="@+id/mailProfile"
+                        android:textSize="@dimen/profile_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/mailProfile"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorToolbar"
+                        />
+
+                    <EditText
+                        android:id="@+id/editMail"
+                        android:hint="@string/mailPlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="textCapSentences|textAutoCorrect|textEmailAddress"
+                        android:maxLength ="70"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="10dp"
+                    >
+
+                    <TextView
+                        android:id="@+id/bioProfile"
+                        android:textSize="@dimen/profile_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/bioProfile"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorToolbar"
+                        />
+
+                    <EditText
+                        android:id="@+id/editBio"
+                        android:hint="@string/bioPlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="textCapSentences|textAutoCorrect"
+                        android:maxLength ="300"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="10dp"
+                    >
+
+                    <TextView
+                        android:id="@+id/cityProfile"
+                        android:textSize="@dimen/profile_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cityProfile"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorToolbar"
+                        />
+
+                    <AutoCompleteTextView
+                        android:id="@+id/autoCompleteCity"
+                        android:hint="@string/cityPlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="textCapSentences|textAutoCorrect"
+                        android:maxLength ="100"
+                        android:dropDownHeight="100dp"
+                        />
+
+                </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="Insert your name"
-                android:inputType="textCapSentences|textAutoCorrect" />
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp">
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/genreProfile"
+                    android:textSize="@dimen/profile_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/genreProfile"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorToolbar"
+                    />
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            >
+                <LinearLayout
+                    android:id="@+id/edit_favourite_genres_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingLeft="5dp"
+                    />
 
-            <TextView
-                android:id="@+id/bioProfile"
-                android:textSize="@dimen/profile_description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/bioProfile"
-                android:textColor="@android:color/darker_gray"
-                />
+                <Button
+                    android:id="@+id/buttonGenre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="@dimen/profile_description"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorToolbar"
+                    android:text="@string/buttonGenreProfile"
+                    android:textAllCaps="false"
+                    />
 
-            <EditText
-                android:id="@+id/editBio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="Insert your name"
-                android:inputType="textCapSentences|textAutoCorrect" />
+            </LinearLayout>
 
-        </LinearLayout>
-
-    </LinearLayout>
+        </TableLayout>
+    </ScrollView>
 
 </LinearLayout>

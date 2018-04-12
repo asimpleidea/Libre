@@ -1,29 +1,75 @@
 <resources>
     <string name="app_name">MyLab1</string>
-    <string name="action_settings">Settings</string>
-    <string name="user_picture_content_description">Your profile picture</string>
-    <string name="toolbar_view_your_profile">Your Profile</string>
-    <string name="view_profile_toolbar_edit_your_profile">Edit profile</string>
-    <string name="title_activity_new_edit_profile">NewEditProfile</string>
-
-    <!-- Edit Profile Activity -->
-    <string name="edit_profile_toolbar_title">Edit your profile</string>
-    <string name="edit_profile_user_name_title">Your user name</string>
-    <string name="edit_profile_user_full_name_title">Your full name</string>
-    <string name="edit_profile_user_birthday">Your birthday</string>
-
-    <!-- Months -->
-    <string-array name="months">
-        <item>January</item>
-        <item>February</item>
-    </string-array>
-    <string name="title_activity_show_profile">ShowProfileActivity</string>
-
 
     <string name="editSave">Save</string>
+    <string name="editCancel">Cancel</string>
 
     <string name="nameProfile">Name:</string>
+    <string name="phoneProfile">Phone:</string>
     <string name="mailProfile">Mail:</string>
     <string name="bioProfile">Short bio:</string>
+    <string name="cityProfile">City:</string>
+    <string name="genreProfile">Favourite book genres:</string>
+    <string name="buttonGenreProfile">Add or remove genres</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
+
+    //strings for placeholders on EditActivity
+    <string name="namePlaceholder">Insert your name</string>
+    <string name="phonePlaceholder">Insert your phone number</string>
+    <string name="mailPlaceholder">Insert your mail</string>
+    <string name="bioPlaceholder">Insert your bio</string>
+    <string name="cityPlaceholder">Insert your city</string>
+
+    //strings for AlertDialog to select between camera or gallery
+    <string name="dialog_camera">Take Photo</string>
+    <string name="dialog_library">Photo Library</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    //string for errors
+    <string name="error_camera">Error while capturing image</string>
+    <string name="permission_necessary">Permission necessary</string>
+    <string name="deny_permission_read">External storage read permission is necessary</string>
+    <string name="deny_permission_camera">Camera permission is necessary</string>
+
+    //string for savings
+    <string name="saving">Saving...</string>
+    <string name="saved">Saved!</string>
+
+    //string for email error
+    <string name="mail_not_valid">E-mail not valid!</string>
+    <string name="insert_valid_mail">Please insert a valid email address</string>
+
+    //strings for phone number error
+    <string name="phone_not_valid">Phone number not valid!</string>
+    <string name="insert_valid_phone">Please insert a valid phone number</string>
+
+    //string for google api error
+    <string name="google_connection_failed">Google Places API connection failed</string>
+
+    //utils
+    <string name="ok">ok</string>
+    <string name="cancel">cancel</string>
+
+    <string name="title_genre_alertdialog">Choose your favourite genres</string>
+
+    <string-array name="genres">
+        <item>Action and Adventure</item>
+        <item>Art</item>
+        <item>Biography</item>
+        <item>Cookbook</item>
+        <item>Drama</item>
+        <item>Fantasy</item>
+        <item>Guide</item>
+        <item>History</item>
+        <item>Horror</item>
+        <item>Kids</item>
+        <item>Mystery</item>
+        <item>Other</item>
+        <item>Romance</item>
+        <item>Science</item>
+        <item>Science fiction</item>
+        <item>School</item>
+        <item>Travel</item>
+    </string-array>
+
 </resources>

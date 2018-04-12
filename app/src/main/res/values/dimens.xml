@@ -6,7 +6,10 @@
     <dimen name="font_size">20dp</dimen>
 
     //profile
-    <dimen name="profile_description">16dp</dimen>
+    <dimen name="profile_description">18dp</dimen>
     <dimen name="paddingLeftRight">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    //checkbox dimension
+    <dimen name="genre_item">8dp</dimen>
 </resources>
