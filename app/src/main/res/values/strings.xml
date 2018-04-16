@@ -52,6 +52,8 @@
 
     <string name="title_genre_alertdialog">Choose your favourite genres</string>
 
+    <string name="join_us_invitation">MAD24 is a free community for all book lovers out there who love to share a nice book! \n\n\n Whether you are new reader, a passionate book-worm, or a student on a low budget trying save some money for a course, MAD24 is the app for you. \n\n\n Join now, it\'s free!</string>
+
     <string-array name="genres">
         <item>Action and Adventure</item>
         <item>Art</item>
@@ -91,6 +93,7 @@
 
         <!-- Error Strings -->
         <string name="fb_error_get_me">Whoops! An error occurred while trying to fetch your user data!</string>
+        <string name="fb_error_authenticate">We could not authenticate you at this time. Try again later.</string>
     <!-- /Facebook -->
 
 </resources>

@@ -41,6 +41,12 @@ public class User
      */
     private Boolean isVerified = false;
 
+    /**
+     * User bio
+     */
+    private String bio = null;
+
+
     User()
     {
 
@@ -177,4 +183,11 @@ public class User
         isVerified = verified;
     }
 
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
 }

@@ -23,8 +23,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -121,7 +124,7 @@ public class FacebookAuthenticator
                     public void onError(FacebookException error)
                     {
                         Log.d("FBLOGIN", "An error occurred while getting user data");
-                        Toast.makeText(context, "Error", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_LONG).show();
                     }
                 }
         );
@@ -152,8 +155,7 @@ public class FacebookAuthenticator
 
         if(Type == ActionTypes.SIGNUP)
         {
-            getMe(token);
-            //CurrentActivity.finish();
+            signMeIn(token);
         }
     }
 
@@ -172,7 +174,7 @@ public class FacebookAuthenticator
      * Get connected user data after a successful signup
      * @param token the token from facebook
      */
-    private void getMe(final AccessToken token)
+    private void signMeIn(final AccessToken token)
     {
         GraphRequest me = GraphRequest.newMeRequest(token, new GraphRequest.GraphJSONObjectCallback() {
             @Override
@@ -199,6 +201,11 @@ public class FacebookAuthenticator
         me.executeAsync();
     }
 
+    /**
+     * Signs the user in
+     * @param token the token from facebook
+     * @param o the data got from facebook
+     */
     private void signIn(final AccessToken token, final JSONObject o)
     {
         //  Get the credential
@@ -209,42 +216,70 @@ public class FacebookAuthenticator
                 new OnCompleteListener<AuthResult>()
                 {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task)
-                    {
-                        if(task.isSuccessful())
-                        {
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
                             //  Get the user logged
-                            FirebaseUser logged = FirebaseAuth.getInstance().getCurrentUser();
+                            final FirebaseUser logged = FirebaseAuth.getInstance().getCurrentUser();
 
-                            //  Setup User
-                            User u = new User();
-                            try
-                            {
-                                u.setEmail(o.getString("email"));
-                                u.setGender(o.getString("gender"));
-                                u.setLocale(o.getString("locale"));
-                                u.setName(o.getString("name"));
-                                u.setTimezone(o.getInt("timezone"));
+                            //----------------------------------
+                            //  User already exists?
+                            //----------------------------------
 
-                                //  Finally, store user to DB!
-                                DB.child("member").child(logged.getUid()).setValue(u);
-                            }
-                            catch(JSONException j)
-                            {
-                                //  Something happened? Then delete the user!
-                                FirebaseAuth.getInstance().getCurrentUser().delete()
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Log.d("FBLOGIN", "User account deleted.");
-                                                    Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
-                                                }
-                                            }
-                                        });
+                            DB.child("member").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    //  No need to do anything else then
+                                    if (dataSnapshot.hasChild(logged.getUid()))
+                                    {
+                                        Toast.makeText(context, "User already exists, just logging", Toast.LENGTH_SHORT).show();
+                                       // CurrentActivity.finish();
+                                        return;
+                                    }
 
-                                return;
-                            }
+                                    //----------------------------------
+                                    //  Create new user
+                                    //----------------------------------
+
+                                    User u = new User();
+                                    try {
+                                        u.setEmail(o.getString("email"));
+                                        u.setGender(o.getString("gender"));
+                                        u.setLocale(o.getString("locale"));
+                                        u.setName(o.getString("name"));
+                                        u.setTimezone(o.getInt("timezone"));
+
+                                        //  Finally, store user to DB!
+                                        DB.child("member")
+                                                .child(logged.getUid())
+                                                .setValue(u, new DatabaseReference.CompletionListener() {
+                                                    @Override
+                                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
+                                                    {
+                                                        //CurrentActivity.finish();
+                                                        Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    } catch (JSONException j) {
+                                        //  Something happened? Then delete the user!
+                                        FirebaseAuth.getInstance().getCurrentUser().delete()
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            Log.d("FBLOGIN", "User account deleted.");
+                                                            Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                });
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError)
+                                {
+
+                                }
+                            });
                         }
                     }
                 }
