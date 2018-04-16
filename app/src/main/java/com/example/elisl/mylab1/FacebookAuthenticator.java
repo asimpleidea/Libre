@@ -3,6 +3,7 @@ package com.example.elisl.mylab1;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -10,8 +11,13 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**
@@ -85,8 +91,7 @@ public class FacebookAuthenticator
                     @Override
                     public void onCancel()
                     {
-                        Log.d("FBLOGIN", "User cancelled operation");
-                        Toast.makeText(context, "Cancel!", Toast.LENGTH_LONG).show();
+                        Log.d("FBLOGIN", "Operation cancelled by user");
                     }
 
                     @Override
@@ -124,9 +129,8 @@ public class FacebookAuthenticator
 
         if(Type == ActionTypes.SIGNUP)
         {
-            //  Authenticate...
-            getMe();
-            CurrentActivity.finish();
+            getMe(token);
+            //CurrentActivity.finish();
         }
     }
 
@@ -141,8 +145,48 @@ public class FacebookAuthenticator
         Manager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void getMe()
+    /**
+     * Get connected user data after a successful signup
+     * @param token the token from facebook
+     */
+    private void getMe(AccessToken token)
     {
-        
+        GraphRequest me = GraphRequest.newMeRequest(token, new GraphRequest.GraphJSONObjectCallback() {
+            @Override
+            public void onCompleted(JSONObject object, GraphResponse response)
+            {
+                Log.d("FBLOGIN", "newMeRequest is finished with status: " + response.getRawResponse());
+
+                //  200 OK?
+                if(response.getError() != null)
+                {
+                    Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                JSONObject data = response.getJSONObject();
+                try
+                {
+                    Log.d("FBLOGIN", "name: " + data.getString("name"));
+                    Log.d("FBLOGIN", "first_name: " + data.getString("first_name"));
+                    Log.d("FBLOGIN", "last_name: " + data.getString("last_name"));
+                    Log.d("FBLOGIN", "gender: " + data.getString("gender"));
+                    Log.d("FBLOGIN", "locale: " + data.getString("locale"));
+                    Log.d("FBLOGIN", "timezone: " + data.getString("timezone"));
+                    Log.d("FBLOGIN", "verified: " + data.getString("verified"));
+                    Log.d("FBLOGIN", "email: " + data.getString("email"));
+                }
+                catch(JSONException j)
+                {
+                    Log.e("FBLOGIN", "Excption occurred");
+                }
+            }
+        });
+
+        //  Query parameters for the request
+        Bundle params = new Bundle();
+        params.putString("fields", context.getResources().getString(R.string.fields));
+        me.setParameters(params);
+        me.executeAsync();
     }
 }

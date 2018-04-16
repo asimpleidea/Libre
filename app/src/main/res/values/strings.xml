@@ -76,7 +76,8 @@
         <string name="facebook_app_id">102712380576500</string>
         <string name="fb_login_protocol_scheme">fb102712380576500</string>
 
-        <string-array name="fields">
+        <string name="fields">name, first_name, last_name, gender, locale, picture, timezone, verified, email</string>
+        <string-array name="fieldsArray">
             <item>name</item>
             <item>first_name</item>
             <item>last_name</item>
@@ -87,6 +88,9 @@
             <item>verified</item>
             <item>email</item>
         </string-array>
+
+        <!-- Error Strings -->
+        <string name="fb_error_get_me">Whoops! An error occurred while trying to fetch your user data!</string>
     <!-- /Facebook -->
 
 </resources>
