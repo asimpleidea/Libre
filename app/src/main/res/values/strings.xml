@@ -72,4 +72,9 @@
         <item>Travel</item>
     </string-array>
 
+    <!-- Facebook Login/Signup -->
+    <string name="facebook_app_id">102712380576500</string>
+    <string name="fb_login_protocol_scheme">fb102712380576500</string>
+    <!-- /Facebook Login/Signup -->
+
 </resources>
