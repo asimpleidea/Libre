@@ -2,16 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.elisl.mylab1">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.front" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -20,33 +23,46 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
-
+            android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDI-s1kInkq07sXnu8haNisg-ZLlGW9IoE"/>
+            android:value="AIzaSyDI-s1kInkq07sXnu8haNisg-ZLlGW9IoE" />
 
-        <activity android:name=".ShowProfileActivity"
+        <activity
+            android:name=".ShowProfileActivity"
             android:theme="@style/AppTheme">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
+        <activity
+            android:name=".EditProfileActivity"
+            android:label="@string/title_activity_edit_profile"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <provider
+            android:name=".MyFileContentProvider"
+            android:authorities="com.example.camerademo"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".BooksActivity"
+            android:label="@string/title_activity_books">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EditProfileActivity"
-            android:label="@string/title_activity_edit_profile"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden|adjustResize">
-        </activity>
-        <provider
-            android:name=".MyFileContentProvider"
-            android:authorities="com.example.camerademo"
-            android:enabled="true"
-            android:exported="true" />
     </application>
 
 </manifest>

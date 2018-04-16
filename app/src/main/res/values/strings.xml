@@ -71,5 +71,13 @@
         <item>School</item>
         <item>Travel</item>
     </string-array>
+    <string name="title_activity_books">BooksActivity</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">TODO</string>
 
 </resources>
