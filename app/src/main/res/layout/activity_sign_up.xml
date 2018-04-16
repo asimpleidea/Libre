@@ -6,4 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".SignUpActivity">
 
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginEnd="103dp"
+        android:layout_marginLeft="103dp"
+        android:layout_marginRight="103dp"
+        android:layout_marginStart="103dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

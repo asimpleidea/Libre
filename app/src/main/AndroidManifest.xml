@@ -72,7 +72,7 @@
                 </intent-filter>
             </activity>
         <!-- /Facebook Login/Signup -->
-        
+
     </application>
 
     <!-- Necessary for HTTP requests, such as querying Facebook for user's data -->

@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -39,6 +41,7 @@ public class ShowProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_show_profile);
 
         //button to edit profile
@@ -71,12 +74,31 @@ public class ShowProfileActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        //----------------------------------
+        //  Is user logged in?
+        //----------------------------------
+
+        /* NOTE: Why are we checking if the user is logged in here and not in onCreate?
+         * Because there are some situations in which onCreate is not called (essentially, when app is resumed).
+         * Instead, onResume is *ALWAYS* called, making this the best place where to check it.
+         * See more at https://i.stack.imgur.com/t0Q93.png for the app life cycle.
+         * So, when user puts app on foreground again, we check if user is still logged in.
+         */
+
+        if(FirebaseAuth.getInstance().getCurrentUser() == null)
+        {
+            Intent signup = new Intent(this, SignUpActivity.class);
+            startActivity(signup);
+        }
+
+        //  If you're here, it means you're logged in. You may proceed.
+
         Log.i("state", "OnResume - show");
         //get preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
