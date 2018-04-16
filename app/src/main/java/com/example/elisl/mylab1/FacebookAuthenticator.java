@@ -60,6 +60,7 @@ public class FacebookAuthenticator
      * The activity I have been called from
      */
     private Activity CurrentActivity = null;
+
     /**
      * The constructor
      * @param context
