@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,6 +16,15 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +72,16 @@ public class FacebookAuthenticator
     private Activity CurrentActivity = null;
 
     /**
+     * The FireBase Authenticator
+     */
+    private FirebaseAuth FireAuth = null;
+
+    /**
+     * The RealTime Database
+     */
+    private DatabaseReference DB = null;
+
+    /**
      * The constructor
      * @param context
      */
@@ -70,6 +90,8 @@ public class FacebookAuthenticator
         this.context = context;
         Manager = CallbackManager.Factory.create();
         CurrentActivity = currentActivity;
+        FireAuth = FirebaseAuth.getInstance();
+        DB = FirebaseDatabase.getInstance().getReference();
     }
 
     /**
@@ -150,7 +172,7 @@ public class FacebookAuthenticator
      * Get connected user data after a successful signup
      * @param token the token from facebook
      */
-    private void getMe(AccessToken token)
+    private void getMe(final AccessToken token)
     {
         GraphRequest me = GraphRequest.newMeRequest(token, new GraphRequest.GraphJSONObjectCallback() {
             @Override
@@ -165,23 +187,8 @@ public class FacebookAuthenticator
                     return;
                 }
 
-                JSONObject data = response.getJSONObject();
-                
-                try
-                {
-                    Log.d("FBLOGIN", "name: " + data.getString("name"));
-                    Log.d("FBLOGIN", "first_name: " + data.getString("first_name"));
-                    Log.d("FBLOGIN", "last_name: " + data.getString("last_name"));
-                    Log.d("FBLOGIN", "gender: " + data.getString("gender"));
-                    Log.d("FBLOGIN", "locale: " + data.getString("locale"));
-                    Log.d("FBLOGIN", "timezone: " + data.getString("timezone"));
-                    Log.d("FBLOGIN", "verified: " + data.getString("verified"));
-                    Log.d("FBLOGIN", "email: " + data.getString("email"));
-                }
-                catch(JSONException j)
-                {
-                    Log.e("FBLOGIN", "Excption occurred");
-                }
+                //  Sign in the user
+                signIn(token, response.getJSONObject());
             }
         });
 
@@ -190,5 +197,57 @@ public class FacebookAuthenticator
         params.putString("fields", context.getResources().getString(R.string.fields));
         me.setParameters(params);
         me.executeAsync();
+    }
+
+    private void signIn(final AccessToken token, final JSONObject o)
+    {
+        //  Get the credential
+        final AuthCredential  credential = FacebookAuthProvider.getCredential(token.getToken());
+
+        //  ... and the user in
+        FireAuth.signInWithCredential(credential).addOnCompleteListener(CurrentActivity,
+                new OnCompleteListener<AuthResult>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task)
+                    {
+                        if(task.isSuccessful())
+                        {
+                            //  Get the user logged
+                            FirebaseUser logged = FirebaseAuth.getInstance().getCurrentUser();
+
+                            //  Setup User
+                            User u = new User();
+                            try
+                            {
+                                u.setEmail(o.getString("email"));
+                                u.setGender(o.getString("gender"));
+                                u.setLocale(o.getString("locale"));
+                                u.setName(o.getString("name"));
+                                u.setTimezone(o.getInt("timezone"));
+
+                                //  Finally, store user to DB!
+                                DB.child("member").child(logged.getUid()).setValue(u);
+                            }
+                            catch(JSONException j)
+                            {
+                                //  Something happened? Then delete the user!
+                                FirebaseAuth.getInstance().getCurrentUser().delete()
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Log.d("FBLOGIN", "User account deleted.");
+                                                    Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+
+                                return;
+                            }
+                        }
+                    }
+                }
+        );
     }
 }
