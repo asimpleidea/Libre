@@ -1,22 +1,20 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import  mad24.polito.it.R;
+
 import java.io.File;
-import java.util.ArrayList;
 
 public class ShowProfileActivity extends AppCompatActivity {
 
@@ -39,23 +37,23 @@ public class ShowProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_show_profile);
+        setContentView(mad24.polito.it.R.layout.activity_show_profile);
 
         //button to edit profile
-        editImage = (ImageView) findViewById(R.id.imageEdit);
+        editImage = (ImageView) findViewById(mad24.polito.it.R.id.imageEdit);
 
         //image profile
-        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.showImageProfile);
+        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(mad24.polito.it.R.id.showImageProfile);
 
         //get edit fields
-        name = (TextView) findViewById(R.id.showName);
-        phone = (TextView) findViewById(R.id.showPhone);
-        mail = (TextView) findViewById(R.id.showMail);
-        bio = (TextView) findViewById(R.id.showBio);
-        city = (TextView) findViewById(R.id.showCity);
+        name = (TextView) findViewById(mad24.polito.it.R.id.showName);
+        phone = (TextView) findViewById(mad24.polito.it.R.id.showPhone);
+        mail = (TextView) findViewById(mad24.polito.it.R.id.showMail);
+        bio = (TextView) findViewById(mad24.polito.it.R.id.showBio);
+        city = (TextView) findViewById(mad24.polito.it.R.id.showCity);
 
-        genres = (LinearLayout) findViewById(R.id.show_favourite_genres_list);
-        genresList = getResources().getStringArray(R.array.genres);
+        genres = (LinearLayout) findViewById(mad24.polito.it.R.id.show_favourite_genres_list);
+        genresList = getResources().getStringArray(mad24.polito.it.R.array.genres);
 
         //listener onClick for editing
         editImage.setOnClickListener(new View.OnClickListener() {
@@ -112,7 +110,7 @@ public class ShowProfileActivity extends AppCompatActivity {
             imageProfile.setImageURI(Uri.fromFile(new File(str)) );
         } else {
             //default image
-            Drawable d = getResources().getDrawable(R.drawable.unknown_user);
+            Drawable d = getResources().getDrawable(mad24.polito.it.R.drawable.unknown_user);
             imageProfile.setImageDrawable(d);
         }
 
@@ -133,8 +131,8 @@ public class ShowProfileActivity extends AppCompatActivity {
     private TextView BuildGenreLayout(final String name) {
         TextView genre = new TextView(getApplicationContext());
         genre.setText(name);
-        genre.setTextSize(this.getResources().getDimension(R.dimen.genre_item));
-        genre.setTextColor(this.getResources().getColor(R.color.black));
+        genre.setTextSize(this.getResources().getDimension(mad24.polito.it.R.dimen.genre_item));
+        genre.setTextColor(this.getResources().getColor(mad24.polito.it.R.color.black));
 
         return genre;
     }

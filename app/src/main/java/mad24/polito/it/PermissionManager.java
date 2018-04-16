@@ -1,4 +1,4 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -12,6 +12,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
+
+import  mad24.polito.it.R;
 
 public class PermissionManager {
     public static final int PERMISSION_READ_EXTERNAL_STORAGE = 123;
@@ -27,8 +29,8 @@ public class PermissionManager {
                 if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
                     alertBuilder.setCancelable(true);
-                    alertBuilder.setTitle(R.string.permission_necessary);
-                    alertBuilder.setMessage(R.string.deny_permission_read);
+                    alertBuilder.setTitle(mad24.polito.it.R.string.permission_necessary);
+                    alertBuilder.setMessage(mad24.polito.it.R.string.deny_permission_read);
                     alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
                         public void onClick(DialogInterface dialog, int which) {
@@ -59,8 +61,8 @@ public class PermissionManager {
                 if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, Manifest.permission.CAMERA)) {
                     AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
                     alertBuilder.setCancelable(true);
-                    alertBuilder.setTitle(R.string.permission_necessary);
-                    alertBuilder.setMessage(R.string.deny_permission_camera);
+                    alertBuilder.setTitle(mad24.polito.it.R.string.permission_necessary);
+                    alertBuilder.setMessage(mad24.polito.it.R.string.deny_permission_camera);
                     alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
                         public void onClick(DialogInterface dialog, int which) {

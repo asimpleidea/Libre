@@ -1,11 +1,10 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
     import android.content.Context;
     import android.util.Log;
     import android.widget.ArrayAdapter;
     import android.widget.Filter;
     import android.widget.Filterable;
-    import android.widget.Toast;
 
     import com.google.android.gms.common.api.GoogleApiClient;
     import com.google.android.gms.common.api.PendingResult;

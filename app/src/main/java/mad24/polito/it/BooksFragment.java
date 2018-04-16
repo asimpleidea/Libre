@@ -1,4 +1,4 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+
+import  mad24.polito.it.R;
 
 import java.util.ArrayList;
 
@@ -30,7 +32,7 @@ public class BooksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_book, container, false);
+        return inflater.inflate(mad24.polito.it.R.layout.fragment_book, container, false);
 
 
     }
@@ -39,7 +41,7 @@ public class BooksFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        lv = (ListView) getActivity().findViewById(R.id.book_list);
+        lv = (ListView) getActivity().findViewById(mad24.polito.it.R.id.book_list);
 
         lv.setAdapter(new BaseAdapter() {
             @Override

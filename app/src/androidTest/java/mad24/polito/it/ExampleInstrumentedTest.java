@@ -1,4 +1,4 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

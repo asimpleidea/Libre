@@ -1,10 +1,10 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 class Book {
 
     private String title;
     private String author;
     private String year;
-    private
+    //private
 
 }

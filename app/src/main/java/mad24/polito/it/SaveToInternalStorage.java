@@ -1,4 +1,4 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -6,6 +6,8 @@ import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.Toast;
+
+import  mad24.polito.it.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,7 +60,7 @@ public class SaveToInternalStorage extends AsyncTask<Bitmap, Integer, String> {
         progressDialog.setCancelable(false);
         progressDialog.setIndeterminate(true);
         progressDialog.show();*/
-        Toast.makeText(applicationContext, R.string.saving, Toast.LENGTH_SHORT).show();
+        Toast.makeText(applicationContext, mad24.polito.it.R.string.saving, Toast.LENGTH_SHORT).show();
     }
 
     @Override

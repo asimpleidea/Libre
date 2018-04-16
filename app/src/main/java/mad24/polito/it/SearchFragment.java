@@ -1,4 +1,4 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import  mad24.polito.it.R;
 
 
 /**
@@ -23,7 +25,7 @@ public class SearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_search, container, false);
+        return inflater.inflate(mad24.polito.it.R.layout.fragment_search, container, false);
     }
 
 }

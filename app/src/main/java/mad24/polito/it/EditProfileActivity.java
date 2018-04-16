@@ -1,8 +1,6 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,20 +17,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import mad24.polito.it.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -45,11 +40,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -101,25 +93,25 @@ public class EditProfileActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         Log.i("state", "onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_profile);
+        setContentView(mad24.polito.it.R.layout.activity_edit_profile);
 
-        saveText = (TextView) findViewById(R.id.saveEdit);
-        cancelImage = (TextView) findViewById(R.id.cancelEdit);
+        saveText = (TextView) findViewById(mad24.polito.it.R.id.saveEdit);
+        cancelImage = (TextView) findViewById(mad24.polito.it.R.id.cancelEdit);
 
         //image profile
-        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.editImageProfile);
+        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(mad24.polito.it.R.id.editImageProfile);
 
         //get edit fields
-        name = (EditText) findViewById(R.id.editName);
-        phone = (EditText) findViewById(R.id.editPhone);
-        mail = (EditText) findViewById(R.id.editMail);
-        bio = (EditText) findViewById(R.id.editBio);
-        city = (AutoCompleteTextView) findViewById(R.id.autoCompleteCity);
+        name = (EditText) findViewById(mad24.polito.it.R.id.editName);
+        phone = (EditText) findViewById(mad24.polito.it.R.id.editPhone);
+        mail = (EditText) findViewById(mad24.polito.it.R.id.editMail);
+        bio = (EditText) findViewById(mad24.polito.it.R.id.editBio);
+        city = (AutoCompleteTextView) findViewById(mad24.polito.it.R.id.autoCompleteCity);
 
         //manage genres
-        genres = (LinearLayout) findViewById(R.id.edit_favourite_genres_list);
-        btnGenre = (Button) findViewById(R.id.buttonGenre);
-        genresList = getResources().getStringArray(R.array.genres);
+        genres = (LinearLayout) findViewById(mad24.polito.it.R.id.edit_favourite_genres_list);
+        btnGenre = (Button) findViewById(mad24.polito.it.R.id.buttonGenre);
+        genresList = getResources().getStringArray(mad24.polito.it.R.array.genres);
         checkedItems = new boolean[genresList.length];
 
         //get preferences
@@ -158,7 +150,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                 uri = Uri.parse(str);
         } else {
             //default image
-            Drawable d = getResources().getDrawable(R.drawable.unknown_user);
+            Drawable d = getResources().getDrawable(mad24.polito.it.R.drawable.unknown_user);
             imageProfile.setImageDrawable(d);
             if(uri == null)
                 uri = Uri.parse("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png");
@@ -186,9 +178,9 @@ public class EditProfileActivity extends AppCompatActivity implements
             public void onClick(View v){
                 if(!mail.getText().toString().isEmpty() && !isValidEmailAddress(mail.getText().toString())) {
                     new AlertDialog.Builder(EditProfileActivity.this)
-                            .setTitle(R.string.mail_not_valid)
-                            .setMessage(R.string.insert_valid_mail)
-                            .setNeutralButton(R.string.ok,new DialogInterface.OnClickListener() {
+                            .setTitle(mad24.polito.it.R.string.mail_not_valid)
+                            .setMessage(mad24.polito.it.R.string.insert_valid_mail)
+                            .setNeutralButton(mad24.polito.it.R.string.ok,new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
@@ -197,9 +189,9 @@ public class EditProfileActivity extends AppCompatActivity implements
                             .show();
                 } else if(!phone.getText().toString().isEmpty() && !isValidPhoneNumber(phone.getText().toString())) {
                     new AlertDialog.Builder(EditProfileActivity.this)
-                            .setTitle(R.string.phone_not_valid)
-                            .setMessage(R.string.insert_valid_phone)
-                            .setNeutralButton(R.string.ok,new DialogInterface.OnClickListener() {
+                            .setTitle(mad24.polito.it.R.string.phone_not_valid)
+                            .setMessage(mad24.polito.it.R.string.insert_valid_phone)
+                            .setNeutralButton(mad24.polito.it.R.string.ok,new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
@@ -265,7 +257,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
                     editor.commit();
 
-                    Toast.makeText(getApplicationContext(), R.string.saved, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), mad24.polito.it.R.string.saved, Toast.LENGTH_SHORT).show();
 
                     finish();
                 }
@@ -288,7 +280,7 @@ public class EditProfileActivity extends AppCompatActivity implements
             }
 
         });
-        FloatingActionButton photoButton = (FloatingActionButton) findViewById(R.id.photoButton);
+        FloatingActionButton photoButton = (FloatingActionButton) findViewById(mad24.polito.it.R.id.photoButton);
         photoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -515,7 +507,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
             if(!out.exists()) {
                 Toast.makeText(getBaseContext(),
-                        R.string.error_camera, Toast.LENGTH_LONG)
+                        mad24.polito.it.R.string.error_camera, Toast.LENGTH_LONG)
                         .show();
                 return;
             }
@@ -560,9 +552,9 @@ public class EditProfileActivity extends AppCompatActivity implements
 
     private void selectImage() {
         //get string for AlertDialog options
-        final String optionCamera = getResources().getString(R.string.dialog_camera);
-        final String optionLibrary = getResources().getString(R.string.dialog_library);
-        final String optionCancel = getResources().getString(R.string.dialog_cancel);
+        final String optionCamera = getResources().getString(mad24.polito.it.R.string.dialog_camera);
+        final String optionLibrary = getResources().getString(mad24.polito.it.R.string.dialog_library);
+        final String optionCancel = getResources().getString(mad24.polito.it.R.string.dialog_cancel);
 
         final CharSequence[] items = {optionCamera, optionLibrary, optionCancel};
 
@@ -631,7 +623,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                         galleryIntent();
                 } else {
                     Toast.makeText(getBaseContext(),
-                        R.string.deny_permission_read, Toast.LENGTH_LONG)
+                        mad24.polito.it.R.string.deny_permission_read, Toast.LENGTH_LONG)
                         .show();
                 }
                 break;
@@ -642,7 +634,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                     cameraIntent();
                 } else {
                     Toast.makeText(getBaseContext(),
-                        R.string.deny_permission_camera, Toast.LENGTH_LONG)
+                        mad24.polito.it.R.string.deny_permission_camera, Toast.LENGTH_LONG)
                         .show();
                 }
                 break;
@@ -702,7 +694,7 @@ public class EditProfileActivity extends AppCompatActivity implements
         Log.e(LOG_TAG, "Google Places API connection failed with error code: "
                 + connectionResult.getErrorCode());
 
-        Toast.makeText(this, R.string.google_connection_failed, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, mad24.polito.it.R.string.google_connection_failed, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -714,8 +706,8 @@ public class EditProfileActivity extends AppCompatActivity implements
     private TextView BuildGenreLayout(final String name) {
         TextView genre = new TextView(getApplicationContext());
         genre.setText(name);
-        genre.setTextSize(this.getResources().getDimension(R.dimen.genre_item));
-        genre.setTextColor(this.getResources().getColor(R.color.black));
+        genre.setTextSize(this.getResources().getDimension(mad24.polito.it.R.dimen.genre_item));
+        genre.setTextColor(this.getResources().getColor(mad24.polito.it.R.color.black));
 
         return genre;
     }
@@ -734,7 +726,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                 }
 
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(EditProfileActivity.this);
-                mBuilder.setTitle(R.string.title_genre_alertdialog);
+                mBuilder.setTitle(mad24.polito.it.R.string.title_genre_alertdialog);
                 mBuilder.setMultiChoiceItems(genresList, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     //called every time you click a checkbox
@@ -751,7 +743,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                 mBuilder.setCancelable(false);
 
                 //called when you click "ok" button
-                mBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                mBuilder.setPositiveButton(mad24.polito.it.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
                         genres.removeAllViews();
@@ -764,7 +756,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                     }
                 });
 
-                mBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                mBuilder.setNegativeButton(mad24.polito.it.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
                         for (int i=0; i < genresList.length; i++) {

@@ -1,4 +1,4 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 
 import android.content.Intent;
@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import  mad24.polito.it.R;
 
 import java.io.File;
 
@@ -53,7 +54,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        return inflater.inflate(mad24.polito.it.R.layout.fragment_profile, container, false);
     }
 
     @Override
@@ -61,20 +62,20 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         //button to edit profile
-        editImage = (ImageView) getView().findViewById(R.id.imageEdit);
+        editImage = (ImageView) getView().findViewById(mad24.polito.it.R.id.imageEdit);
 
         //image profile
-        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) getView().findViewById(R.id.showImageProfile);
+        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) getView().findViewById(mad24.polito.it.R.id.showImageProfile);
 
         //get edit fields
-        name = (TextView) getView().findViewById(R.id.showName);
-        phone = (TextView) getView().findViewById(R.id.showPhone);
-        mail = (TextView) getView().findViewById(R.id.showMail);
-        bio = (TextView) getView().findViewById(R.id.showBio);
-        city = (TextView) getView().findViewById(R.id.showCity);
+        name = (TextView) getView().findViewById(mad24.polito.it.R.id.showName);
+        phone = (TextView) getView().findViewById(mad24.polito.it.R.id.showPhone);
+        mail = (TextView) getView().findViewById(mad24.polito.it.R.id.showMail);
+        bio = (TextView) getView().findViewById(mad24.polito.it.R.id.showBio);
+        city = (TextView) getView().findViewById(mad24.polito.it.R.id.showCity);
 
-        genres = (LinearLayout) getView().findViewById(R.id.show_favourite_genres_list);
-        genresList = getResources().getStringArray(R.array.genres);
+        genres = (LinearLayout) getView().findViewById(mad24.polito.it.R.id.show_favourite_genres_list);
+        genresList = getResources().getStringArray(mad24.polito.it.R.array.genres);
 
         //listener onClick for editing
         editImage.setOnClickListener(new View.OnClickListener() {
@@ -132,7 +133,7 @@ public class ProfileFragment extends Fragment {
             imageProfile.setImageURI(Uri.fromFile(new File(str)) );
         } else {
             //default image
-            Drawable d = getResources().getDrawable(R.drawable.unknown_user);
+            Drawable d = getResources().getDrawable(mad24.polito.it.R.drawable.unknown_user);
             imageProfile.setImageDrawable(d);
         }
 
@@ -153,8 +154,8 @@ public class ProfileFragment extends Fragment {
     private TextView BuildGenreLayout(final String name) {
         TextView genre = new TextView(getActivity().getApplicationContext());
         genre.setText(name);
-        genre.setTextSize(this.getResources().getDimension(R.dimen.genre_item));
-        genre.setTextColor(this.getResources().getColor(R.color.black));
+        genre.setTextSize(this.getResources().getDimension(mad24.polito.it.R.dimen.genre_item));
+        genre.setTextColor(this.getResources().getColor(mad24.polito.it.R.color.black));
 
         return genre;
     }

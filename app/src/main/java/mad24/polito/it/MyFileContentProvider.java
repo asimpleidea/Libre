@@ -1,4 +1,4 @@
-package com.example.elisl.mylab1;
+package mad24.polito.it;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
