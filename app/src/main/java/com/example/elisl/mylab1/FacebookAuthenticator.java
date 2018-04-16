@@ -165,6 +165,7 @@ public class FacebookAuthenticator
                 }
 
                 JSONObject data = response.getJSONObject();
+                
                 try
                 {
                     Log.d("FBLOGIN", "name: " + data.getString("name"));
