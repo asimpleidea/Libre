@@ -8,11 +8,15 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import  mad24.polito.it.R;
+import mad24.polito.it.registrationmail.LoginActivity;
 
 import java.io.File;
 
@@ -31,6 +35,8 @@ public class ShowProfileActivity extends AppCompatActivity {
     private String[] genresList;
     private LinearLayout genres;
 
+    private Button buttonLogoutProfile;
+
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
 
@@ -38,6 +44,12 @@ public class ShowProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(mad24.polito.it.R.layout.activity_show_profile);
+
+        //check if logged, if not go to login activity
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            startActivity(new Intent(ShowProfileActivity.this, LoginActivity.class));
+            finish();
+        }
 
         //button to edit profile
         editImage = (ImageView) findViewById(mad24.polito.it.R.id.imageEdit);
@@ -61,6 +73,17 @@ public class ShowProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), EditProfileActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        buttonLogoutProfile = (Button) findViewById(mad24.polito.it.R.id.buttonLogoutProfile);
+        buttonLogoutProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("state", "Signout");
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(ShowProfileActivity.this, LoginActivity.class));
+                finish();
             }
         });
 

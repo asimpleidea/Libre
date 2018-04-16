@@ -80,4 +80,22 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">TODO</string>
 
+
+    //strings for activity_signup_mail
+    <string name="passwordPlaceholder">Insert your password</string>
+    <string name="signup">Sign up</string>
+    <string name="signup_terms">By signing up, you agree to our Terms and Conditions</string>
+    <string name="signup_insertValidMail">Insert a valid mail</string>
+    <string name="signup_insertValidPassword">Password must be longer than 6 chars</string>
+    <string name="signup_insertValidName">Name must be longer than 2 chars</string>
+    <string name="signup_insertValidCity">Insert a valid city</string>
+    <string name="signup_insertValidPhone">Insert a valid phone number</string>
+    <string name="signup_mail_duplicated">Email already associated to an account</string>
+    <string name="signup_insert_another_mail">Please insert a different email</string>
+    <string name="signup_error">An error occurred during authentication</string>
+    <string name="signup_retry">Please, check you internet connection and retry</string>
+    <string name="signup_no_internet_connection">No Internet connection</string>
+    <string name="signup_internet_retry">Connect your device and retry</string>
+
+    <string name="logout">Log out</string>
 </resources>
