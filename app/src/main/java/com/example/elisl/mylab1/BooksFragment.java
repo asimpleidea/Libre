@@ -2,10 +2,15 @@ package com.example.elisl.mylab1;
 
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 
 /**
@@ -13,6 +18,8 @@ import android.view.ViewGroup;
  */
 public class BooksFragment extends Fragment {
 
+    private ListView lv;
+    private ArrayList<Book> books = new ArrayList<>();
 
     public BooksFragment() {
         // Required empty public constructor
@@ -25,7 +32,35 @@ public class BooksFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_book, container, false);
 
+
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
+        lv = (ListView) getActivity().findViewById(R.id.book_list);
+
+        lv.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return books.size(); //#elements in the list
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return null; //return object at position 'position'
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return 0; // leave 0
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                return null;
+            }
+        });
+    }
 }
