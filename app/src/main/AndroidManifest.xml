@@ -51,7 +51,8 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".SignUpActivity"></activity>
+        <!-- This activity should not be saved on stack! -->
+        <activity android:name=".SignUpActivity" android:noHistory="true"></activity>
 
         <!-- Facebook Login/Signup -->
             <meta-data android:name="com.facebook.sdk.ApplicationId"
