@@ -59,6 +59,11 @@ public class User
      */
     private String location = null;
 
+    /**
+     * User's profile picture
+     */
+    private String picture = null;
+
     User()
     {
         favorite_genres = new ArrayList<>();
@@ -238,5 +243,15 @@ public class User
     public void setLocation(String location)
     {
         this.location = location;
+    }
+
+    public String getPicture()
+    {
+        return picture;
+    }
+
+    public void setPicture(String picture)
+    {
+        this.picture = picture;
     }
 }

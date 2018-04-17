@@ -3,6 +3,7 @@ package com.example.elisl.mylab1;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -17,6 +18,8 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -28,9 +31,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -80,6 +89,11 @@ public class FacebookAuthenticator
     private FirebaseAuth FireAuth = null;
 
     /**
+     * The Firebase Storage
+     */
+    private StorageReference Storage = null;
+
+    /**
      * The RealTime Database
      */
     private DatabaseReference DB = null;
@@ -95,6 +109,7 @@ public class FacebookAuthenticator
         CurrentActivity = currentActivity;
         FireAuth = FirebaseAuth.getInstance();
         DB = FirebaseDatabase.getInstance().getReference();
+        Storage = FirebaseStorage.getInstance().getReference();
     }
 
     /**
@@ -217,7 +232,8 @@ public class FacebookAuthenticator
                 {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful())
+                        {
                             //  Get the user logged
                             final FirebaseUser logged = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -227,7 +243,8 @@ public class FacebookAuthenticator
 
                             DB.child("member").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                public void onDataChange(DataSnapshot dataSnapshot)
+                                {
                                     //  No need to do anything else then
                                     if (dataSnapshot.hasChild(logged.getUid()))
                                     {
@@ -240,48 +257,48 @@ public class FacebookAuthenticator
                                     //  Create new user
                                     //----------------------------------
 
-                                    User u = new User();
+                                    //  Get the user's picture
+                                    InputStream stream = null;
+
                                     try
                                     {
-                                        //  Todo: check for email value, as Facebook not always returns it (check fb developer page)
-                                        u.setEmail(o.getString("email"));
-                                        u.setGender(o.getString("gender"));
-                                        u.setLocale(o.getString("locale"));
-                                        u.setName(o.getString("name"));
-                                        u.setTimezone(o.getInt("timezone"));
-                                        u.setBio("");
-                                        u.setPhone("");
-                                        u.setLocation("");
-                                        u.addFavoriteGenre("horror");
+                                        //----------------------------------
+                                        //  Upload the user's profile pic
+                                        //----------------------------------
 
-                                        //  Finally, store user to DB!
-                                        DB.child("member")
-                                                .child(logged.getUid())
-                                                .setValue(u, new DatabaseReference.CompletionListener() {
-                                                    @Override
-                                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
-                                                    {
-                                                        //CurrentActivity.finish();
-                                                        Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                });
+                                        final String pic = o.getJSONObject("picture").getJSONObject("data").getString("url");
+                                        Log.d("FBLOGIN", pic);
+
+                                        stream = new PullFBPictureStream(logged.getUid()).execute(pic).get();
                                     }
-                                    catch (JSONException j)
+                                    catch(JSONException j)
                                     {
-                                        //  Something happened? Then first sign the user out, then delete them!
-                                        String uid = logged.getUid();
-                                        FirebaseAuth.getInstance().signOut();
-
-                                        DB.child("member").child(uid).removeValue(new DatabaseReference.CompletionListener()
-                                        {
-                                            @Override
-                                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
-                                            {
-                                                Log.d("FBLOGIN", "User account deleted.");
-                                                Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
+                                        //  Nothing, just don't save the picture
                                     }
+                                    catch(InterruptedException i){}
+                                    catch(ExecutionException e){}
+
+
+                                    UploadTask task = Storage.child("profile_pictures").child(logged.getUid()+".jpg").putStream(stream);
+                                    task.addOnFailureListener(new OnFailureListener()
+                                    {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e)
+                                        {
+                                            //  Create User
+                                            Log.d("UPLOAD", "failure");
+                                            createUser(logged, o, null);
+                                        }
+                                    });
+
+                                    task.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+                                    {
+                                        @Override
+                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+                                        {
+                                            createUser(logged, o, taskSnapshot.getDownloadUrl().toString());
+                                        }
+                                    });
                                 }
 
                                 @Override
@@ -294,5 +311,64 @@ public class FacebookAuthenticator
                     }
                 }
         );
+    }
+
+    private void createUser(final FirebaseUser logged, final JSONObject o, String picture)
+    {
+        User u = new User();
+
+        try
+        {
+            //  Todo: check for email value, as Facebook not always returns it (check fb developer page)
+            u.setEmail(o.getString("email"));
+            u.setGender(o.getString("gender"));
+            u.setLocale(o.getString("locale"));
+            u.setName(o.getString("name"));
+            u.setTimezone(o.getInt("timezone"));
+            u.setBio("");
+            u.setPhone("");
+            u.setLocation("");
+            u.addFavoriteGenre("horror");
+            u.setPicture(picture);
+
+            //  Finally, store user to DB!
+            DB.child("member")
+                    .child(logged.getUid())
+                    .setValue(u, new DatabaseReference.CompletionListener()
+                    {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
+                        {
+                            if(databaseError != null) onFailure(logged);
+                            else
+                            {
+                                //CurrentActivity.finish();
+                                Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+        catch(JSONException j)
+        {
+            onFailure(logged);
+        }
+
+    }
+
+    private void onFailure(final FirebaseUser logged)
+    {
+        //  Something happened? Then first sign the user out, then delete them!
+        String uid = logged.getUid();
+        FirebaseAuth.getInstance().signOut();
+
+        DB.child("member").child(uid).removeValue(new DatabaseReference.CompletionListener()
+        {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
+            {
+                Log.d("FBLOGIN", "User account deleted.");
+                Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
