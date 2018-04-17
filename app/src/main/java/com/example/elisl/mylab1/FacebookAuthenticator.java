@@ -259,18 +259,22 @@ public class FacebookAuthenticator
                                                         Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
                                                     }
                                                 });
-                                    } catch (JSONException j) {
-                                        //  Something happened? Then delete the user!
-                                        FirebaseAuth.getInstance().getCurrentUser().delete()
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()) {
-                                                            Log.d("FBLOGIN", "User account deleted.");
-                                                            Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    }
-                                                });
+                                    }
+                                    catch (JSONException j)
+                                    {
+                                        //  Something happened? Then first sign the user out, then delete them!
+                                        String uid = logged.getUid();
+                                        FirebaseAuth.getInstance().signOut();
+
+                                        DB.child("member").child(uid).removeValue(new DatabaseReference.CompletionListener()
+                                        {
+                                            @Override
+                                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
+                                            {
+                                                Log.d("FBLOGIN", "User account deleted.");
+                                                Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                                     }
                                 }
 
