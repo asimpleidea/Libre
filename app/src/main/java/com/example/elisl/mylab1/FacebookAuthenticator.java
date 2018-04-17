@@ -241,12 +241,18 @@ public class FacebookAuthenticator
                                     //----------------------------------
 
                                     User u = new User();
-                                    try {
+                                    try
+                                    {
+                                        //  Todo: check for email value, as Facebook not always returns it (check fb developer page)
                                         u.setEmail(o.getString("email"));
                                         u.setGender(o.getString("gender"));
                                         u.setLocale(o.getString("locale"));
                                         u.setName(o.getString("name"));
                                         u.setTimezone(o.getInt("timezone"));
+                                        u.setBio("");
+                                        u.setPhone("");
+                                        u.setLocation("");
+                                        u.addFavoriteGenre("horror");
 
                                         //  Finally, store user to DB!
                                         DB.child("member")

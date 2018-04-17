@@ -2,6 +2,9 @@ package com.example.elisl.mylab1;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class User
 {
     /**
@@ -46,10 +49,19 @@ public class User
      */
     private String bio = null;
 
+    /**
+     * User's favorite genres
+     */
+    private List<String> favorite_genres = null;
+
+    /**
+     * User's location
+     */
+    private String location = null;
 
     User()
     {
-
+        favorite_genres = new ArrayList<>();
     }
 
     public static Boolean logged()
@@ -183,11 +195,48 @@ public class User
         isVerified = verified;
     }
 
-    public String getBio() {
+    public String getBio()
+    {
         return bio;
     }
 
-    public void setBio(String bio) {
+    public void setBio(String bio)
+    {
         this.bio = bio;
+    }
+
+    public List<String> getFavorite_genres()
+    {
+        //  https://stackoverflow.com/a/4042464/3497202
+        return favorite_genres;
+    }
+
+    /**
+     * Adds a new genre to user's favorites
+     * Todo: check for genre ids
+     * @param genre
+     */
+    public void addFavoriteGenre(String genre)
+    {
+        favorite_genres.add(genre);
+    }
+
+    /**
+     * Sets user's favorite genres
+     * @param favorite_genres
+     */
+    public void setFavorite_genres(List<String> favorite_genres)
+    {
+        this.favorite_genres = favorite_genres;
+    }
+
+    public String getLocation()
+    {
+        return location;
+    }
+
+    public void setLocation(String location)
+    {
+        this.location = location;
     }
 }
