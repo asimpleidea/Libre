@@ -11,7 +11,9 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import  mad24.polito.it.R;
+import mad24.polito.it.fragments.BooksFragment;
+import mad24.polito.it.fragments.ProfileFragment;
+import mad24.polito.it.fragments.SearchFragment;
 
 public class BooksActivity extends AppCompatActivity {
 
