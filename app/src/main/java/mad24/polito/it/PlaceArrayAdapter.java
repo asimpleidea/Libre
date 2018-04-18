@@ -1,23 +1,23 @@
 package mad24.polito.it;
 
-    import android.content.Context;
-    import android.util.Log;
-    import android.widget.ArrayAdapter;
-    import android.widget.Filter;
-    import android.widget.Filterable;
+import android.content.Context;
+import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 
-    import com.google.android.gms.common.api.GoogleApiClient;
-    import com.google.android.gms.common.api.PendingResult;
-    import com.google.android.gms.common.api.Status;
-    import com.google.android.gms.location.places.AutocompleteFilter;
-    import com.google.android.gms.location.places.AutocompletePrediction;
-    import com.google.android.gms.location.places.AutocompletePredictionBuffer;
-    import com.google.android.gms.location.places.Places;
-    import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.location.places.AutocompletePredictionBuffer;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLngBounds;
 
-    import java.util.ArrayList;
-    import java.util.Iterator;
-    import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 public class PlaceArrayAdapter
         extends ArrayAdapter<PlaceArrayAdapter.PlaceAutocomplete> implements Filterable {
@@ -127,7 +127,7 @@ public class PlaceArrayAdapter
         return filter;
     }
 
-    class PlaceAutocomplete {
+    public class PlaceAutocomplete {
 
         public CharSequence placeId;
         public CharSequence description;

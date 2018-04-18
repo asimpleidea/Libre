@@ -13,7 +13,7 @@
         android:layout_height="match_parent">
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/signupMail_progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -38,6 +38,39 @@
                 android:clickable="true"
                 android:focusableInTouchMode="true"
                 >
+
+                //profile image
+                <RelativeLayout
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="10dp">
+
+                    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/signupMail_imageProfile"
+                        android:layout_width="115dp"
+                        android:layout_height="119dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_gravity="center_horizontal"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:src="@drawable/unknown_user"
+                        app:civ_border_color="@android:color/black"
+                        app:civ_border_width="1dp" />
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/signupMail_photoButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignEnd="@+id/signupMail_imageProfile"
+                        android:layout_alignRight="@+id/signupMail_imageProfile"
+                        android:layout_alignParentBottom="true"
+                        android:clickable="true"
+                        android:src="@drawable/ic_photo_camera_black"
+                        app:backgroundTint="@android:color/background_light"
+                        app:fabSize="mini" />
+                </RelativeLayout>
 
                 <!--MAIL-->
                 <LinearLayout
@@ -273,25 +306,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-                        <Button
-                            android:id="@+id/signupMail_buttonSignup"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:layout_marginTop="16dp"
-                            android:background="@color/colorToolbar"
-                            android:text="@string/signup"
-                            android:textColor="@android:color/white"
-                            android:textSize="@dimen/font_size"
-                            />
+                    <Button
+                        android:id="@+id/signupMail_buttonSignup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/colorToolbar"
+                        android:text="@string/signup"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/font_size"
+                        />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="@string/signup_terms"
-                            android:textSize="14dp"
-                            />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/signup_terms"
+                        android:textSize="14dp"
+                        android:paddingBottom="10dp"
+                        />
 
                 </LinearLayout>
 

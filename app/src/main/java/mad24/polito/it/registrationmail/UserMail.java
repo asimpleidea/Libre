@@ -1,6 +1,6 @@
 package mad24.polito.it.registrationmail;
 
-public class User {
+public class UserMail {
     String email;
     String name;
     String city;
@@ -8,11 +8,11 @@ public class User {
     String bio;
     //String[] genres;
 
-    public User() {
+    public UserMail() {
 
     }
 
-    public User(String email, String name, String city, String phone, String bio) {
+    public UserMail(String email, String name, String city, String phone, String bio) {
         this.email = email;
         this.name = name;
         this.city = city;

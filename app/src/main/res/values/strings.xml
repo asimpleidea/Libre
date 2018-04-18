@@ -98,5 +98,12 @@
     <string name="signup_no_internet_connection">No Internet connection</string>
     <string name="signup_internet_retry">Connect your device and retry</string>
 
+    //string for reset password
+    <string name="reset_password">Reset password</string>
+    <string name="reset_password_success">Reset password success</string>
+    <string name="reset_password_success_mail">Check your email, you should have received the instruction</string>
+    <string name="reset_password_failed">Reset password failed</string>
+    <string name="reset_password_failed_mail">Failed sending reset email, check if email is correct</string>
+
     <string name="logout">Log out</string>
 </resources>

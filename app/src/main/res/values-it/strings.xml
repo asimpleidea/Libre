@@ -89,6 +89,13 @@
     <string name="signup_no_internet_connection">Nessuna connessione Internet</string>
     <string name="signup_internet_retry">Connetti il tuo dispositivo e riprova</string>
 
+    //string for reset password
+    <string name="reset_password">Ripristina password</string>
+    <string name="reset_password_success">Ripristino password con successo</string>
+    <string name="reset_password_success_mail">Controlla la tua email, dovresti aver ricevuto le istruzioni</string>
+    <string name="reset_password_failed">Ripristino password fallito</string>
+    <string name="reset_password_failed_mail">Errore inviando la mail, controlla se l\'email è corretta</string>
+
     <string name="logout">Disconnetti</string>
 
 </resources>

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "194990875631-nmg0b8vb8hod0k7ltmo0q9la2oo0mbe3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.elisl.mylab1",
+            "certificate_hash": "9bbf22c29120c866e9758067960e1f63702e2368"
+          }
+        },
+        {
           "client_id": "194990875631-3f5rtms1k3ufr1brhme843c5mu6occoo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -59,6 +67,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "194990875631-qquvh7sqe6nd7veb09umui561i7tlceb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mad24.polito.it",
+            "certificate_hash": "f8a84ec83dfa7e90b257000d282f7987e95c9d86"
+          }
+        },
+        {
           "client_id": "194990875631-47kqioejm6fci89fpfh2uai7q7nl7bk9.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -73,8 +89,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "194990875631-47kqioejm6fci89fpfh2uai7q7nl7bk9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

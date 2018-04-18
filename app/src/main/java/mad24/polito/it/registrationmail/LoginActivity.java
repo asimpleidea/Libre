@@ -1,10 +1,13 @@
 package mad24.polito.it.registrationmail;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,6 +22,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
+    private static final int RESET_PASSWORD_ACTIVITY = 1;
 
     private EditText inputEmail, inputPassword;
     private FirebaseAuth auth;
@@ -59,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         btnReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this, ResetPasswordMailActivity.class));
+                startActivityForResult(new Intent(LoginActivity.this, ResetPasswordMailActivity.class), RESET_PASSWORD_ACTIVITY);
             }
         });
 
@@ -106,6 +110,26 @@ public class LoginActivity extends AppCompatActivity {
                         });
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        //if image profile is taken by gallery
+        if (requestCode == RESET_PASSWORD_ACTIVITY && resultCode == RESULT_OK) {
+            new AlertDialog.Builder(LoginActivity.this)
+                    .setTitle(R.string.reset_password_success)
+                    .setMessage(R.string.reset_password_success_mail)
+                    .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        }
+
     }
 }
 
