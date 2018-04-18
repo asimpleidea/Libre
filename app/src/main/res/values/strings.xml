@@ -77,8 +77,7 @@
     <string name="nav_chat">Chat</string>
     <string name="nav_profile">Profile</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">TODO</string>
+    <!-- TODO: Change this text -->
     <string name="dialog_scan">ISBN scan</string>
     <string name="dialog_manualIns">Manual Insert</string>
 

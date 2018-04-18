@@ -12,6 +12,10 @@
         android:icon="@drawable/ic_search_black"
         android:title="@string/nav_search" />
     <item
+        android:id="@+id/nav_chat"
+        android:icon="@drawable/ic_message_black"
+        android:title="Chat"/>
+    <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_person_black"
         android:title="@string/nav_profile" />

@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import mad24.polito.it.fragments.BooksFragment;
+import mad24.polito.it.fragments.ChatFragment;
 import mad24.polito.it.fragments.ProfileFragment;
 import mad24.polito.it.fragments.SearchFragment;
 
@@ -22,6 +23,7 @@ public class BooksActivity extends AppCompatActivity {
 
     private BooksFragment booksFragment;
     private SearchFragment searchFragment;
+    private ChatFragment chatFragment;
     private ProfileFragment profileFragment;
 
     private TextView mTextMessage;
@@ -41,6 +43,11 @@ public class BooksActivity extends AppCompatActivity {
                     Log.d("frag", "nav_search pressed");
 //                    mTextMessage.setText(R.string.nav_search);
                     setFragment(searchFragment);
+                    return true;
+                case R.id.nav_chat:
+                    Log.d("frag", "nav_profile_pressed");
+//                    mTextMessage.setText(R.string.nav_profile);
+                    setFragment(chatFragment);
                     return true;
                 case mad24.polito.it.R.id.nav_profile:
                     Log.d("frag", "nav_profile pressed");
@@ -64,9 +71,11 @@ public class BooksActivity extends AppCompatActivity {
 
         booksFragment = new BooksFragment();
         searchFragment = new SearchFragment();
+        chatFragment = new ChatFragment();
         profileFragment = new ProfileFragment();
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(mad24.polito.it.R.id.main_nav);
+        BottomNavigationViewHelper.disableShiftMode(navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
 

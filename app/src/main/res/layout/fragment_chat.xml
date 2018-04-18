@@ -3,12 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="mad24.polito.it.fragments.SearchFragment">
+    tools:context=".fragments.ChatFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/nav_search" />
+        android:text="@string/nav_chat" />
 
 </FrameLayout>
