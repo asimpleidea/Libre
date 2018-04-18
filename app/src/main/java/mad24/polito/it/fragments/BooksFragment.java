@@ -170,6 +170,7 @@ public class BooksFragment extends Fragment {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, MyFileContentProvider.CONTENT_URI);
 
         if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+            //TODO: actual code for scan book
             //startActivityForResult(intent, REQUEST_CAMERA);
             Log.d("booksfragment", "camera intent should start");
             Toast.makeText(getActivity().getBaseContext(), "Camera intent should start", Toast.LENGTH_LONG).show();
@@ -182,6 +183,8 @@ public class BooksFragment extends Fragment {
         // Show only images, no videos or anything else
         intent.setType("image/*");
         // Always show the chooser (if there are multiple options available)
+
+        //TODO: actual code for manual insert book
         //startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
 
         Log.d("booksfragment", "manual intent should start");
