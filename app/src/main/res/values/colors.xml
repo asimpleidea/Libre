@@ -13,5 +13,5 @@
     <color name="colorWhite">#ffffff</color>
     <color name="colorWhiteTransparent">#80ffffff</color>
 
-    <color name="colorRed">#ee1200</color>
+    <color name="red">@android:color/holo_red_dark</color>
 </resources>
