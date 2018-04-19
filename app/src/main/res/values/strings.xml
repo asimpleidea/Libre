@@ -97,6 +97,7 @@
     <string name="signup_retry">Please, check you internet connection and retry</string>
     <string name="signup_no_internet_connection">No Internet connection</string>
     <string name="signup_internet_retry">Connect your device and retry</string>
+    <string name="signup_genre_button">Add your favourite genres</string>
 
     //string for reset password
     <string name="reset_password">Reset password</string>

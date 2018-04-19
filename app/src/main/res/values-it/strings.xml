@@ -88,6 +88,7 @@
     <string name="signup_retry">Controlla la tua connession Internet e riprova</string>
     <string name="signup_no_internet_connection">Nessuna connessione Internet</string>
     <string name="signup_internet_retry">Connetti il tuo dispositivo e riprova</string>
+    <string name="signup_genre_button">Aggiungi i tuoi generi preferiti</string>
 
     //string for reset password
     <string name="reset_password">Ripristina password</string>

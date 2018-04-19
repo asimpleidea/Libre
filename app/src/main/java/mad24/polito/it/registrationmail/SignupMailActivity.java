@@ -60,7 +60,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -82,6 +84,11 @@ public class SignupMailActivity extends AppCompatActivity implements
     private Button buttonSignup;
     private ImageButton buttonBack;
     private ProgressBar progressBar;
+
+    private Button btnGenre;
+    private String[] genresList;                                    //all genres list
+    boolean[] checkedItems;                                         //checked genres
+    ArrayList<Integer> selectedGenres = new ArrayList<Integer>();
 
     private FirebaseAuth auth;
 
@@ -105,7 +112,7 @@ public class SignupMailActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_signup_mail);
 
         //image profile
-        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(mad24.polito.it.R.id.signupMail_imageProfile);
+        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.signupMail_imageProfile);
 
         //get EditText of fields
         mail = (EditText) findViewById(R.id.signupMail_mail);
@@ -114,6 +121,14 @@ public class SignupMailActivity extends AppCompatActivity implements
         city = (AutoCompleteTextView) findViewById(R.id.signupMail_city);
         phone = (EditText) findViewById(R.id.signupMail_phone);
         bio = (EditText) findViewById(R.id.signupMail_bio);
+
+        //get elements to manage favourite genres
+        btnGenre = (Button) findViewById(R.id.signupMail_buttonGenre);
+        genresList = getResources().getStringArray(R.array.genres);
+        checkedItems = new boolean[genresList.length];
+
+        //set event to manage favourite genres
+        manageButtonGenre();
 
         //button to signup
         buttonSignup = (Button) findViewById(R.id.signupMail_buttonSignup);
@@ -132,7 +147,7 @@ public class SignupMailActivity extends AppCompatActivity implements
         bio.setOnFocusChangeListener(eventFocusChangeListener);
 
         //set default image
-        Drawable d = getResources().getDrawable(mad24.polito.it.R.drawable.unknown_user);
+        Drawable d = getResources().getDrawable(R.drawable.unknown_user);
         imageProfile.setImageDrawable(d);
         uri = Uri.parse("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png");
 
@@ -153,7 +168,7 @@ public class SignupMailActivity extends AppCompatActivity implements
             }
 
         });
-        FloatingActionButton photoButton = (FloatingActionButton) findViewById(mad24.polito.it.R.id.signupMail_photoButton);
+        FloatingActionButton photoButton = (FloatingActionButton) findViewById(R.id.signupMail_photoButton);
         photoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -243,14 +258,16 @@ public class SignupMailActivity extends AppCompatActivity implements
                             .addOnCompleteListener(SignupMailActivity.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
-                                    progressBar.setVisibility(View.GONE);
 
                                     if (!task.isSuccessful()) {
                                         //if duplicated email
                                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                            progressBar.setVisibility(View.GONE);
                                             showDialog(getResources().getString(R.string.signup_mail_duplicated),
                                                     getResources().getString(R.string.signup_insert_another_mail) );
                                         } else {
+                                            progressBar.setVisibility(View.GONE);
+
                                             //if generic error
                                             showDialog(getResources().getString(R.string.signup_error),
                                                     getResources().getString(R.string.signup_retry) );
@@ -259,78 +276,82 @@ public class SignupMailActivity extends AppCompatActivity implements
                                         FirebaseUser user = auth.getCurrentUser();
                                         Uri downloadUrl = Uri.parse("");
 
+                                        //if the image profile is the default one --> not upload it on Firebase Storage
+                                        if(uri.toString().equals("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png") ){
+                                            createUserOnDabase(mailString, nameString, cityString, phoneString, bioString, "");
+                                        }
+
                                         //load image profile in Firebase Storage
-                                        /*try {
+                                        try {
                                             FirebaseStorage storage = FirebaseStorage.getInstance();
+                                            StorageReference storageRef = storage.getReference().child("profile_pictures").child(user.getUid() + ".jpg");
 
-                                            StorageReference storageRef = storage.getReference().child("profile_pictures").child(user.getUid()+".jpg");
+                                            UploadTask uploadTask;
+                                            if(isPhoto) {
+                                                File f = new File(getBaseContext().getCacheDir(), "profileimage.jpg");
+                                                f.createNewFile();
 
-                                            Uri file = Uri.fromFile(new File(uri.toString()));
-                                            UploadTask uploadTask = storageRef.putFile(file);
+                                                Bitmap mBitmap = BitmapFactory.decodeFile(uri.toString());
+                                                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                                                mBitmap.compress(Bitmap.CompressFormat.JPEG, 0, bos);
+                                                byte[] bitmapdata = bos.toByteArray();
+
+                                                FileOutputStream fos = new FileOutputStream(f);
+                                                fos.write(bitmapdata);
+                                                fos.flush();
+                                                fos.close();
+
+                                                uploadTask = storageRef.putFile(Uri.fromFile(f));
+                                            } else {
+                                                File f = new File(getBaseContext().getCacheDir(), "profileimage.jpg");
+                                                f.createNewFile();
+
+                                                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                                                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 0, bos);
+                                                byte[] bitmapdata = bos.toByteArray();
+
+                                                FileOutputStream fos = new FileOutputStream(f);
+                                                fos.write(bitmapdata);
+                                                fos.flush();
+                                                fos.close();
+
+                                                uploadTask = storageRef.putFile(uri);
+                                            }
 
                                             // Register observers to listen for when the download is done or if it fails
                                             uploadTask.addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception exception) {
+                                                    auth.signOut();
+                                                    auth.getCurrentUser().delete();
+
+                                                    progressBar.setVisibility(View.GONE);
+
                                                     showDialog(getResources().getString(R.string.signup_error),
-                                                            getResources().getString(R.string.signup_retry) );
+                                                            getResources().getString(R.string.signup_retry));
                                                 }
                                             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                                 @Override
                                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                    FirebaseUser user = auth.getCurrentUser();
                                                     Uri downloadUrl = Uri.parse("");
 
                                                     //taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                                                     downloadUrl = taskSnapshot.getDownloadUrl();
 
-                                                    //add new user in Firebase Database
-                                                    try {
-                                                        DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
-                                                        myDatabase.child("users").child(user.getUid() )
-                                                                .setValue(new UserMail(mailString, nameString, cityString, phoneString, bioString));
-                                                    } catch (Exception e) {
-                                                        showDialog(getResources().getString(R.string.signup_error),
-                                                                getResources().getString(R.string.signup_retry) );
-
-                                                        if(auth.getCurrentUser() != null) {
-                                                            user = auth.getCurrentUser();
-                                                            auth.signOut();
-                                                            user.delete();
-                                                        }
-
-                                                        return;
-                                                    }
-
-                                                    startActivity(new Intent(SignupMailActivity.this, BooksActivity.class));
-                                                    finish();
+                                                    //create user on database
+                                                    createUserOnDabase(mailString, nameString, cityString, phoneString, bioString, downloadUrl.toString() );
                                                 }
                                             });
 
                                         } catch (Exception e) {
+                                            progressBar.setVisibility(View.GONE);
+
                                             //if image profile saving fails
                                             showDialog(getResources().getString(R.string.signup_error),
-                                                    getResources().getString(R.string.signup_retry) );
+                                                    getResources().getString(R.string.signup_retry));
 
-                                            if(auth.getCurrentUser() != null) {
-                                                user = auth.getCurrentUser();
-                                                auth.signOut();
-                                                user.delete();
-                                            }
-
-                                            return;
-                                        }*/
-
-                                        //add new user in Firebase Database
-                                        try {
-                                            DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
-                                            myDatabase.child("users").child(user.getUid() )
-                                                    .setValue(new UserMail(mailString, nameString, cityString, phoneString, bioString));
-                                        } catch (Exception e) {
-                                            showDialog(getResources().getString(R.string.signup_error),
-                                                    getResources().getString(R.string.signup_retry) );
-
-                                            if(auth.getCurrentUser() != null) {
+                                            if (auth.getCurrentUser() != null) {
                                                 user = auth.getCurrentUser();
                                                 auth.signOut();
                                                 user.delete();
@@ -338,9 +359,6 @@ public class SignupMailActivity extends AppCompatActivity implements
 
                                             return;
                                         }
-
-                                        startActivity(new Intent(SignupMailActivity.this, BooksActivity.class));
-                                        finish();
                                     }
                                 }
                             });
@@ -574,10 +592,14 @@ public class SignupMailActivity extends AppCompatActivity implements
         Log.i("state", "onSaveInstanceState");
         super.onSaveInstanceState(outState);
 
+        //save uri photo/image
         if(uri != null)
             outState.putString("profileImageURI", uri.toString());
 
         outState.putBoolean("isPhoto", isPhoto);
+
+        //save favourite genres
+        outState.putSerializable("genres", checkedItems);
     }
 
     @Override
@@ -585,7 +607,7 @@ public class SignupMailActivity extends AppCompatActivity implements
         Log.i("state", "onRestoreInstanceState");
         super.onRestoreInstanceState(savedInstanceState);
 
-        //get resources
+        //get profile image
         uri = Uri.parse(savedInstanceState.getString("profileImageURI"));
         isPhoto = savedInstanceState.getBoolean("isPhoto");
 
@@ -606,6 +628,9 @@ public class SignupMailActivity extends AppCompatActivity implements
         }catch (IOException e) {
             e.printStackTrace();
         }
+
+        //get favourite genres
+        checkedItems = (boolean[]) savedInstanceState.getSerializable("genres");
     }
 
     @Override
@@ -648,6 +673,97 @@ public class SignupMailActivity extends AppCompatActivity implements
 
             uri = Uri.parse(out.getAbsolutePath());
             isPhoto = true;
+        }
+    }
+
+    //event clicking the button to choose favourite genres
+    private void manageButtonGenre() {
+        btnGenre.setOnClickListener(new View.OnClickListener() {
+            boolean[] oldSelectedGenres = new boolean[genresList.length];
+
+            @Override
+            public void onClick(View view) {
+                oldSelectedGenres = new boolean[genresList.length];
+
+                for(int i=0; i < genresList.length; i++) {
+                    if(checkedItems[i] == true)
+                        oldSelectedGenres[i] = true;
+                }
+
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(SignupMailActivity.this);
+                mBuilder.setTitle(R.string.title_genre_alertdialog);
+                mBuilder.setMultiChoiceItems(genresList, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    //called every time you click a checkbox
+                    public void onClick(DialogInterface dialogInterface, int position, boolean isChecked) {
+                    }
+                });
+
+                mBuilder.setCancelable(false);
+
+                //called when you click "ok" button
+                mBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                    }
+                });
+
+                mBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        for(int i=0; i < genresList.length; i++) {
+                            checkedItems[i] = oldSelectedGenres[i];
+                        }
+
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                final AlertDialog mDialog = mBuilder.create();
+
+                mDialog.show();
+            }
+        });
+    }
+
+    private void createUserOnDabase(String mailString, String nameString, String cityString,
+                                   String phoneString, String bioString, String downloadUrl) {
+        FirebaseUser user = auth.getCurrentUser();
+
+        //add new user in Firebase Database
+        try {
+            //get genre strings
+            ArrayList<String> selectedGenres = new ArrayList<String>();
+
+            for (int i = 0; i < genresList.length; i++) {
+                if (checkedItems[i] == true)
+                    selectedGenres.add(genresList[i]);
+            }
+
+            DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
+            myDatabase.child("users").child(user.getUid())
+                    .setValue(new UserMail(mailString, nameString, cityString, phoneString, bioString, selectedGenres, downloadUrl) );
+
+            progressBar.setVisibility(View.GONE);
+
+            //start BooksActivity and finish SignUpMailActivity
+            startActivity(new Intent(SignupMailActivity.this, BooksActivity.class));
+            finish();
+
+        } catch (Exception e) {
+            progressBar.setVisibility(View.GONE);
+            showDialog(getResources().getString(R.string.signup_error),
+                    getResources().getString(R.string.signup_retry));
+
+            if (auth.getCurrentUser() != null) {
+                //delete profile image
+                StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("profile_pictures").child(user.getUid() + ".jpg");
+                storageRef.delete();
+
+                //sign out and delete account
+                auth.signOut();
+                user.delete();
+            }
         }
     }
 
