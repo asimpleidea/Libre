@@ -17,8 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import mad24.polito.it.*;
 import mad24.polito.it.models.*;
@@ -38,7 +41,8 @@ public class BooksFragment extends Fragment {
     View v;
 
     // Firebase var
-    private DatabaseReference mDatabase;
+/*    final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference mDatabase;*/
 
     // Android Layout
     private RecyclerView rv;
@@ -60,8 +64,10 @@ public class BooksFragment extends Fragment {
         Log.d("booksfragment", "onCreateView");
         // Inflate the layout for this fragment
         v =  inflater.inflate(R.layout.fragment_book, container, false);
+/*
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
+*/
 
         rv = (RecyclerView) v.findViewById(R.id.book_list);
         new_book_button = (FloatingActionButton) v.findViewById(R.id.newBookBtn);
@@ -88,7 +94,26 @@ public class BooksFragment extends Fragment {
 
         Log.d("booksfragment", "onCreate method");
 
-/*        mDatabase.addValueEventListener(new ValueEventListener() {
+        books = new ArrayList<>();
+
+        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
+        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
+        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
+        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
+
+        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
+        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
+        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
+        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
+
+        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
+        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
+        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
+        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
+/*
+        DatabaseReference ref = database.getReference("books/");
+
+        mDatabase.addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -106,21 +131,6 @@ public class BooksFragment extends Fragment {
             }
         });*/
 
-        books = new ArrayList<>();
-        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
-        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
-        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
-        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
-
-        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
-        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
-        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
-        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
-
-        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
-        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
-        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
-        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
     }
 
     private void selectBookInsertMethod() {
@@ -179,13 +189,10 @@ public class BooksFragment extends Fragment {
 
     //intent to access the gallery
     private void manualIntent() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        // Show only images, no videos or anything else
-        intent.setType("image/*");
-        // Always show the chooser (if there are multiple options available)
+        Intent intent = new Intent(getActivity(), ManualInsertActivity.class);
 
         //TODO: actual code for manual insert book
-        //startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+        startActivity(intent);
 
         Log.d("booksfragment", "manual intent should start");
         Toast.makeText(getActivity().getBaseContext(), "Camera intent should start", Toast.LENGTH_LONG).show();

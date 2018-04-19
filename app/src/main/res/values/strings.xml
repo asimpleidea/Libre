@@ -82,7 +82,7 @@
     <string name="dialog_manualIns">Manual Insert</string>
 
 
-    //strings for activity_signup_mail
+    <!-- strings for activity_signup_mail -->
     <string name="passwordPlaceholder">Insert your password</string>
     <string name="signup">Sign up</string>
     <string name="signup_terms">By signing up, you agree to our Terms and Conditions</string>
@@ -106,4 +106,13 @@
     <string name="reset_password_failed_mail">Failed sending reset email, check if email is correct</string>
 
     <string name="logout">Log out</string>
+    <string name="title_activity_manual_insert">ManualInsertActivity</string>
+
+    <!-- book insert strings -->
+    <string name="book_title">Title</string>
+    <string name="book_author">Author</string>
+    <string name="book_genre">Genre</string>
+    <string name="book_isbn">ISBN</string>
+    <string name="bookSend">Send</string>
+
 </resources>
