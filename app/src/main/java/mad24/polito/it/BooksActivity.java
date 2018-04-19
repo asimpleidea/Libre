@@ -26,6 +26,9 @@ public class BooksActivity extends AppCompatActivity {
     private ChatFragment chatFragment;
     private ProfileFragment profileFragment;
 
+    private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment};
+    private CurrentFragment currentFragment;
+
     private TextView mTextMessage;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -82,6 +85,9 @@ public class BooksActivity extends AppCompatActivity {
     }
 
     private void setFragment(Fragment fragment) {
+
+        currentFragment = CurrentFragment.valueOf(fragment.getClass().getSimpleName());
+
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
         fragmentTransaction.replace(mad24.polito.it.R.id.main_frame, fragment);
@@ -89,4 +95,34 @@ public class BooksActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Log.d("currFrag", "Saving: "+ currentFragment.ordinal());
+        outState.putInt("fragment", currentFragment.ordinal());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.d("currFrag", "On restore instance state");
+
+        int cf = (int) savedInstanceState.get("fragment");
+
+        Log.d("currFrag", "Restoring: "+ cf);
+        switch (cf){
+            case 0:
+                setFragment(booksFragment);
+                break;
+            case 1:
+                setFragment(searchFragment);
+                break;
+            case 2:
+                setFragment(chatFragment);
+                break;
+            case 3:
+                setFragment(profileFragment);
+        }
+    }
 }

@@ -66,18 +66,6 @@
 
     <include layout="@layout/content_manual_insert" />
 
-    <Button
-        android:id="@+id/manual_ins_submitbtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center|bottom"
-        android:layout_margin="20dp"
-        android:background="@drawable/roundedbutton"
-        android:text="@string/bookSend"
-        android:textColor="@color/colorWhite"
-        android:clickable="true"
-        />
-
     <!--<android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

@@ -10,73 +10,133 @@
     android:layout_gravity="center"
     android:orientation="vertical">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp">
+        android:fillViewport="true"
+        >
 
-        <!-- TODO: change this -->
-        <android.support.v7.widget.AppCompatImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@android:drawable/ic_input_add"
-            android:tint="@color/colorPrimary"
-            android:background="@drawable/imageviewborder"
-            />
-
-        <android.support.design.widget.TextInputLayout
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp">
-
-            <EditText
-                android:id="@+id/manual_ins_book_title"
+            android:stretchColumns="1"
+            android:clickable="true"
+            android:focusableInTouchMode="true"
+            android:paddingRight="@dimen/paddingLeftRight"
+            >
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/book_title"
-                android:inputType="text" />
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <!-- TODO: modify this -->
+                <android.support.v7.widget.AppCompatImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:background="@drawable/imageviewborder"
+                    android:src="@android:drawable/ic_input_add"
+                    android:tint="@color/colorPrimary" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp">
+
+                    <EditText
+                        android:id="@+id/manual_ins_isbn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/book_isbn"
+                        android:inputType="number" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp">
+
+                    <EditText
+                        android:id="@+id/manual_ins_book_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/book_title"
+                        android:inputType="text" />
+
+                </android.support.design.widget.TextInputLayout>
 
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp">
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp">
 
-            <EditText
-                android:id="@+id/manual_ins_book_author"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/book_author"
-                android:inputType="text"/>
+                    <EditText
+                        android:id="@+id/manual_ins_book_author"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/book_author"
+                        android:inputType="text" />
 
-        </android.support.design.widget.TextInputLayout>
+                </android.support.design.widget.TextInputLayout>
 
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp">
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp">
 
-            <EditText
-                android:id="@+id/manual_ins_isbn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/book_isbn"
-                android:inputType="number"/>
+                    <EditText
+                        android:id="@+id/manual_ins_book_editionYear"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/edition_year"
+                        android:inputType="date" />
 
-        </android.support.design.widget.TextInputLayout>
+                </android.support.design.widget.TextInputLayout>
 
-    </LinearLayout>
 
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp">
+
+                    <EditText
+                        android:id="@+id/manual_ins_book_conditions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/book_conditions"
+                        android:inputType="text|textMultiLine"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+
+                <Button
+                    android:id="@+id/manual_ins_submitbtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|bottom"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/roundedbutton"
+                    android:clickable="true"
+                    android:text="@string/bookSend"
+                    android:textColor="@color/colorWhite" />
+
+            </LinearLayout>
+        </TableLayout>
+    </ScrollView>
 </LinearLayout>
