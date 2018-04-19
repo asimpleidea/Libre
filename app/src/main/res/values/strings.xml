@@ -115,4 +115,8 @@
     <string name="book_isbn">ISBN</string>
     <string name="bookSend">Send</string>
 
+    <!-- book insert errors -->
+    <string name="required">Required!</string>
+    <string name="ISBN_explain">ISBN is a code of 13 digits!</string>
+
 </resources>

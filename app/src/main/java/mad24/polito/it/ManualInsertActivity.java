@@ -23,8 +23,6 @@ import mad24.polito.it.models.Book;
 
 public class ManualInsertActivity extends AppCompatActivity {
 
-    private static final String REQUIRED = "Required";
-
     // [START declare_database_ref]
     private DatabaseReference mDatabase;
     // [END declare_database_ref]
@@ -83,19 +81,25 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         // Title is required
         if (TextUtils.isEmpty(title)) {
-            mTitleField.setError(REQUIRED);
+            mTitleField.setError(getResources().getString(R.string.required));
             return;
         }
 
         // Author is required
         if (TextUtils.isEmpty(author)) {
-            mAuthorField.setError(REQUIRED);
+            mAuthorField.setError(getResources().getString(R.string.required));
             return;
         }
 
         // ISBN is required
         if (TextUtils.isEmpty(isbn)) {
-            mISBNField.setError(REQUIRED);
+            mISBNField.setError(getResources().getString(R.string.required));
+            return;
+        }
+
+        // ISBN 13 digits
+        if (isbn.length() != 13) {
+            mISBNField.setError(getResources().getString(R.string.ISBN_explain));
             return;
         }
 
