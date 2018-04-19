@@ -77,6 +77,8 @@ public class BooksActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(mad24.polito.it.R.id.main_nav);
         BottomNavigationViewHelper.disableShiftMode(navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        setFragment(booksFragment);
     }
 
     private void setFragment(Fragment fragment) {

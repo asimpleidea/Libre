@@ -4,14 +4,29 @@ public class Book {
 
     private String title;
     private String author;
+    private String isbn;
     private String location;
     private int photo;
 
-    public Book(String title, String author, String location, int photo) {
+    public Book(String title, String author, String isbn, int photo) {
         this.title = title;
         this.author = author;
-        this.location = location;
+        this.isbn = isbn;
         this.photo = photo;
+    }
+
+    public Book(String title, String author, String isbn) {
+        this.title = title;
+        this.author = author;
+        this.isbn = isbn;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
     }
 
     public int getPhoto() {

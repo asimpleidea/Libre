@@ -67,6 +67,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "194990875631-g93v7vkmukpfrb0gm5uoi7amab08uvl9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mad24.polito.it",
+            "certificate_hash": "54ea96484bf71058aeadd7531b38d2831aa87296"
+          }
+        },
+        {
           "client_id": "194990875631-qquvh7sqe6nd7veb09umui561i7tlceb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

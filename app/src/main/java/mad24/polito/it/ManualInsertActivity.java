@@ -7,11 +7,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class ManualInsertActivity extends AppCompatActivity {
     private EditText mAuthorField;
     private EditText mISBNField;
     private Button submit_btn;
+    private TextView mCancel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +51,21 @@ public class ManualInsertActivity extends AppCompatActivity {
             }
         });*/
 
+        // [START initialize_database_ref]
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        // [END initialize_database_ref]
+
         mTitleField = (EditText) findViewById(R.id.manual_ins_book_title);
         mAuthorField = (EditText) findViewById(R.id.manual_ins_book_author);
-        mISBNField = (EditText)findViewById(R.id.manual_ins_isbn);
+        mISBNField = (EditText) findViewById(R.id.manual_ins_isbn);
+
+        mCancel = (TextView) findViewById(R.id.cancelEdit);
+        mCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         submit_btn = (Button) findViewById(R.id.manual_ins_submitbtn);
         submit_btn.setOnClickListener(new View.OnClickListener() {
@@ -79,11 +94,16 @@ public class ManualInsertActivity extends AppCompatActivity {
         }
 
         // ISBN is required
-        if (TextUtils.isEmpty(author)) {
+        if (TextUtils.isEmpty(isbn)) {
             mISBNField.setError(REQUIRED);
             return;
         }
 
+        DatabaseReference mRef = mDatabase.child("books/MyFirstBook");
+        mRef.setValue(new Book(mTitleField.getText().toString(),
+                mAuthorField.getText().toString(),
+                mISBNField.getText().toString()));
+/*
         // Disable button so there are no multi-posts
         setEditingEnabled(false);
         Toast.makeText(this, "Posting...", Toast.LENGTH_SHORT).show();
@@ -151,5 +171,6 @@ public class ManualInsertActivity extends AppCompatActivity {
         mDatabase.updateChildren(childUpdates);
     }
     // [END write_fan_out]
-
+*/
+    }
 }

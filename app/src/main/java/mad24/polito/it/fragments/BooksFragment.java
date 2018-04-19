@@ -191,11 +191,10 @@ public class BooksFragment extends Fragment {
     private void manualIntent() {
         Intent intent = new Intent(getActivity(), ManualInsertActivity.class);
 
-        //TODO: actual code for manual insert book
         startActivity(intent);
 
         Log.d("booksfragment", "manual intent should start");
-        Toast.makeText(getActivity().getBaseContext(), "Camera intent should start", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity().getBaseContext(), "Manual insert intent should start", Toast.LENGTH_LONG).show();
     }
 
     @Override
