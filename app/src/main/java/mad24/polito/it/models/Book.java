@@ -23,10 +23,11 @@ public class Book {
         this.photo = photo;
     }
 
-    public Book(String title, String author, String isbn, String book_id) {
+    public Book(String title, String author, String isbn, String bookImageLink, String book_id) {
         this.title = title;
         this.author = author;
         this.isbn = isbn;
+        this.bookImageLink = bookImageLink;
         this.book_id = book_id;
     }
 

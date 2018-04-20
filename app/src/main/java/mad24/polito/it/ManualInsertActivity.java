@@ -58,6 +58,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
     private String userChoosenTask;
     private Uri uri;
+    private String bookCoverUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +131,6 @@ public class ManualInsertActivity extends AppCompatActivity {
                         userChoosenTask ="Cancel";
                         dialog.dismiss();
                     }
-
                 }
             });
 
@@ -266,11 +266,13 @@ public class ManualInsertActivity extends AppCompatActivity {
         String bookKey = mRef.push().getKey();
 
         StorageReference bookCoverRef = mStorageRef.child("bookCovers").child(bookKey);
+        bookCoverUri = null;
         bookCoverRef.putFile(uri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         Uri downloadUri = taskSnapshot.getDownloadUrl();
+                        bookCoverUri = downloadUri.toString();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -281,11 +283,12 @@ public class ManualInsertActivity extends AppCompatActivity {
                     }
                 });
 
-        mRef.child(bookKey).setValue(new Book(mTitleField.getText().toString(),
+        mRef.child(bookKey).setValue(new Book(
+                mTitleField.getText().toString(),
                 mAuthorField.getText().toString(),
                 mISBNField.getText().toString(),
+                bookCoverUri,
                 bookKey));
-
 
         finish();
 /*
