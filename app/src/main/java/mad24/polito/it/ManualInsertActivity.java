@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ public class ManualInsertActivity extends AppCompatActivity {
     private EditText mISBNField;
     private Button submit_btn;
     private TextView mCancel;
+    private ImageView mImageField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class ManualInsertActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         // [END initialize_database_ref]
 
+        mImageField = (ImageView) findViewById(R.id.manual_ins_newImage);
         mTitleField = (EditText) findViewById(R.id.manual_ins_book_title);
         mAuthorField = (EditText) findViewById(R.id.manual_ins_book_author);
         mISBNField = (EditText) findViewById(R.id.manual_ins_isbn);
@@ -59,6 +62,13 @@ public class ManualInsertActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 submitBook();
+            }
+        });
+
+        mImageField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }

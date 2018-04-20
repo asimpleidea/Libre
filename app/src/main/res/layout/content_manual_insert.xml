@@ -35,6 +35,7 @@
 
                 <!-- TODO: modify this -->
                 <android.support.v7.widget.AppCompatImageView
+                    android:id="@+id/manual_ins_newImage"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:background="@drawable/imageviewborder"
