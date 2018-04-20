@@ -39,8 +39,7 @@
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:background="@drawable/imageviewborder"
-                    android:src="@android:drawable/ic_input_add"
-                    android:tint="@color/colorPrimary" />
+                    android:src="@android:drawable/ic_input_add"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
