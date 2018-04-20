@@ -2,6 +2,7 @@ package mad24.polito.it;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +65,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             tv_location = (TextView) itemView.findViewById(R.id.book_location);
             book_img = (ImageView) itemView.findViewById(R.id.book_img);
         }
+    }
+
+    public String getLastItemId() {
+        Log.d("booksfragment", "I've found "+mData.size()+" items");
+
+        return mData.get(mData.size() - 1).getBook_id();
+    }
+
+    public void addAll(List<Book> newBooks) {
+        int initialSize = mData.size();
+        mData.addAll(newBooks);
+        notifyItemRangeInserted(initialSize, newBooks.size());
     }
 
 }

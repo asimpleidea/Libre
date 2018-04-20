@@ -2,11 +2,19 @@ package mad24.polito.it.models;
 
 public class Book {
 
+    private String user_id;
+    private String book_id;
+
     private String title;
     private String author;
     private String isbn;
     private String location;
+
+    private String bookImageLink;
     private int photo;
+
+    public Book() {
+    }
 
     public Book(String title, String author, String isbn, int photo) {
         this.title = title;
@@ -15,10 +23,11 @@ public class Book {
         this.photo = photo;
     }
 
-    public Book(String title, String author, String isbn) {
+    public Book(String title, String author, String isbn, String book_id) {
         this.title = title;
         this.author = author;
         this.isbn = isbn;
+        this.book_id = book_id;
     }
 
     public String getIsbn() {
@@ -59,5 +68,9 @@ public class Book {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getBook_id() {
+        return book_id;
     }
 }

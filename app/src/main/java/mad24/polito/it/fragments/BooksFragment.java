@@ -9,18 +9,21 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import mad24.polito.it.*;
@@ -35,22 +38,30 @@ import java.util.List;
  */
 public class BooksFragment extends Fragment {
 
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
 
     View v;
 
     // Firebase var
-/*    final FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference mDatabase;*/
+    final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference mDatabase;
 
     // Android Layout
     private RecyclerView rv;
+    private RecyclerViewAdapter recyclerViewAdapter;
     private FloatingActionButton new_book_button;
 
     // Array lists
     private List<Book> books;
     private String userChoosenTask;
+
+    // Recycler view management
+    private int mTotalItemCount = 0;
+    private int mLastVisibleItemPosition;
+    private boolean mIsLoading = false;
+    private int mPostsPerPage = 20;
 
     public BooksFragment() {
         // Required empty public constructor
@@ -61,75 +72,103 @@ public class BooksFragment extends Fragment {
                              Bundle savedInstanceState) {
 
 
-        Log.d("booksfragment", "onCreateView");
+        //Log.d("booksfragment", "onCreateView");
         // Inflate the layout for this fragment
         v =  inflater.inflate(R.layout.fragment_book, container, false);
-/*
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-*/
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("books");
 
         rv = (RecyclerView) v.findViewById(R.id.book_list);
         new_book_button = (FloatingActionButton) v.findViewById(R.id.newBookBtn);
 
-        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
-        rv.setLayoutManager(new LinearLayoutManager(getActivity()));
+        final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        rv.setLayoutManager(mLayoutManager);
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rv.getContext(),
+                mLayoutManager.getOrientation());
+        rv.addItemDecoration(dividerItemDecoration);
+
+        books = new ArrayList<Book>();
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
         rv.setAdapter(recyclerViewAdapter);
 
         new_book_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Log.d("booksfragment", "Button pressed");
+                //Log.d("booksfragment", "Button pressed");
                 selectBookInsertMethod();
             }
         });
 
+        getBooks(null);
+
+        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (dy > 0) {
+                    mTotalItemCount = mLayoutManager.getItemCount();
+                    mLastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
+
+                    if (!mIsLoading && mTotalItemCount <= (mLastVisibleItemPosition)) {
+
+                        getBooks(recyclerViewAdapter.getLastItemId());
+                        mIsLoading = true;
+                    }
+                }
+            }
+        });
+
+
         return v;
+    }
+
+    private void getBooks(String nodeId) {
+
+        //Log.d("booksfragment", "getting books starting from: "+nodeId);
+
+        Query query;
+
+        if (nodeId == null)
+            query = FirebaseDatabase.getInstance().getReference()
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
+                    .orderByKey()
+                    .limitToFirst(mPostsPerPage);
+        else
+            query = FirebaseDatabase.getInstance().getReference()
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
+                    .orderByKey()
+                    .startAt(nodeId)
+                    .limitToFirst(mPostsPerPage);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Book> books = new ArrayList<>();
+                for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
+                    books.add(bookSnapshot.getValue(Book.class));
+                }
+
+                //Log.d("booksfragment", "adding "+books.size()+" books");
+                recyclerViewAdapter.addAll(books);
+                mIsLoading = false;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                mIsLoading = false;
+            }
+        });
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d("booksfragment", "onCreate method");
-
-        books = new ArrayList<>();
-
-        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
-        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
-        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
-        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
-
-        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
-        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
-        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
-        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
-
-        books.add(new Book("title1", "author1", "location1", R.drawable.book1));
-        books.add(new Book("title2", "author2", "location2", R.drawable.book2));
-        books.add(new Book("title3", "author3", "location3", R.drawable.book3));
-        books.add(new Book("title4", "author4", "location4", R.drawable.book4));
-/*
-        DatabaseReference ref = database.getReference("books/");
-
-        mDatabase.addValueEventListener(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot myitem : dataSnapshot.getChildren()){
-                    Book b = myitem.getValue(Book.class);
-
-                    books.add(b);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });*/
+        //Log.d("booksfragment", "onCreate method");
 
     }
 
@@ -193,14 +232,14 @@ public class BooksFragment extends Fragment {
 
         startActivity(intent);
 
-        Log.d("booksfragment", "manual intent should start");
-        Toast.makeText(getActivity().getBaseContext(), "Manual insert intent should start", Toast.LENGTH_LONG).show();
+        //Log.d("booksfragment", "manual intent should start");
+        //Toast.makeText(getActivity().getBaseContext(), "Manual insert intent should start", Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
-        Log.d("booksfragment", "onRequestPermissionsResult");
+        //Log.d("booksfragment", "onRequestPermissionsResult");
 
         switch (requestCode) {
             case PermissionManager.PERMISSION_READ_EXTERNAL_STORAGE:
@@ -226,10 +265,6 @@ public class BooksFragment extends Fragment {
                             .show();
                 }
                 break;
-
         }
-
     }
-
-
 }

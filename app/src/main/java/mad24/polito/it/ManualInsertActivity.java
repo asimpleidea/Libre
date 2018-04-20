@@ -37,17 +37,6 @@ public class ManualInsertActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manual_insert);
-        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         // [START initialize_database_ref]
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -103,10 +92,14 @@ public class ManualInsertActivity extends AppCompatActivity {
             return;
         }
 
-        DatabaseReference mRef = mDatabase.child("books/MyFirstBook");
-        mRef.setValue(new Book(mTitleField.getText().toString(),
+        DatabaseReference mRef = mDatabase.child("books");
+        String bookKey = mRef.push().getKey();
+        mRef.child(bookKey).setValue(new Book(mTitleField.getText().toString(),
                 mAuthorField.getText().toString(),
-                mISBNField.getText().toString()));
+                mISBNField.getText().toString(),
+                bookKey));
+
+        finish();
 /*
         // Disable button so there are no multi-posts
         setEditingEnabled(false);
@@ -176,5 +169,6 @@ public class ManualInsertActivity extends AppCompatActivity {
     }
     // [END write_fan_out]
 */
+
     }
 }
