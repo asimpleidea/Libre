@@ -272,13 +272,14 @@ public class SignupMailActivity extends AppCompatActivity implements
                                             showDialog(getResources().getString(R.string.signup_error),
                                                     getResources().getString(R.string.signup_retry) );
                                         }
+                                        return;
                                     } else {
                                         FirebaseUser user = auth.getCurrentUser();
-                                        Uri downloadUrl = Uri.parse("");
 
                                         //if the image profile is the default one --> not upload it on Firebase Storage
                                         if(uri.toString().equals("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png") ){
-                                            createUserOnDabase(mailString, nameString, cityString, phoneString, bioString, "");
+                                            createUserOnDabase(mailString, nameString, cityString, phoneString, bioString);
+                                            return;
                                         }
 
                                         //load image profile in Firebase Storage
@@ -291,9 +292,21 @@ public class SignupMailActivity extends AppCompatActivity implements
                                                 File f = new File(getBaseContext().getCacheDir(), "profileimage.jpg");
                                                 f.createNewFile();
 
-                                                Bitmap mBitmap = BitmapFactory.decodeFile(uri.toString());
+                                                //the shortest side must be 180px
+                                                Bitmap b = BitmapFactory.decodeFile(uri.toString());
+                                                float scale;
+                                                if(b.getWidth() > b.getHeight()) {
+                                                    scale = (float)b.getHeight() / 180;
+                                                } else {
+                                                    scale = (float)b.getWidth() / 180;
+                                                }
+
+                                                if(scale < 1)
+                                                    scale = 1;
+
+                                                Bitmap mBitmap = Bitmap.createScaledBitmap(b, (int)((float)b.getWidth()/scale), (int)((float)b.getHeight()/scale), true);
                                                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                                                mBitmap.compress(Bitmap.CompressFormat.JPEG, 0, bos);
+                                                mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
                                                 byte[] bitmapdata = bos.toByteArray();
 
                                                 FileOutputStream fos = new FileOutputStream(f);
@@ -306,9 +319,21 @@ public class SignupMailActivity extends AppCompatActivity implements
                                                 File f = new File(getBaseContext().getCacheDir(), "profileimage.jpg");
                                                 f.createNewFile();
 
-                                                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                                                //the shortest side must be 180px
+                                                Bitmap b = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                                                float scale;
+                                                if(b.getWidth() > b.getHeight()) {
+                                                    scale = (float)b.getHeight() / 180;
+                                                } else {
+                                                    scale = (float)b.getWidth() / 180;
+                                                }
+
+                                                if(scale < 1)
+                                                    scale = 1;
+
+                                                Bitmap bitmap = Bitmap.createScaledBitmap(b, (int)((float)b.getWidth()/scale), (int)((float)b.getHeight()/scale), true);
                                                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 0, bos);
+                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
                                                 byte[] bitmapdata = bos.toByteArray();
 
                                                 FileOutputStream fos = new FileOutputStream(f);
@@ -316,7 +341,7 @@ public class SignupMailActivity extends AppCompatActivity implements
                                                 fos.flush();
                                                 fos.close();
 
-                                                uploadTask = storageRef.putFile(uri);
+                                                uploadTask = storageRef.putFile(Uri.fromFile(f));
                                             }
 
                                             // Register observers to listen for when the download is done or if it fails
@@ -340,7 +365,7 @@ public class SignupMailActivity extends AppCompatActivity implements
                                                     downloadUrl = taskSnapshot.getDownloadUrl();
 
                                                     //create user on database
-                                                    createUserOnDabase(mailString, nameString, cityString, phoneString, bioString, downloadUrl.toString() );
+                                                    createUserOnDabase(mailString, nameString, cityString, phoneString, bioString);
                                                 }
                                             });
 
@@ -727,27 +752,29 @@ public class SignupMailActivity extends AppCompatActivity implements
     }
 
     private void createUserOnDabase(String mailString, String nameString, String cityString,
-                                   String phoneString, String bioString, String downloadUrl) {
+                                   String phoneString, String bioString) {
         FirebaseUser user = auth.getCurrentUser();
 
         //add new user in Firebase Database
         try {
             //get genre strings
-            ArrayList<String> selectedGenres = new ArrayList<String>();
+            ArrayList<Integer> selectedGenres = new ArrayList<Integer>();
 
             for (int i = 0; i < genresList.length; i++) {
                 if (checkedItems[i] == true)
-                    selectedGenres.add(genresList[i]);
+                    selectedGenres.add(i);
             }
 
             DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
             myDatabase.child("users").child(user.getUid())
-                    .setValue(new UserMail(mailString, nameString, cityString, phoneString, bioString, selectedGenres, downloadUrl) );
+                    .setValue(new UserMail(mailString, nameString, cityString, phoneString, bioString, selectedGenres) );
 
             progressBar.setVisibility(View.GONE);
 
             //start BooksActivity and finish SignUpMailActivity
-            startActivity(new Intent(SignupMailActivity.this, BooksActivity.class));
+            Intent i = new Intent(getApplicationContext(), BooksActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //This will clear all the activities on top of "BooksActivity"
+            startActivity(i);
             finish();
 
         } catch (Exception e) {

@@ -10,21 +10,19 @@ public class UserMail {
     String city;
     String phone;
     String bio;
-    ArrayList<String> genres;
-    String profileImage;
+    ArrayList<Integer> genres;
 
     public UserMail() {
 
     }
 
-    public UserMail(String email, String name, String city, String phone, String bio, ArrayList<String> genres, String profileImage) {
+    public UserMail(String email, String name, String city, String phone, String bio, ArrayList<Integer> genres) {
         this.email = email;
         this.name = name;
         this.city = city;
         this.phone = phone;
         this.bio = bio;
         this.genres = genres;
-        this.profileImage = profileImage;
     }
 
     public String getEmail() {
@@ -67,19 +65,12 @@ public class UserMail {
         this.bio = bio;
     }
 
-    public ArrayList<String> getGenres() {
+    public ArrayList<Integer> getGenres() {
         return genres;
     }
 
-    public void setGenres(ArrayList<String> genres) {
+    public void setGenres(ArrayList<Integer> genres) {
         this.genres = genres;
     }
 
-    public String getProfileImage() {
-        return profileImage;
-    }
-
-    public void setProfileImage(String profileImage) {
-        this.profileImage = profileImage;
-    }
 }
