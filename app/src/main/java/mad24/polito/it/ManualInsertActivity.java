@@ -230,6 +230,7 @@ public class ManualInsertActivity extends AppCompatActivity {
             mImageField.setImageBitmap(mBitmap);
 
             uri = Uri.parse(out.getAbsolutePath());
+            Log.d("absolutepath", uri.toString());
         }
     }
 
@@ -237,18 +238,6 @@ public class ManualInsertActivity extends AppCompatActivity {
         final String title = mTitleField.getText().toString();
         final String author = mAuthorField.getText().toString();
         final String isbn = mISBNField.getText().toString();
-
-        // Title is required
-        if (TextUtils.isEmpty(title)) {
-            mTitleField.setError(getResources().getString(R.string.required));
-            return;
-        }
-
-        // Author is required
-        if (TextUtils.isEmpty(author)) {
-            mAuthorField.setError(getResources().getString(R.string.required));
-            return;
-        }
 
         // ISBN is required
         if (TextUtils.isEmpty(isbn)) {
@@ -259,6 +248,18 @@ public class ManualInsertActivity extends AppCompatActivity {
         // ISBN 13 digits
         if (isbn.length() != 13) {
             mISBNField.setError(getResources().getString(R.string.ISBN_explain));
+            return;
+        }
+
+        // Title is required
+        if (TextUtils.isEmpty(title)) {
+            mTitleField.setError(getResources().getString(R.string.required));
+            return;
+        }
+
+        // Author is required
+        if (TextUtils.isEmpty(author)) {
+            mAuthorField.setError(getResources().getString(R.string.required));
             return;
         }
 
@@ -273,6 +274,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         Uri downloadUri = taskSnapshot.getDownloadUrl();
                         bookCoverUri = downloadUri.toString();
+                        Toast.makeText(getApplicationContext(), "Image loaded", Toast.LENGTH_LONG);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

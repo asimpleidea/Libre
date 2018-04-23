@@ -1,6 +1,10 @@
 package mad24.polito.it;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,11 +13,24 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import mad24.polito.it.models.Book;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
+
+    private StorageReference mStorageRef;
+    private StorageReference coverRef;
 
     Context mContext;
     List<Book> mData;
@@ -21,6 +38,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public RecyclerViewAdapter(Context mContext, List<Book> mData) {
         this.mContext = mContext;
         this.mData = mData;
+
+        mStorageRef = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -35,13 +54,31 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(final MyViewHolder holder, int position) {
 
         holder.tv_title.setText(mData.get(position).getTitle());
         holder.tv_author.setText(mData.get(position).getAuthor());
         holder.tv_location.setText(mData.get(position).getLocation());
-        holder.book_img.setImageResource(mData.get(position).getPhoto());
 
+        String bookID = mData.get(position).getBook_id();
+        Log.d("bookid", "I'm trying to get this book img: "+bookID);
+
+        if(bookID != null) {
+            StorageReference storageReference = mStorageRef.child("bookCovers").child(bookID);
+            /*Glide.with(mContext)
+                    .using(new FirebaseImageLoader())
+                    .load(storageReference)
+                    .into(holder.book_img);*/
+            storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    String imageURL = uri.toString();
+                    Glide.with(mContext).load(imageURL).into(holder.book_img);
+                }
+            });
+        }else{
+            holder.book_img.setImageDrawable(mContext.getResources().getDrawable(R.drawable.default_book_cover));
+        }
     }
 
     @Override

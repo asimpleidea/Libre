@@ -648,6 +648,7 @@ public class EditProfileActivity extends AppCompatActivity implements
             imageProfile.setImageBitmap(mBitmap);
 
             uri = Uri.parse(out.getAbsolutePath());
+            Log.d("absolutepath", uri.toString());
             isPhoto = true;
         }
     }

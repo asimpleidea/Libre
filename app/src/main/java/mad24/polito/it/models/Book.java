@@ -11,16 +11,8 @@ public class Book {
     private String location;
 
     private String bookImageLink;
-    private int photo;
 
     public Book() {
-    }
-
-    public Book(String title, String author, String isbn, int photo) {
-        this.title = title;
-        this.author = author;
-        this.isbn = isbn;
-        this.photo = photo;
     }
 
     public Book(String title, String author, String isbn, String bookImageLink, String book_id) {
@@ -31,20 +23,18 @@ public class Book {
         this.book_id = book_id;
     }
 
+    public Book(String s, String s1, String s2) {
+        this.title = s;
+        this.author = s1;
+        this.isbn = s2;
+    }
+
     public String getIsbn() {
         return isbn;
     }
 
     public void setIsbn(String isbn) {
         this.isbn = isbn;
-    }
-
-    public int getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(int photo) {
-        this.photo = photo;
     }
 
     public String getTitle() {
@@ -73,5 +63,9 @@ public class Book {
 
     public String getBook_id() {
         return book_id;
+    }
+
+    public String getBookImageLink() {
+        return bookImageLink;
     }
 }
