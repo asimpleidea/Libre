@@ -52,7 +52,7 @@ public class ShowProfileActivity extends AppCompatActivity {
         }
 
         //button to edit profile
-        editImage = (ImageView) findViewById(mad24.polito.it.R.id.imageEdit);
+        editImage = (ImageView) findViewById(mad24.polito.it.R.id.showprofile_imageEdit);
 
         //image profile
         imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(mad24.polito.it.R.id.showImageProfile);
@@ -76,13 +76,16 @@ public class ShowProfileActivity extends AppCompatActivity {
             }
         });
 
-        buttonLogoutProfile = (Button) findViewById(mad24.polito.it.R.id.buttonLogoutProfile);
+        buttonLogoutProfile = (Button) findViewById(R.id.buttonLogoutProfile);
         buttonLogoutProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("state", "Signout");
                 FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(ShowProfileActivity.this, LoginActivity.class));
+
+                Intent i = new Intent(ShowProfileActivity.this, LoginActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(i);
                 finish();
             }
         });

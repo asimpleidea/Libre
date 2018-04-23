@@ -7,14 +7,16 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -24,6 +26,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,13 +40,27 @@ import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseError;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.google.gson.Gson;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import mad24.polito.it.registrationmail.LoginActivity;
+import mad24.polito.it.registrationmail.UserMail;
 
 public class EditProfileActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -60,7 +77,6 @@ public class EditProfileActivity extends AppCompatActivity implements
 
     private EditText name;
     private EditText phone;
-    private EditText mail;
     private EditText bio;
     private AutoCompleteTextView city;
     private LinearLayout genres;
@@ -68,7 +84,6 @@ public class EditProfileActivity extends AppCompatActivity implements
     private Button btnGenre;
     private String[] genresList;                                    //all genres list
     boolean[] checkedItems;                                         //checked genres
-    ArrayList<Integer> selectedGenres = new ArrayList<Integer>();   //favourite genres
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -77,8 +92,15 @@ public class EditProfileActivity extends AppCompatActivity implements
 
     Uri uri = null;
 
+    FirebaseUser userAuth;
+    UserMail user;
+    Integer semaphore = 0;
+    Bitmap profileImageBitmap = null;
+
     private String userChoosenTask;
     private boolean isPhoto = false;
+
+    private ProgressBar progressBar;
 
     private static final String LOG_TAG = "EditProfileActivity";
     private static final int GOOGLE_API_CLIENT_ID = 0;
@@ -94,6 +116,21 @@ public class EditProfileActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(mad24.polito.it.R.layout.activity_edit_profile);
 
+        //get user
+        userAuth = FirebaseAuth.getInstance().getCurrentUser();
+
+        //check if logged, if not go to login activity
+        if (userAuth == null) {
+            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+
+            FragmentManager fm = getSupportFragmentManager();
+            for(int j = 0; j < fm.getBackStackEntryCount(); ++j)
+                fm.popBackStack();
+
+        }
+
         saveText = (TextView) findViewById(mad24.polito.it.R.id.saveEdit);
         cancelImage = (TextView) findViewById(mad24.polito.it.R.id.cancelEdit);
 
@@ -103,162 +140,325 @@ public class EditProfileActivity extends AppCompatActivity implements
         //get edit fields
         name = (EditText) findViewById(mad24.polito.it.R.id.editName);
         phone = (EditText) findViewById(mad24.polito.it.R.id.editPhone);
-        mail = (EditText) findViewById(mad24.polito.it.R.id.editMail);
         bio = (EditText) findViewById(mad24.polito.it.R.id.editBio);
         city = (AutoCompleteTextView) findViewById(mad24.polito.it.R.id.autoCompleteCity);
 
         //manage genres
         genres = (LinearLayout) findViewById(mad24.polito.it.R.id.edit_favourite_genres_list);
         btnGenre = (Button) findViewById(mad24.polito.it.R.id.buttonGenre);
-        genresList = getResources().getStringArray(mad24.polito.it.R.array.genres);
+        genresList = getResources().getStringArray(R.array.genres);
         checkedItems = new boolean[genresList.length];
+
+        //get progressBar
+        progressBar = (ProgressBar) findViewById(R.id.editprofile_progressBar);
 
         //get preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
+        editor = prefs.edit();
 
-        //get name if already inserted
-        String str = prefs.getString("profileName", null);
-        if (str != null)
-            name.setText(str);
+        //get User object
+        String userJson = prefs.getString("user", null);
+        Gson gson = new Gson();
+        user = gson.fromJson(userJson, UserMail.class);
 
-        //get phone if already inserted
-        str = prefs.getString("profilePhone", null);
-        if(str != null)
-            phone.setText(str);
+        if(user != null) {
+            name.setText(user.getName());
+            phone.setText(user.getPhone());
+            bio.setText(user.getBio());
+            city.setText(user.getCity());
 
-        //get mail if already inserted
-        str = prefs.getString("profileMail", null);
-        if (str != null)
-            mail.setText(str);
-
-        //get bio if already inserted
-        str = prefs.getString("profileBio", null);
-        if (str != null)
-            bio.setText(str);
-
-        //get city if already inserted
-        str = prefs.getString("profileCity", null);
-        if (str != null)
-            city.setText(str);
-
-        //get image profile if already inserted
-        str = prefs.getString("profileImage", null);
-        if (str != null) {
-            imageProfile.setImageURI(Uri.fromFile(new File(str)) );
-            if(uri == null)
-                uri = Uri.parse(str);
-        } else {
-            //default image
-            Drawable d = getResources().getDrawable(mad24.polito.it.R.drawable.unknown_user);
-            imageProfile.setImageDrawable(d);
-            if(uri == null)
-                uri = Uri.parse("android.resource://"+ getApplicationContext().getPackageName() +"/drawable/unknown_user.png");
-        }
-
-        //get saved selectedItems
-        str = prefs.getString("profileGenres", null);
-        genres.removeAllViews();
-        selectedGenres = new ArrayList<Integer>();
-
-        if(str != null && !str.isEmpty()) {
-            Log.i("state", "onCreate GENRES: " +str);
-            String[] strArray = str.split(",");
-
-            for(int i = 0; i < strArray.length; i++) {
-                selectedGenres.add(Integer.parseInt(strArray[i]) );
-                checkedItems[Integer.parseInt(strArray[i])] = true;
-                genres.addView(BuildGenreLayout(genresList[Integer.parseInt(strArray[i])] ) );
+            //get favourite genres
+            if(user.getGenres() == null)
+                genres.addView(BuildGenreLayout(getResources().getString(R.string.noFavouriteGenreProfile) ) );
+            else {
+                for (Integer genreIndex : user.getGenres()) {
+                    genres.addView(BuildGenreLayout(genresList[genreIndex]));
+                    checkedItems[genreIndex] = true;
+                }
             }
         }
+
+        //get profile image
+        String encoded = prefs.getString("profileImage", null);
+        if(!encoded.equals("unknown")) {
+            byte[] imageAsBytes = Base64.decode(encoded.getBytes(), Base64.DEFAULT);
+            imageProfile.setImageBitmap(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
+        } else {
+            imageProfile.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user) );
+        }
+
+        //no new image is set
+        uri = null;
+
 
         //save changes if "Save" is pressed and load showProfile
         saveText.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                if(!mail.getText().toString().isEmpty() && !isValidEmailAddress(mail.getText().toString())) {
-                    new AlertDialog.Builder(EditProfileActivity.this)
-                            .setTitle(mad24.polito.it.R.string.mail_not_valid)
-                            .setMessage(mad24.polito.it.R.string.insert_valid_mail)
-                            .setNeutralButton(mad24.polito.it.R.string.ok,new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            })
-                            .show();
-                } else if(!phone.getText().toString().isEmpty() && !isValidPhoneNumber(phone.getText().toString())) {
-                    new AlertDialog.Builder(EditProfileActivity.this)
-                            .setTitle(mad24.polito.it.R.string.phone_not_valid)
-                            .setMessage(mad24.polito.it.R.string.insert_valid_phone)
-                            .setNeutralButton(mad24.polito.it.R.string.ok,new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            })
-                            .show();
+                boolean isModified = false;
+
+                //read fields
+                final String newName = name.getText().toString();
+                final String newCity = city.getText().toString();
+                final String newPhone = phone.getText().toString();
+                final String newBio = bio.getText().toString();
+
+                //get favourite genres
+                final ArrayList<Integer> newSelectedGenres = new ArrayList<Integer>();
+
+                for (int i = 0; i < genresList.length; i++) {
+                    if (checkedItems[i] == true)
+                        newSelectedGenres.add(i);
+                }
+
+                //check name
+                if(newName.length() < 2) {
+                    showDialog(getResources().getString(R.string.invalidName),
+                            getResources().getString(R.string.editprofile_insertValidName));
+
+                    return;
+                }
+
+                //check city
+                if(newCity.length() < 2) {
+                    showDialog(getResources().getString(R.string.invalidCity),
+                            getResources().getString(R.string.editprofile_insertValidCity));
+
+                    return;
+                }
+
+                //check phone number (not mandatory)
+                if(!newPhone.isEmpty() && !isValidPhoneNumber(newPhone)) {
+                    showDialog(getResources().getString(R.string.invalidPhone),
+                            getResources().getString(R.string.editprofile_insertValidPhone));
+
+                    return;
+                }
+
+                //bio is not mandatory
+                //favourite genres are not mandatory
+
+                //if some fields have been modified
+                if(!newName.equals(user.getName()) || !newCity.equals(user.getCity()) || !newPhone.equals(user.getPhone()) ||
+                        !newBio.equals(user.getBio()) ) {
+                    isModified = true;
                 } else {
-
-                    editor = prefs.edit();
-
-                    String newName = name.getText().toString();
-                    String newPhone = phone.getText().toString();
-                    String newMail = mail.getText().toString();
-                    String newBio = bio.getText().toString();
-                    String newCity = city.getText().toString();
-
-                    //store new image profile
-                    String pathProfileImage = new String();
-                    if (newProfileImage != null) {
-
-                        try {
-                            pathProfileImage = new SaveToInternalStorage(getApplicationContext()).execute(newProfileImage).get();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
+                    //if past favourite genres list was empty
+                    if(user.getGenres() == null || user.getGenres().size() == 0) {
+                        for (int i = 0; i < genresList.length; i++) {
+                            if(checkedItems[i] == true) {
+                                isModified = true;
+                                break;
+                            }
                         }
-                        /*pathProfileImage = saveToInternalStorage(newProfileImage);*/
-                    }
-
-                    // Save strings in SharedPref
-                    editor.putString("profileName", newName);
-                    editor.putString("profilePhone", newPhone);
-                    editor.putString("profileMail", newMail);
-                    editor.putString("profileBio", newBio);
-                    editor.putString("profileCity", newCity);
-                    if (newProfileImage != null) {
-                        String oldImage = prefs.getString("profileImage", null);
-
-                        editor.putString("profileImage", pathProfileImage);
-
-                        //delete the previous profile image
-                        if (oldImage != null) {
-                            File file = new File(oldImage);
-                            boolean deleted = file.delete();
-                            Log.i("state", "Old profile image deleted: " + deleted);
+                    } else {
+                        //if past favourite genres list was not empty
+                        for (int i = 0; i < genresList.length; i++) {
+                            if (user.getGenres().contains(i) && checkedItems[i] == false) {
+                                isModified = true;
+                                break;
+                            } else if (!user.getGenres().contains(i) && checkedItems[i] == true) {
+                                isModified = true;
+                                break;
+                            }
                         }
                     }
+                }
 
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < selectedGenres.size()-1; i++) {
-                        sb.append(selectedGenres.get(i).toString() ).append(",");
-                    }
+                //set semaphore
+                semaphore = 0;
 
-                    if(selectedGenres.size() > 0) {
-                        sb.append(selectedGenres.get(selectedGenres.size() - 1).toString());
-                        editor.putString("profileGenres", sb.toString());
-                    } else
-                        editor.remove("profileGenres");
+                if(isModified)
+                    semaphore++;
 
-                    Log.i("state", "save button GENRES: "+sb.toString());
-                    Log.i("state", "content saved");
+                if(uri != null)
+                    semaphore++;
 
-                    editor.commit();
-
-                    Toast.makeText(getApplicationContext(), mad24.polito.it.R.string.saved, Toast.LENGTH_SHORT).show();
-
+                //if data and image are not modified
+                if(uri == null && !isModified) {
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("modified", false);
+                    resultIntent.putExtra("imageModified", false);
+                    setResult(Activity.RESULT_OK, resultIntent);
                     finish();
+                }
+
+                //show progress bar
+                progressBar.setVisibility(View.VISIBLE);
+
+                //if profile image has been modified
+                if(uri != null) {
+                    //load image profile in Firebase Storage
+                    try {
+                        FirebaseStorage storage = FirebaseStorage.getInstance();
+                        StorageReference storageRef = storage.getReference().child("profile_pictures").child(userAuth.getUid() + ".jpg");
+
+                        UploadTask uploadTask;
+                        if (isPhoto) {
+                            File f = new File(getBaseContext().getCacheDir(), "profileimage.jpg");
+                            f.createNewFile();
+
+                            //the shortest side must be 180px
+                            Bitmap b = BitmapFactory.decodeFile(uri.toString());
+                            float scale;
+                            if(b.getWidth() > b.getHeight()) {
+                                scale = (float)b.getHeight() / 180;
+                            } else {
+                                scale = (float)b.getWidth() / 180;
+                            }
+
+                            if(scale < 1)
+                                scale = 1;
+
+                            profileImageBitmap = Bitmap.createScaledBitmap(b, (int)((float)b.getWidth()/scale), (int)((float)b.getHeight()/scale), true);
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                            byte[] bitmapdata = bos.toByteArray();
+
+                            FileOutputStream fos = new FileOutputStream(f);
+                            fos.write(bitmapdata);
+                            fos.flush();
+                            fos.close();
+
+                            uploadTask = storageRef.putFile(Uri.fromFile(f));
+                        } else {
+                            File f = new File(getBaseContext().getCacheDir(), "profileimage.jpg");
+                            f.createNewFile();
+
+                            //the shortest side must be 180px
+                            Bitmap b = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                            float scale;
+                            if(b.getWidth() > b.getHeight()) {
+                                scale = (float)b.getHeight() / 180;
+                            } else {
+                                scale = (float)b.getWidth() / 180;
+                            }
+
+                            if(scale < 1)
+                                scale = 1;
+
+                            profileImageBitmap = Bitmap.createScaledBitmap(b, (int)((float)b.getWidth()/scale), (int)((float)b.getHeight()/scale), true);
+                            //profileImageBitmap = Bitmap.createScaledBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), uri), 200, 200, true);
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                            byte[] bitmapdata = bos.toByteArray();
+
+                            FileOutputStream fos = new FileOutputStream(f);
+                            fos.write(bitmapdata);
+                            fos.flush();
+                            fos.close();
+
+                            uploadTask = storageRef.putFile(Uri.fromFile(f));
+                        }
+
+                        // Register observers to listen for when the download is done or if it fails
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                progressBar.setVisibility(View.GONE);
+
+                                showDialog(getResources().getString(R.string.signup_error),
+                                        getResources().getString(R.string.signup_retry));
+
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                                //check if upload on database and/or storage have finished
+                                synchronized (semaphore) {
+                                    semaphore--;
+
+                                    if(semaphore <= 0) {
+                                        progressBar.setVisibility(View.GONE);
+
+                                        //store bitmap in sharedPreferences
+                                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                        profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                        byte[] b = baos.toByteArray();
+                                        String encoded = Base64.encodeToString(b, Base64.DEFAULT);
+
+                                        Intent resultIntent = new Intent();
+                                        resultIntent.putExtra("modified", true);
+                                        resultIntent.putExtra("imageModified", true);
+                                        resultIntent.putExtra("profileImage", encoded);
+                                        setResult(Activity.RESULT_OK, resultIntent);
+                                        finish();
+                                    }
+                                }
+                            }
+                        });
+
+                    } catch (Exception e) {
+                        progressBar.setVisibility(View.GONE);
+
+                        //if image profile saving fails
+                        showDialog(getResources().getString(R.string.signup_error),
+                                getResources().getString(R.string.signup_retry));
+
+                        return;
+                    }
+                }
+
+                //if all checks are positive
+                if(isModified) {
+                    try {
+                        DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
+
+                        Task initTask = myDatabase.child("users").child(userAuth.getUid())
+                                .setValue(new UserMail(userAuth.getEmail(), newName, newCity, newPhone,
+                                        newBio, newSelectedGenres) );
+
+                        initTask.addOnSuccessListener(new OnSuccessListener() {
+                            @Override
+                            public void onSuccess(Object o) {
+                                //check if upload on database and/or storage have finished
+                                synchronized (semaphore) {
+                                    semaphore--;
+
+                                    if (semaphore <= 0) {
+                                        progressBar.setVisibility(View.GONE);
+
+                                        String encoded = "";
+                                        if(profileImageBitmap != null) {
+                                            //store bitmap in sharedPreferences
+                                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                            profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                            byte[] b = baos.toByteArray();
+                                            encoded = Base64.encodeToString(b, Base64.DEFAULT);
+                                        }
+
+                                        Intent resultIntent = new Intent();
+                                        resultIntent.putExtra("modified", true);
+                                        resultIntent.putExtra("imageModified", (uri != null));
+                                        if(!encoded.equals(""))
+                                            resultIntent.putExtra("profileImage", encoded);
+
+                                        setResult(Activity.RESULT_OK, resultIntent);
+                                        finish();
+                                    }
+                                }
+
+                            }
+                        });
+
+                        initTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                progressBar.setVisibility(View.GONE);
+
+                                //if image profile saving fails
+                                showDialog(getResources().getString(R.string.signup_error),
+                                        getResources().getString(R.string.signup_retry));
+                            }
+                        });
+                    } catch (Exception e) {
+                        progressBar.setVisibility(View.GONE);
+
+                        //if image profile saving fails
+                        showDialog(getResources().getString(R.string.signup_error),
+                                getResources().getString(R.string.signup_retry));
+                    }
                 }
             }
         });
@@ -267,6 +467,10 @@ public class EditProfileActivity extends AppCompatActivity implements
         cancelImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("modified", false);
+                resultIntent.putExtra("imageModified", false);
+                setResult(Activity.RESULT_OK, resultIntent);
                 finish();
             }
         });
@@ -289,53 +493,10 @@ public class EditProfileActivity extends AppCompatActivity implements
         });
 
         //hide keyboard if you click away
-        name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    hideKeyboard(v);
-                }
-            }
-        });
-
-        phone.setOnFocusChangeListener(new View.OnFocusChangeListener(){
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus){
-                    hideKeyboard(v);
-                }
-            }
-        });
-
-        //hide keyboard if you click away
-        mail.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    hideKeyboard(v);
-                }
-            }
-        });
-
-        //hide keyboard if you click away
-        bio.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    hideKeyboard(v);
-                }
-            }
-        });
-
-        //hide keyboard if you click away
-        city.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    hideKeyboard(v);
-                }
-            }
-        });
+        name.setOnFocusChangeListener(eventFocusChangeListener);
+        phone.setOnFocusChangeListener(eventFocusChangeListener);
+        bio.setOnFocusChangeListener(eventFocusChangeListener);
+        city.setOnFocusChangeListener(eventFocusChangeListener);
 
         //set listener for genre button
         manageButtonGenre();
@@ -357,23 +518,13 @@ public class EditProfileActivity extends AppCompatActivity implements
         city.setAdapter(mPlaceArrayAdapter);
     }
 
-    private boolean isValidEmailAddress(String emailAddress)
-    {
-        return Patterns.EMAIL_ADDRESS.matcher(emailAddress).matches();
-    }
-
     private boolean isValidPhoneNumber(String phoneNumber) {
-        String expression="^(\\+([0-9]{2,3})\\s)?[0-9\\s]{4,13}$";
-        CharSequence inputStr = phoneNumber;
-        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(inputStr);
-        return matcher.matches();
+        return Patterns.PHONE.matcher(phoneNumber).matches();
     }
 
     @Override
     protected void onStart() {
         Log.i("state", "onStart");
-
 
         super.onStart();
     }
@@ -398,29 +549,14 @@ public class EditProfileActivity extends AppCompatActivity implements
         Log.i("state", "onSaveInstanceState");
         super.onSaveInstanceState(outState);
 
-        outState.putString("profileName", name.getText().toString());
-        outState.putString("profilePhone", phone.getText().toString());
-        outState.putString("profileEmail", mail.getText().toString());
-        outState.putString("profileBio", bio.getText().toString());
-        outState.putString("profileCity", city.getText().toString());
+        //save uri photo/image
         if(uri != null)
             outState.putString("profileImageURI", uri.toString());
 
-        //save selected genres
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < selectedGenres.size()-1; i++) {
-            sb.append(selectedGenres.get(i).toString() ).append(",");
-        }
-
-        if(selectedGenres.size() > 0) {
-            sb.append(selectedGenres.get(selectedGenres.size() - 1).toString());
-            outState.putString("profileGenres", sb.toString());
-        } else
-            outState.remove("profileGenres");
-
-        Log.i("state", "onSaveInstanceState GENRES: "+sb.toString());
-
         outState.putBoolean("isPhoto", isPhoto);
+
+        //save favourite genres
+        outState.putSerializable("genres", checkedItems);
     }
 
     @Override
@@ -428,55 +564,49 @@ public class EditProfileActivity extends AppCompatActivity implements
         Log.i("state", "onRestoreInstanceState");
         super.onRestoreInstanceState(savedInstanceState);
 
-        name.setText(savedInstanceState.getString("profileName"));
-        phone.setText(savedInstanceState.getString("profilePhone"));
-        mail.setText(savedInstanceState.getString("profileEmail"));
-        bio.setText(savedInstanceState.getString("profileBio"));
-        city.setText(savedInstanceState.getString("profileCity"));
-        isPhoto = savedInstanceState.getBoolean("isPhoto");
+        //get profile image
+        String imageProfileUri = savedInstanceState.getString("profileImageURI");
+        if(imageProfileUri != null)
+            uri = Uri.parse(imageProfileUri);
 
-        uri = Uri.parse(savedInstanceState.getString("profileImageURI"));
+        //if photo has been changed
+        if(uri != null) {
+            isPhoto = savedInstanceState.getBoolean("isPhoto");
 
-        try {
-            if(isPhoto) {
-                Bitmap mBitmap = BitmapFactory.decodeFile(uri.toString());
-                newProfileImage = mBitmap;
-                imageProfile.setImageBitmap(mBitmap);
-            } else {
-                File f = new File(uri.toString());
-                if(!f.exists() ) {
-                    //if image is saved on gallery (new image)
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                    newProfileImage = bitmap;
-                    imageProfile.setImageBitmap(bitmap);
+            try {
+                if (isPhoto) {
+                    Bitmap mBitmap = BitmapFactory.decodeFile(uri.toString());
+                    newProfileImage = mBitmap;
+                    imageProfile.setImageBitmap(mBitmap);
+                } else {
+                    File f = new File(uri.toString());
+                    if (!f.exists()) {
+                        //if image is saved on gallery (new image)
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                        newProfileImage = bitmap;
+                        imageProfile.setImageBitmap(bitmap);
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }catch (IOException e) {
-            e.printStackTrace();
         }
 
-        //get saved selectedItems
-        String str = savedInstanceState.getString("profileGenres", null);
+        //get favourite genres
+        checkedItems = (boolean[]) savedInstanceState.getSerializable("genres");
+
+        //show favourite genres
         genres.removeAllViews();
-        selectedGenres = new ArrayList<Integer>();
-        checkedItems = new boolean[genresList.length];
-
-        if(str != null) {
-            if(str.isEmpty()) {
-                genres.addView(BuildGenreLayout("") );
-            } else {
-                Log.i("state", "onRestoreInstanceState GENRES: "+str);
-                String[] strArray = str.split(",");
-                selectedGenres = new ArrayList<Integer>();
-
-
-                for (int i = 0; i < strArray.length; i++) {
-                    selectedGenres.add(Integer.parseInt(strArray[i]));
-                    checkedItems[Integer.parseInt(strArray[i])] = true;
-                    genres.addView(BuildGenreLayout(genresList[Integer.parseInt(strArray[i])]));
-                }
+        boolean noGenres = true;
+        for (int i = 0; i < genresList.length; i++) {
+            if(checkedItems[i] == true) {
+                genres.addView(BuildGenreLayout(genresList[i]));
+                noGenres = false;
             }
         }
+
+        if(noGenres)
+            genres.addView(BuildGenreLayout(getResources().getString(R.string.noFavouriteGenreProfile) ) );
     }
 
     @Override
@@ -521,33 +651,6 @@ public class EditProfileActivity extends AppCompatActivity implements
             isPhoto = true;
         }
     }
-
-    /*private String saveToInternalStorage(Bitmap bitmapImage) {
-        String imageName = Long.toString(System.currentTimeMillis() );
-        //String imageName = "profile.jpg";
-
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/yourapp/app_data/imageDir
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-        File mypath=new File(directory, imageName);
-
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 85, fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return directory.getAbsolutePath() +"/"+ imageName;
-    }*/
 
     private void selectImage() {
         //get string for AlertDialog options
@@ -622,8 +725,8 @@ public class EditProfileActivity extends AppCompatActivity implements
                         galleryIntent();
                 } else {
                     Toast.makeText(getBaseContext(),
-                        mad24.polito.it.R.string.deny_permission_read, Toast.LENGTH_LONG)
-                        .show();
+                            mad24.polito.it.R.string.deny_permission_read, Toast.LENGTH_LONG)
+                            .show();
                 }
                 break;
 
@@ -633,8 +736,8 @@ public class EditProfileActivity extends AppCompatActivity implements
                     cameraIntent();
                 } else {
                     Toast.makeText(getBaseContext(),
-                        mad24.polito.it.R.string.deny_permission_camera, Toast.LENGTH_LONG)
-                        .show();
+                            mad24.polito.it.R.string.deny_permission_camera, Toast.LENGTH_LONG)
+                            .show();
                 }
                 break;
 
@@ -664,22 +767,22 @@ public class EditProfileActivity extends AppCompatActivity implements
 
     private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
             = new ResultCallback<PlaceBuffer>() {
-                @Override
-                public void onResult(PlaceBuffer places) {
-                    if (!places.getStatus().isSuccess()) {
-                        Log.e(LOG_TAG, "Place query did not complete. Error: " +
-                                places.getStatus().toString());
-                        return;
-                    }
-                    // Selecting the first object buffer.
-                    final Place place = places.get(0);
-                    CharSequence attributions = places.getAttributions();
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                Log.e(LOG_TAG, "Place query did not complete. Error: " +
+                        places.getStatus().toString());
+                return;
+            }
+            // Selecting the first object buffer.
+            final Place place = places.get(0);
+            CharSequence attributions = places.getAttributions();
 
-                    if (attributions != null) {
+            if (attributions != null) {
 
-                    }
-                }
-            };
+            }
+        }
+    };
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -713,60 +816,48 @@ public class EditProfileActivity extends AppCompatActivity implements
 
     private void manageButtonGenre() {
         btnGenre.setOnClickListener(new View.OnClickListener() {
-            ArrayList<Integer> oldSelectedGenres = new ArrayList<Integer>();
+            boolean[] oldSelectedGenres = new boolean[genresList.length];
 
             @Override
             public void onClick(View view) {
-                oldSelectedGenres = new ArrayList<Integer>();
+                oldSelectedGenres = new boolean[genresList.length];
 
                 for(int i=0; i < genresList.length; i++) {
                     if(checkedItems[i] == true)
-                        oldSelectedGenres.add(i);
+                        oldSelectedGenres[i] = true;
                 }
 
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(EditProfileActivity.this);
-                mBuilder.setTitle(mad24.polito.it.R.string.title_genre_alertdialog);
+                mBuilder.setTitle(R.string.title_genre_alertdialog);
                 mBuilder.setMultiChoiceItems(genresList, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     //called every time you click a checkbox
                     public void onClick(DialogInterface dialogInterface, int position, boolean isChecked) {
-                        if (isChecked) {
-                            if(!selectedGenres.contains(position))
-                                selectedGenres.add(position);
-                        } else {
-                            selectedGenres.remove((Integer.valueOf(position)));
-                        }
                     }
                 });
 
                 mBuilder.setCancelable(false);
 
                 //called when you click "ok" button
-                mBuilder.setPositiveButton(mad24.polito.it.R.string.ok, new DialogInterface.OnClickListener() {
+                mBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
                         genres.removeAllViews();
 
-                        for (int i = 0; i < selectedGenres.size(); i++) {
-                            String item = genresList[selectedGenres.get(i)];
-
-                            genres.addView(BuildGenreLayout(item));
+                        for (int i = 0; i < genresList.length; i++) {
+                            if(checkedItems[i] == true)
+                                genres.addView(BuildGenreLayout(genresList[i]));
                         }
+
                     }
                 });
 
-                mBuilder.setNegativeButton(mad24.polito.it.R.string.cancel, new DialogInterface.OnClickListener() {
+                mBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-                        for (int i=0; i < genresList.length; i++) {
-                            checkedItems[i] = false;
+                        for(int i=0; i < genresList.length; i++) {
+                            checkedItems[i] = oldSelectedGenres[i];
                         }
-
-                        for(int i=0; i < oldSelectedGenres.size(); i++) {
-                            checkedItems[oldSelectedGenres.get(i)] = true;
-                        }
-
-                        selectedGenres = new ArrayList<Integer>(oldSelectedGenres);
 
                         dialogInterface.dismiss();
                     }
@@ -778,5 +869,30 @@ public class EditProfileActivity extends AppCompatActivity implements
             }
         });
     }
+
+    //hide keyboard when you click away the EditText
+    View.OnFocusChangeListener eventFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
+                InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            }
+        }
+    };
+
+    private void showDialog(String title, String message) {
+        new AlertDialog.Builder(EditProfileActivity.this)
+                .setTitle(title)
+                .setMessage(message)
+                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
 }
+
 

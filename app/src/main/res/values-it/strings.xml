@@ -4,6 +4,7 @@
 
     <string name="editSave">Salva</string>
     <string name="editCancel">Annulla</string>
+    <string name="your_profile">Il tuo profilo</string>
 
     <string name="nameProfile">Nome:</string>
     <string name="phoneProfile">Telefono:</string>
@@ -13,6 +14,15 @@
     <string name="genreProfile">Generi preferiti:</string>
     <string name="buttonGenreProfile">Aggiungi o rimuovi generi</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="noFavouriteGenreProfile">Nessun genere preferito</string>
+    <string name="invalidName">Nome non valido</string>
+    <string name="invalidCity">Città non valida</string>
+    <string name="invalidPhone">Numero di telefono non valido</string>
+    <string name="editprofile_insertValidName">Inserisci un nome di almeno 2 caratteri</string>
+    <string name="editprofile_insertValidCity">Inserisci una città valida</string>
+    <string name="editprofile_insertValidPhone">Inserisci un numero di telefono valido</string>
+    <string name="showprofile_waitData">Aspetta che i dati vengano caricati</string>
+    <string name="showprofile_dataNotLoaded">I dati non sono ancora stati caricati</string>
 
     //strings for placeholders on EditActivity
     <string name="namePlaceholder">Aggiungi il tuo nome</string>
