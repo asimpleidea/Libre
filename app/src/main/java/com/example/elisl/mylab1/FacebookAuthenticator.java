@@ -55,7 +55,7 @@ public class FacebookAuthenticator
     /**
      * The action types
      */
-    public enum ActionTypes {UNKNOWN, SIGNUP, LOGIN};
+    public enum ActionTypes {UNKNOWN, SIGNUP, LOGIN, LOGOUT};
 
     /**
      * The button
@@ -152,6 +152,26 @@ public class FacebookAuthenticator
     public void setActionType(ActionTypes type)
     {
         Type = type;
+
+        String text = null;
+
+        switch (type)
+        {
+            case LOGIN:
+                text = context.getResources().getString(R.string.login_with_fb);
+                break;
+
+            case SIGNUP:
+                text = context.getResources().getString(R.string.signup_with_fb);
+                break;
+
+            case LOGOUT:
+                text = context.getResources().getString(R.string.logout_from_fb);
+                break;
+
+        }
+
+        //Button.setText(text);
     }
 
     /**
@@ -226,7 +246,7 @@ public class FacebookAuthenticator
         //  Get the credential
         final AuthCredential  credential = FacebookAuthProvider.getCredential(token.getToken());
 
-        //  ... and the user in
+        //  ... and log the user in
         FireAuth.signInWithCredential(credential).addOnCompleteListener(CurrentActivity,
                 new OnCompleteListener<AuthResult>()
                 {
