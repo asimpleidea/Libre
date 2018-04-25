@@ -47,7 +47,7 @@
 
         <provider
             android:name=".MyFileContentProvider"
-            android:authorities="com.example.camerademo"
+            android:authorities="com.example.elisl.mylab1"
             android:enabled="true"
             android:exported="true" />
 
