@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MyLab1</string>
+    <string name="app_name">MAD24</string>
 
     <string name="editSave">Salva</string>
     <string name="editCancel">Annulla</string>
+    <string name="your_profile">Il tuo profilo</string>
 
     <string name="nameProfile">Nome:</string>
     <string name="phoneProfile">Telefono:</string>
@@ -13,6 +14,15 @@
     <string name="genreProfile">Generi preferiti:</string>
     <string name="buttonGenreProfile">Aggiungi o rimuovi generi</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="noFavouriteGenreProfile">Nessun genere preferito</string>
+    <string name="invalidName">Nome non valido</string>
+    <string name="invalidCity">Città non valida</string>
+    <string name="invalidPhone">Numero di telefono non valido</string>
+    <string name="editprofile_insertValidName">Inserisci un nome di almeno 2 caratteri</string>
+    <string name="editprofile_insertValidCity">Inserisci una città valida</string>
+    <string name="editprofile_insertValidPhone">Inserisci un numero di telefono valido</string>
+    <string name="showprofile_waitData">Aspetta che i dati vengano caricati</string>
+    <string name="showprofile_dataNotLoaded">I dati non sono ancora stati caricati</string>
 
     //strings for placeholders on EditActivity
     <string name="namePlaceholder">Aggiungi il tuo nome</string>
@@ -72,5 +82,40 @@
         <item>Scuola</item>
         <item>Viaggi</item>
     </string-array>
+
+    //strings for activity_signup_mail
+    <string name="passwordPlaceholder">Inserisci la tua password</string>
+    <string name="signup">Registrati</string>
+    <string name="signup_terms">Registrandoti, accetti i nostri Termini e Condizioni</string>
+    <string name="signup_insertValidMail">Inserisci una mail valida</string>
+    <string name="signup_insertValidPassword">Password di almeno 6 caratteri</string>
+    <string name="signup_insertValidName">Nome di almeno 2 caratteri</string>
+    <string name="signup_insertValidCity">Inserisci una città valida</string>
+    <string name="signup_insertValidPhone">Inserisci un numero valido</string>
+    <string name="signup_mail_duplicated">Email già associata ad un account</string>
+    <string name="signup_insert_another_mail">Inserisci un\'altra email</string>
+    <string name="signup_error">Si è verificato un errore</string>
+    <string name="signup_retry">Controlla la tua connession Internet e riprova</string>
+    <string name="signup_no_internet_connection">Nessuna connessione Internet</string>
+    <string name="signup_internet_retry">Connetti il tuo dispositivo e riprova</string>
+    <string name="signup_genre_button">Aggiungi i tuoi generi preferiti</string>
+
+    //string for reset password
+    <string name="reset_password">Ripristina password</string>
+    <string name="reset_password_success">Ripristino password con successo</string>
+    <string name="reset_password_success_mail">Controlla la tua email, dovresti aver ricevuto le istruzioni</string>
+    <string name="reset_password_failed">Ripristino password fallito</string>
+    <string name="reset_password_failed_mail">Errore inviando la mail, controlla se l\'email è corretta</string>
+
+    //string for login
+    <string name="login_insert_mail">Inserisci la tua mail</string>
+    <string name="login_insert_password">Inserisci la tua password</string>
+    <string name="login_auth_failed">Login non riuscito</string>
+    <string name="login_wrong_mail_pass">Mail o password errati. Inserisci le tue credenziali e riprova</string>
+    <string name="login_or">OPPURE</string>
+    <string name="login_forgot_password">Password dimenticata?</string>
+
+    <string name="login">Login</string>
+    <string name="logout">Disconnetti</string>
 
 </resources>

@@ -13,32 +13,35 @@
     <!--iosched:titleTextAppearance="@string/app_name"-->
 
     <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:theme="@style/ToolbarTheme.NoActionBar"
         >
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20dp"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:textStyle="bold"
-            android:text="@string/app_name"
-            />
+            android:layout_marginLeft="0dp"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="@string/your_profile"
+            android:textSize="20dp"
+            android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/imageEdit"
+        <ImageButton
+            android:id="@+id/showprofile_imageEdit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:adjustViewBounds="true"
             android:padding="12dp"
-            android:scaleType="fitXY"
+            android:background="@null"
+            android:foregroundGravity="right"
             android:src="@drawable/ic_mode_edit_white_24dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right"
             />
 
     </RelativeLayout>

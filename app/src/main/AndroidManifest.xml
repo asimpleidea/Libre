@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.elisl.mylab1">
+    package="mad24.polito.it">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -31,7 +34,38 @@
             android:value="AIzaSyDI-s1kInkq07sXnu8haNisg-ZLlGW9IoE" />
 
         <activity
-            android:name=".ShowProfileActivity"
+
+            android:name="mad24.polito.it.ShowProfileActivity"
+
+            android:theme="@style/AppTheme">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
+        <activity
+
+            android:name="mad24.polito.it.EditProfileActivity"
+            android:label="@string/title_activity_edit_profile"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <provider
+            android:name="mad24.polito.it.MyFileContentProvider"
+            android:authorities="mad24.polito.it"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name="mad24.polito.it.BooksActivity"
+            android:label="@string/title_activity_books">
+        </activity>
+
+        <activity android:name=".registrationmail.LoginActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,17 +73,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".EditProfileActivity"
+        <activity android:name=".registrationmail.SignupMailActivity"
             android:label="@string/title_activity_edit_profile"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden|adjustResize"></activity>
+            android:windowSoftInputMode="stateHidden|adjustResize">
+        </activity>
+        <activity android:name=".registrationmail.ResetPasswordMailActivity"
+            android:label="@string/title_activity_edit_profile"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+        </activity>
 
-        <provider
-            android:name=".MyFileContentProvider"
-            android:authorities="com.example.elisl.mylab1"
-            android:enabled="true"
-            android:exported="true" />
+        <activity android:name=".ManualInsertActivity"
+            android:label="Insert a new Book"
+            android:theme="@style/AppTheme">
+<!--            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
+        </activity>
+
 
         <activity android:name=".SignUpActivity" ></activity>
 
@@ -72,6 +116,7 @@
                 </intent-filter>
             </activity>
         <!-- /Facebook Login/Signup -->
+
 
     </application>
 
