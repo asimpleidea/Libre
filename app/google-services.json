@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:194990875631:android:145186ada29b958b",
         "android_client_info": {
-          "package_name": "com.example.elisl.mylab1"
+          "package_name": "mad24.polito.it"
         }
       },
       "oauth_client": [
@@ -26,7 +26,7 @@
           "client_id": "194990875631-3f5rtms1k3ufr1brhme843c5mu6occoo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.elisl.mylab1",
+            "package_name": "mad24.polito.it",
             "certificate_hash": "54ea96484bf71058aeadd7531b38d2831aa87296"
           }
         },
