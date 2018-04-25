@@ -51,7 +51,7 @@
 
         <provider
             android:name="mad24.polito.it.MyFileContentProvider"
-            android:authorities="com.example.camerademo"
+            android:authorities="mad24.polito.it"
             android:enabled="true"
             android:exported="true" />
 
