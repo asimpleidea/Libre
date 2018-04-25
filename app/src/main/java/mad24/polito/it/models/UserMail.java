@@ -1,4 +1,4 @@
-package mad24.polito.it.registrationmail;
+package mad24.polito.it.models;
 
 import android.net.Uri;
 

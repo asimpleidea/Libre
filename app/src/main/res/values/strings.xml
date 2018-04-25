@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MyLab1</string>
+    <string name="app_name">MAD24</string>
 
     <string name="editSave">Save</string>
     <string name="editCancel">Cancel</string>
@@ -117,6 +117,15 @@
     <string name="reset_password_failed">Reset password failed</string>
     <string name="reset_password_failed_mail">Failed sending reset email, check if email is correct</string>
 
+    //string for login
+    <string name="login_insert_mail">Insert your email</string>
+    <string name="login_insert_password">Insert your password</string>
+    <string name="login_login_failed">Login failed</string>
+    <string name="login_wrong_mail_pass">Wrong mail or password. Insert your credentials and retry</string>
+    <string name="login_or">OR</string>
+    <string name="login_forgot_password">Forgot password?</string>
+
+    <string name="login">Login</string>
     <string name="logout">Log out</string>
     <string name="title_activity_manual_insert">ManualInsertActivity</string>
 

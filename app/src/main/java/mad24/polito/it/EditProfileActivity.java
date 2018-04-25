@@ -43,7 +43,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseError;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -60,7 +59,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import mad24.polito.it.registrationmail.LoginActivity;
-import mad24.polito.it.registrationmail.UserMail;
+import mad24.polito.it.models.UserMail;
 
 public class EditProfileActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,

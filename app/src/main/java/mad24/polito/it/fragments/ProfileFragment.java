@@ -43,7 +43,7 @@ import java.io.IOException;
 import mad24.polito.it.EditProfileActivity;
 import mad24.polito.it.R;
 import mad24.polito.it.registrationmail.LoginActivity;
-import mad24.polito.it.registrationmail.UserMail;
+import mad24.polito.it.models.UserMail;
 
 import static android.content.Context.MODE_PRIVATE;
 

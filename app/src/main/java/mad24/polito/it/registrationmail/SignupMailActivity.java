@@ -31,11 +31,12 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import mad24.polito.it.BooksActivity;
-import mad24.polito.it.EditProfileActivity;
 import mad24.polito.it.MyFileContentProvider;
 import mad24.polito.it.PermissionManager;
 import mad24.polito.it.PlaceArrayAdapter;
 import mad24.polito.it.R;
+import mad24.polito.it.models.UserMail;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -192,16 +193,16 @@ public class SignupMailActivity extends AppCompatActivity implements
 
                 //check email
                 if(mailString.isEmpty() || !isValidEmailAddress(mailString)) {
-                    TextInputLayout mailLayout = (TextInputLayout) findViewById(R.id.signupMail_mailLayout);
-                    mailLayout.setError(getString(R.string.signup_insertValidMail));
+                    TextInputLayout mailLayout = (TextInputLayout) findViewById(R.id.login_mailLayout);
+                    mailLayout.setError(getString(R.string.login_insert_mail));
 
                     isValid = false;
                 }
 
                 //check password
                 if(passwordString.length() < 6) {
-                    TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.signupMail_passwordLayout);
-                    passwordLayout.setError(getString(R.string.signup_insertValidPassword));
+                    TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.login_passwordLayout);
+                    passwordLayout.setError(getString(R.string.login_insert_password));
 
                     isValid = false;
                 }

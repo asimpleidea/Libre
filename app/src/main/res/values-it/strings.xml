@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MyLab1</string>
+    <string name="app_name">MAD24</string>
 
     <string name="editSave">Salva</string>
     <string name="editCancel">Annulla</string>
@@ -107,6 +107,15 @@
     <string name="reset_password_failed">Ripristino password fallito</string>
     <string name="reset_password_failed_mail">Errore inviando la mail, controlla se l\'email è corretta</string>
 
+    //string for login
+    <string name="login_insert_mail">Inserisci la tua mail</string>
+    <string name="login_insert_password">Inserisci la tua password</string>
+    <string name="login_auth_failed">Login non riuscito</string>
+    <string name="login_wrong_mail_pass">Mail o password errati. Inserisci le tue credenziali e riprova</string>
+    <string name="login_or">OPPURE</string>
+    <string name="login_forgot_password">Password dimenticata?</string>
+
+    <string name="login">Login</string>
     <string name="logout">Disconnetti</string>
 
 </resources>
