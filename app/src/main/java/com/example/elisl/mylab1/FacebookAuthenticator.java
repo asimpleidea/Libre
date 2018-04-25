@@ -269,7 +269,7 @@ public class FacebookAuthenticator
                                     if (dataSnapshot.hasChild(logged.getUid()))
                                     {
                                         Toast.makeText(context, "User already exists, just logging", Toast.LENGTH_SHORT).show();
-                                       // CurrentActivity.finish();
+                                        CurrentActivity.finish();
                                         return;
                                     }
 
@@ -362,8 +362,9 @@ public class FacebookAuthenticator
                             if(databaseError != null) onFailure(logged);
                             else
                             {
-                                //CurrentActivity.finish();
+
                                 Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
+                                CurrentActivity.finish();
                             }
                         }
                     });
