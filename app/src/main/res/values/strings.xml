@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">MyLab1</string>
+    <string name="app_name">MAD24</string>
 
     <string name="editSave">Save</string>
     <string name="editCancel">Cancel</string>
+    <string name="your_profile">Your profile</string>
 
     <string name="nameProfile">Name:</string>
     <string name="phoneProfile">Phone:</string>
@@ -12,6 +13,16 @@
     <string name="genreProfile">Favourite book genres:</string>
     <string name="buttonGenreProfile">Add or remove genres</string>
     <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="noFavouriteGenreProfile">No favourite genre</string>
+    <string name="invalidName">Name not valid</string>
+    <string name="invalidCity">City not valid</string>
+    <string name="invalidPhone">Phone number not valid</string>
+    <string name="editprofile_insertValidName">Insert a name longer than 2 chars</string>
+    <string name="editprofile_insertValidCity">Insert a valid city</string>
+    <string name="editprofile_insertValidPhone">Insert a valid phone number</string>
+    <string name="showprofile_waitData">Please, wait that data are loaded</string>
+    <string name="showprofile_dataNotLoaded">Data has not yet been uploaded</string>
+
 
     //strings for placeholders on EditActivity
     <string name="namePlaceholder">Insert your name</string>
@@ -73,6 +84,65 @@
         <item>School</item>
         <item>Travel</item>
     </string-array>
+    <string name="title_activity_books">BooksActivity</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- TODO: Change this text -->
+    <string name="dialog_scan">ISBN scan</string>
+    <string name="dialog_manualIns">Manual Insert</string>
+
+
+    <!-- strings for activity_signup_mail -->
+    <string name="passwordPlaceholder">Insert your password</string>
+    <string name="signup">Sign up</string>
+    <string name="signup_terms">By signing up, you agree to our Terms and Conditions</string>
+    <string name="signup_insertValidMail">Insert a valid mail</string>
+    <string name="signup_insertValidPassword">Password must be longer than 6 chars</string>
+    <string name="signup_insertValidName">Name must be longer than 2 chars</string>
+    <string name="signup_insertValidCity">Insert a valid city</string>
+    <string name="signup_insertValidPhone">Insert a valid phone number</string>
+    <string name="signup_mail_duplicated">Email already associated to an account</string>
+    <string name="signup_insert_another_mail">Please insert a different email</string>
+    <string name="signup_error">An error occurred during authentication</string>
+    <string name="signup_retry">Please, check you internet connection and retry</string>
+    <string name="signup_no_internet_connection">No Internet connection</string>
+    <string name="signup_internet_retry">Connect your device and retry</string>
+    <string name="signup_genre_button">Add your favourite genres</string>
+
+    //string for reset password
+    <string name="reset_password">Reset password</string>
+    <string name="reset_password_success">Reset password success</string>
+    <string name="reset_password_success_mail">Check your email, you should have received the instruction</string>
+    <string name="reset_password_failed">Reset password failed</string>
+    <string name="reset_password_failed_mail">Failed sending reset email, check if email is correct</string>
+
+    //string for login
+    <string name="login_insert_mail">Insert your email</string>
+    <string name="login_insert_password">Insert your password</string>
+    <string name="login_login_failed">Login failed</string>
+    <string name="login_wrong_mail_pass">Wrong mail or password. Insert your credentials and retry</string>
+    <string name="login_or">OR</string>
+    <string name="login_forgot_password">Forgot password?</string>
+
+    <string name="login">Login</string>
+    <string name="logout">Log out</string>
+    <string name="title_activity_manual_insert">ManualInsertActivity</string>
+
+    <!-- book insert strings -->
+    <string name="book_title">Title</string>
+    <string name="book_author">Author</string>
+    <string name="book_genre">Genre</string>
+    <string name="book_isbn">ISBN</string>
+    <string name="bookSend">Send</string>
+
+    <!-- book insert errors -->
+    <string name="required">Required!</string>
+    <string name="ISBN_explain">ISBN is a code of 13 digits!</string>
+    <string name="edition_year">Edition Year</string>
+    <string name="book_conditions">Book conditions</string>
 
     <!-- Facebook -->
         <string name="facebook_app_id">102712380576500</string>

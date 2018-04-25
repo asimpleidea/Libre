@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
+    <!--<color name="colorPrimary">#3F51B5</color>-->
+    <color name="colorPrimary">@android:color/holo_blue_dark</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#0099ff</color>
     <color name="colorTextView">#000000</color>
@@ -8,4 +9,9 @@
     <color name="colorToolbar">@android:color/holo_blue_dark</color>
 
     <color name="black">@android:color/black</color>
+
+    <color name="colorWhite">#ffffff</color>
+    <color name="colorWhiteTransparent">#80ffffff</color>
+
+    <color name="red">@android:color/holo_red_dark</color>
 </resources>
