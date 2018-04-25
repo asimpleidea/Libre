@@ -12,7 +12,9 @@ import java.util.HashMap;
 
 public class MyFileContentProvider extends ContentProvider {
 
+
     public static final Uri CONTENT_URI = Uri.parse("content://mad24.polito.it/");
+
 
     private static final HashMap<String, String> MIME_TYPES = new HashMap<String, String>();
 

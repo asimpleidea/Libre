@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+
 import  mad24.polito.it.R;
 import mad24.polito.it.registrationmail.LoginActivity;
 
@@ -43,6 +44,7 @@ public class ShowProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(mad24.polito.it.R.layout.activity_show_profile);
 
         //check if logged, if not go to login activity
@@ -50,6 +52,7 @@ public class ShowProfileActivity extends AppCompatActivity {
             startActivity(new Intent(ShowProfileActivity.this, LoginActivity.class));
             finish();
         }
+
 
         //button to edit profile
         editImage = (ImageView) findViewById(mad24.polito.it.R.id.showprofile_imageEdit);
@@ -95,12 +98,31 @@ public class ShowProfileActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        //----------------------------------
+        //  Is user logged in?
+        //----------------------------------
+
+        /* NOTE: Why are we checking if the user is logged in here and not in onCreate?
+         * Because there are some situations in which onCreate is not called (essentially, when app is resumed).
+         * Instead, onResume is *ALWAYS* called, making this the best place where to check it.
+         * See more at https://i.stack.imgur.com/t0Q93.png for the app life cycle.
+         * So, when user puts app on foreground again, we check if user is still logged in.
+         */
+        //FirebaseAuth.getInstance().signOut();
+        if(FirebaseAuth.getInstance().getCurrentUser() == null)
+        {
+            Intent signup = new Intent(this, SignUpActivity.class);
+            startActivity(signup);
+        }
+
+        //  If you're here, it means you're logged in. You may proceed.
+
         Log.i("state", "OnResume - show");
         //get preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
