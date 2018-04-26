@@ -25,6 +25,8 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -302,7 +304,8 @@ public class ManualInsertActivity extends AppCompatActivity {
                 mAuthorField.getText().toString(),
                 mISBNField.getText().toString(),
                 bookCoverUri,
-                bookKey));
+                bookKey,
+                FirebaseAuth.getInstance().getUid()));
 
     }
 
