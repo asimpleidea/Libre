@@ -201,5 +201,18 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
     };
+
+    private void showDialog(String title, String message) {
+        new AlertDialog.Builder(getApplicationContext())
+                .setTitle(title)
+                .setMessage(message)
+                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
 }
 

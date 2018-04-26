@@ -39,6 +39,10 @@ import com.google.firebase.storage.UploadTask;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import mad24.polito.it.models.Book;
 
@@ -272,6 +277,56 @@ public class ManualInsertActivity extends AppCompatActivity {
 
                     Toast.makeText(getApplicationContext(),
                             "format: " + scanFormat + " code: " + scanContent, Toast.LENGTH_LONG).show();
+
+
+                    //get info by isbn
+                    try {
+                        mISBNField.setText(scanContent);
+                        JSONObject responseJson = new RetrieveBookGoogle().execute(scanContent).get();
+
+                        if (responseJson == null) {
+                            Log.i("state", "NULL");
+
+                            //alert dialog
+                        } else {
+                            Log.i("state", "OK");
+                            Book book = new Book();
+
+                            try {
+                                JSONObject bookInfoJSON = (JSONObject) responseJson.getJSONArray("items").get(0);
+                                JSONObject bookJSON = bookInfoJSON.getJSONObject("volumeInfo");
+
+                                //set title
+                                mTitleField.setText(bookJSON.getString("title"));
+
+                                //get and set authors
+                                String authors = "";
+                                JSONArray arrayAuthors = bookJSON.getJSONArray("authors");
+                                for(int i=0; i < arrayAuthors.length(); i++) {
+                                    if(i > 0)
+                                        authors += ", ";
+
+                                    authors += arrayAuthors.getString(i);
+                                }
+
+                                mAuthorField.setText(authors);
+
+                                //to get year publication bookJSON.getString("publishedDate");
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+
+                                showDialog("Error getting info about book", "Please retry or insert data handly");
+                            }
+                        }
+
+                    }  catch (Exception e) {
+                        e.printStackTrace();
+
+                        showDialog("Error getting info about book", "Please retry or insert data handly");
+                    }
+
+
                 } else {
                     Log.d("isbn", "error");
                     Toast.makeText(getApplicationContext(),
@@ -381,5 +436,18 @@ public class ManualInsertActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void showDialog(String title, String message) {
+        new AlertDialog.Builder(getApplicationContext())
+                .setTitle(title)
+                .setMessage(message)
+                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 }
