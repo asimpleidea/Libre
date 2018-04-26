@@ -61,11 +61,7 @@
         <activity
             android:name=".BooksActivity"
             android:label="@string/title_activity_books">
-            <intent-filter>
-                <action android:name="com.google.zxing.client.android.SCAN" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".registrationmail.LoginActivity"
@@ -90,7 +86,11 @@
             android:name=".ManualInsertActivity"
             android:label="Insert a new Book"
             android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="com.google.zxing.client.android.SCAN" />
 
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <!--
                 <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -124,10 +124,6 @@
         </activity>
         <!-- /Facebook Login/Signup -->
 
-        <activity
-            android:name=".ScanISBNActivity"
-            android:label="@string/title_activity_scan_isbn"
-            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

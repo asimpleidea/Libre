@@ -119,11 +119,9 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         if(value == 1){
             IntentIntegrator scan_integrator = new IntentIntegrator(this);
-            /*scan_integrator.setBeepEnabled(false)
-                    .setRequestCode(ISBN_SCAN)
+            scan_integrator.setBeepEnabled(false)
                     .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
-                    .initiateScan();*/
-            scan_integrator.setRequestCode(ISBN_SCAN).initiateScan();
+                    .initiateScan();
         }
 
     }
@@ -228,25 +226,6 @@ public class ManualInsertActivity extends AppCompatActivity {
         Log.i("isbn", "onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == ISBN_SCAN){
-
-            IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-
-            if (scanningResult != null) {
-                String scanContent = scanningResult.getContents();
-                String scanFormat = scanningResult.getFormatName();
-
-                Log.d("isbn", scanContent);
-                Log.d("isbn", scanFormat);
-
-                Toast.makeText(getApplicationContext(),
-                        "format: "+scanFormat+" code: "+scanContent, Toast.LENGTH_LONG).show();
-            }else{
-                Log.d("isbn", "error");
-                Toast.makeText(getApplicationContext(),
-                        "No scan data received!", Toast.LENGTH_SHORT).show();
-            }
-        }
 
         //if image profile is taken by gallery
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
@@ -260,28 +239,47 @@ public class ManualInsertActivity extends AppCompatActivity {
             }
 
             mImageField.setImageBitmap(mBitmap);
-        }
+        }else {
+            //if image profile is shot by the camera
+            if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
+                File out = new File(getFilesDir(), "newImage.jpg");
 
-        //if image profile is shot by the camera
-        if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
-            File out = new File(getFilesDir(), "newImage.jpg");
+                if (!out.exists()) {
+                    Toast.makeText(getBaseContext(),
+                            mad24.polito.it.R.string.error_camera, Toast.LENGTH_LONG)
+                            .show();
+                    return;
+                }
 
-            if(!out.exists()) {
-                Toast.makeText(getBaseContext(),
-                        mad24.polito.it.R.string.error_camera, Toast.LENGTH_LONG)
-                        .show();
-                return;
+                mBitmap = BitmapFactory.decodeFile(out.getAbsolutePath());
+
+                //set new profile image = shot photo
+                mImageField.setImageBitmap(mBitmap);
+
+                uri = Uri.parse(out.getAbsolutePath());
+                Log.d("absolutepath", uri.toString());
+            } else {
+
+                //        if(requestCode == ISBN_SCAN){
+                IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
+                if (scanningResult != null) {
+                    String scanContent = scanningResult.getContents();
+                    String scanFormat = scanningResult.getFormatName();
+
+                    Log.d("isbn", scanContent);
+                    Log.d("isbn", scanFormat);
+
+                    Toast.makeText(getApplicationContext(),
+                            "format: " + scanFormat + " code: " + scanContent, Toast.LENGTH_LONG).show();
+                } else {
+                    Log.d("isbn", "error");
+                    Toast.makeText(getApplicationContext(),
+                            "No scan data received!", Toast.LENGTH_SHORT).show();
+                }
+//          }
             }
-
-            mBitmap = BitmapFactory.decodeFile(out.getAbsolutePath());
-
-            //set new profile image = shot photo
-            mImageField.setImageBitmap(mBitmap);
-
-            uri = Uri.parse(out.getAbsolutePath());
-            Log.d("absolutepath", uri.toString());
         }
-
     }
 
     private void submitBook() {
