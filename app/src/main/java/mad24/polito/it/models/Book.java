@@ -24,12 +24,6 @@ public class Book {
         this.user_id = uid;
     }
 
-    public Book(String s, String s1, String s2) {
-        this.title = s;
-        this.author = s1;
-        this.isbn = s2;
-    }
-
     public String getIsbn() {
         return isbn;
     }
@@ -68,5 +62,21 @@ public class Book {
 
     public String getBookImageLink() {
         return bookImageLink;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public void setBook_id(String book_id) {
+        this.book_id = book_id;
+    }
+
+    public void setBookImageLink(String bookImageLink) {
+        this.bookImageLink = bookImageLink;
     }
 }

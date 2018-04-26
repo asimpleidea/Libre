@@ -276,28 +276,8 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         DatabaseReference mRef = mDatabase.child("books");
         String bookKey = mRef.push().getKey();
-/*
-        StorageReference bookCoverRef = mStorageRef.child("bookCovers").child(bookKey);
-        bookCoverUri = null;
-        bookCoverRef.putFile(uri)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Uri downloadUri = taskSnapshot.getDownloadUrl();
-                        bookCoverUri = downloadUri.toString();
-                        Toast.makeText(getApplicationContext(), "Image loaded", Toast.LENGTH_LONG);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error loading image", Toast.LENGTH_LONG);
-                        return;
-                    }
-                });*/
 
         uploadImage(bookKey);
-
 
         mRef.child(bookKey).setValue(new Book(
                 mTitleField.getText().toString(),
@@ -306,6 +286,8 @@ public class ManualInsertActivity extends AppCompatActivity {
                 bookCoverUri,
                 bookKey,
                 FirebaseAuth.getInstance().getUid()));
+
+        Log.d("user_id",  FirebaseAuth.getInstance().getUid());
 
     }
 
