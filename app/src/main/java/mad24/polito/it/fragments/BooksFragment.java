@@ -83,10 +83,12 @@ public class BooksFragment extends Fragment {
 
         final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
+/*
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rv.getContext(),
                 mLayoutManager.getOrientation());
         rv.addItemDecoration(dividerItemDecoration);
+*/
 
         books = new ArrayList<Book>();
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);

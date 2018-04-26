@@ -287,8 +287,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 bookKey,
                 FirebaseAuth.getInstance().getUid()));
 
-        Log.d("user_id",  FirebaseAuth.getInstance().getUid());
-
+        //Log.d("user_id",  FirebaseAuth.getInstance().getUid());
     }
 
     private void uploadImage(String bookKey) {
