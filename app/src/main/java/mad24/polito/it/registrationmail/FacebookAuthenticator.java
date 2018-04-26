@@ -1,4 +1,4 @@
-package mad24.polito.it;
+package mad24.polito.it.registrationmail;
 
 import android.app.Activity;
 import android.content.Context;
@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -39,6 +40,9 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
+
+import mad24.polito.it.BooksActivity;
+import mad24.polito.it.R;
 
 
 /**
@@ -138,7 +142,7 @@ public class FacebookAuthenticator
                     public void onError(FacebookException error)
                     {
                         Log.d("FBLOGIN", "An error occurred while getting user data");
-                        Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getResources().getString(R.string.fb_error_get_me), Toast.LENGTH_LONG).show();
                     }
                 }
         );
@@ -179,7 +183,7 @@ public class FacebookAuthenticator
      */
     protected void onFinish(AccessToken token)
     {
-        Log.d("FBLOGIN", "onFinish called!");
+        Log.d("FBLOGIN", "onFinish called! and action is" + Type.toString());
 
         if(Type == ActionTypes.UNKNOWN) return;
 
@@ -187,7 +191,7 @@ public class FacebookAuthenticator
         //  Sign up
         //---------------------------------
 
-        if(Type == ActionTypes.SIGNUP)
+        if(Type == ActionTypes.SIGNUP || Type == ActionTypes.LOGIN)
         {
             signMeIn(token);
         }
@@ -244,15 +248,18 @@ public class FacebookAuthenticator
     {
         //  Get the credential
         final AuthCredential  credential = FacebookAuthProvider.getCredential(token.getToken());
-
+        Log.d("FBLOGIN", "in sign in");
         //  ... and log the user in
         FireAuth.signInWithCredential(credential).addOnCompleteListener(CurrentActivity,
                 new OnCompleteListener<AuthResult>()
                 {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    public void onComplete(@NonNull Task<AuthResult> task)
+                    {
+                        Log.d("FBLOGIN", "in onComplete");
                         if (task.isSuccessful())
                         {
+                            Log.d("FBLOGIN", "task is successful");
                             //  Get the user logged
                             final FirebaseUser logged = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -260,14 +267,17 @@ public class FacebookAuthenticator
                             //  User already exists?
                             //----------------------------------
 
-                            DB.child("member").addListenerForSingleValueEvent(new ValueEventListener() {
+                            DB.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot)
                                 {
+                                    Log.d("FBB", "ONDATACHANGE");
                                     //  No need to do anything else then
                                     if (dataSnapshot.hasChild(logged.getUid()))
                                     {
-                                        Toast.makeText(context, "User already exists, just logging", Toast.LENGTH_SHORT).show();
+                                        Log.d("FBB", "hasChild");
+                                        //Toast.makeText(context, "User already exists, just logging", Toast.LENGTH_SHORT).show();
+                                        context.startActivity(new Intent(context, BooksActivity.class));
                                         CurrentActivity.finish();
                                         return;
                                     }
@@ -305,7 +315,7 @@ public class FacebookAuthenticator
                                         public void onFailure(@NonNull Exception e)
                                         {
                                             //  Create User
-                                            Log.d("UPLOAD", "failure");
+                                            Log.d("FBLOGIN", "failure");
                                             createUser(logged, o, null);
                                         }
                                     });
@@ -330,6 +340,7 @@ public class FacebookAuthenticator
                     }
                 }
         );
+        Log.d("FBLOGIN", "after signin with credential");
     }
 
     private void createUser(final FirebaseUser logged, final JSONObject o, String picture)
@@ -338,6 +349,7 @@ public class FacebookAuthenticator
 
         try
         {
+            //Log.d("FBB", o.toString());
             //  Todo: check for email value, as Facebook not always returns it (check fb developer page)
             u.setEmail(o.getString("email"));
             u.setGender(o.getString("gender"));
@@ -346,12 +358,12 @@ public class FacebookAuthenticator
             u.setTimezone(o.getInt("timezone"));
             u.setBio("");
             u.setPhone("");
-            u.setLocation("");
-            u.addFavoriteGenre("horror");
+            u.setCity("");
+            //u.addFavoriteGenre("horror");
             u.setPicture(picture);
 
             //  Finally, store user to DB!
-            DB.child("member")
+            DB.child("users")
                     .child(logged.getUid())
                     .setValue(u, new DatabaseReference.CompletionListener()
                     {
@@ -361,8 +373,7 @@ public class FacebookAuthenticator
                             if(databaseError != null) onFailure(logged);
                             else
                             {
-
-                                Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
                                 CurrentActivity.finish();
                             }
                         }

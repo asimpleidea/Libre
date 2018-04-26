@@ -15,8 +15,10 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
         app:layout_editor_absoluteX="0dp"
         app:layout_editor_absoluteY="0dp">
 
@@ -32,7 +34,9 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="503dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="5dp"
             android:fillViewport="true"
             android:orientation="vertical">
 
@@ -138,13 +142,28 @@
                         android:id="@+id/login_button_login"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginTop="16dp"
                         android:background="@color/colorToolbar"
                         android:text="@string/login"
                         android:textColor="@android:color/white"
-                        android:textSize="@dimen/font_size"
-                        />
+                        android:textSize="@dimen/font_size" />
+
+                    <com.facebook.login.widget.LoginButton xmlns:fb="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/login_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/colorToolbar"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingBottom="12dp"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:paddingTop="12dp"
+                        android:textAllCaps="true"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"
+                        fb:com_facebook_login_text="@string/login_with_fb"
+                        fb:com_facebook_logout_text="@string/logout_from_fb" />
 
                     <TextView
                         android:id="@+id/login_resetpassword"
@@ -152,9 +171,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="@string/login_forgot_password"
-                        android:textSize="20dp"
                         android:textColor="@color/colorToolbar"
-                        />
+                        android:textSize="20dp" />
 
                 </LinearLayout>
 

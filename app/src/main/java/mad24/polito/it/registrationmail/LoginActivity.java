@@ -19,7 +19,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import mad24.polito.it.BooksActivity;
+import mad24.polito.it.registrationmail.FacebookAuthenticator;
 import mad24.polito.it.R;
+
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -35,6 +38,11 @@ public class LoginActivity extends AppCompatActivity {
     private Button buttonLogin;
     private TextView textReset;
 
+    /**
+     * The facebook authenticator class
+     */
+    FacebookAuthenticator FBAuth = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,18 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(LoginActivity.this, BooksActivity.class));
             finish();
         }
+
+        //-----------------------------------
+        //  Set up facebook log in
+        //-----------------------------------
+
+        FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
+        FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
+        FBAuth.setActionType(FacebookAuthenticator.ActionTypes.LOGIN);
+
+        //-----------------------------------
+        //  Set up Email log in
+        //-----------------------------------
 
         setContentView(R.layout.activity_login);
         inputEmail = (EditText) findViewById(R.id.login_mail);
@@ -139,18 +159,28 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         //if image profile is taken by gallery
-        if (requestCode == RESET_PASSWORD_ACTIVITY && resultCode == RESULT_OK) {
-            new AlertDialog.Builder(LoginActivity.this)
-                    .setTitle(R.string.reset_password_success)
-                    .setMessage(R.string.reset_password_success_mail)
-                    .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .show();
+        if (requestCode == RESET_PASSWORD_ACTIVITY)
+        {
+            if(resultCode == RESULT_OK) {
+                new AlertDialog.Builder(LoginActivity.this)
+                        .setTitle(R.string.reset_password_success)
+                        .setMessage(R.string.reset_password_success_mail)
+                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
         }
+        else
+        {
+            // Pass the activity result back to Facebook
+            Log.d("FBB", "on result activyt");
+            FBAuth.setActivityResult(requestCode, resultCode, data);
+        }
+
 
     }
 

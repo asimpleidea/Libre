@@ -1,4 +1,4 @@
-package mad24.polito.it;
+package mad24.polito.it.registrationmail;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -52,12 +52,12 @@ public class User
     /**
      * User's favorite genres
      */
-    private List<String> favorite_genres = null;
+    private List<String> genres = null;
 
     /**
      * User's location
      */
-    private String location = null;
+    private String city = null;
 
     /**
      * User's profile picture
@@ -66,7 +66,7 @@ public class User
 
     User()
     {
-        favorite_genres = new ArrayList<>();
+        genres = new ArrayList<>();
     }
 
     public static Boolean logged()
@@ -210,10 +210,10 @@ public class User
         this.bio = bio;
     }
 
-    public List<String> getFavorite_genres()
+    public List<String> getGenres()
     {
         //  https://stackoverflow.com/a/4042464/3497202
-        return favorite_genres;
+        return genres;
     }
 
     /**
@@ -223,26 +223,26 @@ public class User
      */
     public void addFavoriteGenre(String genre)
     {
-        favorite_genres.add(genre);
+        genres.add(genre);
     }
 
     /**
      * Sets user's favorite genres
-     * @param favorite_genres
+     * @param genres
      */
-    public void setFavorite_genres(List<String> favorite_genres)
+    public void setGenres(List<String> genres)
     {
-        this.favorite_genres = favorite_genres;
+        this.genres = genres;
     }
 
-    public String getLocation()
+    public String getCity()
     {
-        return location;
+        return city;
     }
 
-    public void setLocation(String location)
+    public void setCity(String city)
     {
-        this.location = location;
+        this.city = city;
     }
 
     public String getPicture()

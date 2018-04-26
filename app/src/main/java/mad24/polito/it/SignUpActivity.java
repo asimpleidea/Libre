@@ -8,7 +8,7 @@ import com.facebook.login.widget.LoginButton;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    FacebookAuthenticator FBAuth = null;
+    //FacebookAuthenticator FBAuth = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,9 +19,9 @@ public class SignUpActivity extends AppCompatActivity {
         //  Set up facebook sign up
         //-----------------------------------
 
-        FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
+        /*FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
         FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
-        FBAuth.setActionType(FacebookAuthenticator.ActionTypes.SIGNUP);
+        FBAuth.setActionType(FacebookAuthenticator.ActionTypes.SIGNUP);*/
 
     }
 
@@ -30,7 +30,7 @@ public class SignUpActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         // Pass the activity result back to Facebook
-        FBAuth.setActivityResult(requestCode, resultCode, data);
+        //FBAuth.setActivityResult(requestCode, resultCode, data);
     }
 
 }

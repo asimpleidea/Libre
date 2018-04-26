@@ -1,4 +1,4 @@
-package mad24.polito.it;
+package mad24.polito.it.registrationmail;
 
 import android.os.AsyncTask;
 import java.io.IOException;

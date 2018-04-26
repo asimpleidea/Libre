@@ -161,8 +161,8 @@
             <item>email</item>
         </string-array>
 
-        <string name="login_with_fb">Login</string>
-        <string name="signup_with_fb">Sign up</string>
+        <string name="login_with_fb">Login with Facebook</string>
+        <string name="signup_with_fb">Sign up with Facebook</string>
         <string name="logout_from_fb">Log out</string>
 
         <!-- Error Strings -->

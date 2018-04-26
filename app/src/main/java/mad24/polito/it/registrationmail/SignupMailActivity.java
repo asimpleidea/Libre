@@ -37,6 +37,7 @@ import mad24.polito.it.PlaceArrayAdapter;
 import mad24.polito.it.R;
 import mad24.polito.it.models.UserMail;
 
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -107,10 +108,24 @@ public class SignupMailActivity extends AppCompatActivity implements
     Uri uri = null;
     Bitmap newProfileImage = null;
 
+    FacebookAuthenticator FBAuth = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup_mail);
+
+        //-----------------------------------
+        //  Set up facebook sign up
+        //-----------------------------------
+
+        FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
+        FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
+        FBAuth.setActionType(FacebookAuthenticator.ActionTypes.SIGNUP);
+
+        //-----------------------------------
+        //  Regular sign up
+        //-----------------------------------
 
         //image profile
         imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.signupMail_imageProfile);
@@ -660,13 +675,23 @@ public class SignupMailActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i("state", "onActivityResult");
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        Log.i("state", "onActivityResult code:" + requestCode);
         super.onActivityResult(requestCode, resultCode, data);
 
-        //if image profile is taken by gallery
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+        //  Is Facebook?
+        //  NOTE: We *DON'T* know exactly what kind of request code is given to facebook.
+        //  So we have to do it like this.
+        if(requestCode != PICK_IMAGE_REQUEST && requestCode != REQUEST_CAMERA)
+        {
+            FBAuth.setActivityResult(requestCode, resultCode, data);
+            return;
+        }
 
+        //if image profile is taken by gallery
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null)
+        {
             try {
                 uri = data.getData();
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
