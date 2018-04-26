@@ -1,12 +1,18 @@
 package mad24.polito.it.registrationmail;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AlertDialogLayout;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -101,6 +107,12 @@ public class FacebookAuthenticator
      */
     private DatabaseReference DB = null;
 
+    private AlertDialog.Builder DialogBuilder = null;
+
+    private AlertDialog WaitingDialog = null;
+
+    private AlertDialog ErrorDialog = null;
+
     /**
      * The constructor
      * @param context
@@ -193,8 +205,46 @@ public class FacebookAuthenticator
 
         if(Type == ActionTypes.SIGNUP || Type == ActionTypes.LOGIN)
         {
+            WaitingDialog.show();
             signMeIn(token);
         }
+    }
+
+    public void setDialogBuilder(AlertDialog.Builder p)
+    {
+        DialogBuilder = p;
+
+        //-------------------------------------
+        //  Waiting Dialog
+        //-------------------------------------
+
+        //  Seems like that creating everything through DialogBuilder gets an error when showing another.
+        //  So I have to build it like this.
+        WaitingDialog = DialogBuilder.create();
+
+        //  Create the progress bar
+        ProgressBar progress = new ProgressBar(context, null, android.R.attr.progressBarStyleLarge);
+        progress.setPadding(0,0,0,25);
+
+        WaitingDialog.setTitle(R.string.fb_wait);
+        WaitingDialog.setMessage(context.getResources().getString(R.string.fb_wait_message));
+        WaitingDialog.setView(progress);
+
+        //-------------------------------------
+        //  Error Dialog
+        //-------------------------------------
+
+        ErrorDialog = DialogBuilder.create();
+
+        ErrorDialog.setTitle(R.string.fb_error);
+        ErrorDialog.setMessage(context.getResources().getString(R.string.fb_error_authenticate));
+        ErrorDialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getResources().getString(R.string.ok), new DialogInterface.OnClickListener()
+        {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        ErrorDialog.dismiss();
+                    }
+                });
     }
 
     /**
@@ -223,7 +273,16 @@ public class FacebookAuthenticator
                 //  200 OK?
                 if(response.getError() != null)
                 {
-                    Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
+                    WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface)
+                        {
+                            ErrorDialog.show();
+                        }
+                    });
+                    WaitingDialog.dismiss();
+
+                    //Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -373,8 +432,17 @@ public class FacebookAuthenticator
                             if(databaseError != null) onFailure(logged);
                             else
                             {
+                                WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialogInterface)
+                                    {
+                                        context.startActivity(new Intent(context, BooksActivity.class));
+                                        CurrentActivity.finish();
+                                    }
+                                });
+                                WaitingDialog.dismiss();
                                 //Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
-                                CurrentActivity.finish();
+
                             }
                         }
                     });
@@ -397,8 +465,16 @@ public class FacebookAuthenticator
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
             {
-                Log.d("FBLOGIN", "User account deleted.");
-                Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
+                WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface)
+                    {
+                        ErrorDialog.setTitle(R.string.fb_error);
+                        ErrorDialog.show();
+                    }
+                });
+                WaitingDialog.dismiss();
+                //Toast.makeText(context, context.getResources().getText(R.string.fb_error_get_me), Toast.LENGTH_SHORT).show();
             }
         });
     }
