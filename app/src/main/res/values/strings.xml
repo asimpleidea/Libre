@@ -145,32 +145,33 @@
     <string name="book_conditions">Book conditions</string>
 
     <!-- Facebook -->
-        <string name="facebook_app_id">102712380576500</string>
-        <string name="fb_login_protocol_scheme">fb102712380576500</string>
+    <string name="facebook_app_id">102712380576500</string>
+    <string name="fb_login_protocol_scheme">fb102712380576500</string>
 
-        <string name="fields">name, first_name, last_name, gender, locale, picture.type(large), timezone, verified, email</string>
-        <string-array name="fieldsArray">
-            <item>name</item>
-            <item>first_name</item>
-            <item>last_name</item>
-            <item>gender</item>
-            <item>locale</item>
-            <item>picture</item>
-            <item>timezone</item>
-            <item>verified</item>
-            <item>email</item>
-        </string-array>
+    <string name="fields">name, first_name, last_name, gender, locale, picture.type(large), timezone, verified, email</string>
+    <string-array name="fieldsArray">
+        <item>name</item>
+        <item>first_name</item>
+        <item>last_name</item>
+        <item>gender</item>
+        <item>locale</item>
+        <item>picture</item>
+        <item>timezone</item>
+        <item>verified</item>
+        <item>email</item>
+    </string-array>
 
-        <string name="login_with_fb">Login with Facebook</string>
-        <string name="signup_with_fb">Sign up with Facebook</string>
-        <string name="logout_from_fb">Log out</string>
-        <string name="fb_wait">Loading data...</string>
-        <string name="fb_wait_message">Please wait while we fetch your data...</string>
-        <string name="fb_error">Whoops...</string>
+    <string name="login_with_fb">Login with Facebook</string>
+    <string name="signup_with_fb">Sign up with Facebook</string>
+    <string name="logout_from_fb">Log out</string>
+    <string name="fb_wait">Loading data...</string>
+    <string name="fb_wait_message">Please wait while we fetch your data...</string>
+    <string name="fb_error">Whoops...</string>
 
-        <!-- Error Strings -->
-        <string name="fb_error_get_me">Whoops! An error occurred while trying to fetch your user data!</string>
-        <string name="fb_error_authenticate">We could not authenticate you at this time. Try again later or choose another method.</string>
+    <!-- Error Strings -->
+    <string name="fb_error_get_me">Whoops! An error occurred while trying to fetch your user data!</string>
+    <string name="fb_error_authenticate">We could not authenticate you at this time. Try again later or choose another method.</string>
+    <string name="title_activity_scan_isbn">ScanISBNActivity</string>
 
     <!-- /Facebook -->
 

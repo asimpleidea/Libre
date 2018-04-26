@@ -36,6 +36,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -51,6 +53,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
+    private int ISBN_SCAN = 3;
 
     // [START declare_database_ref]
     private DatabaseReference mDatabase;
@@ -108,6 +111,21 @@ public class ManualInsertActivity extends AppCompatActivity {
                 addBookPhoto();
             }
         });
+
+        Bundle b = getIntent().getExtras();
+        int value = -1; // or other values
+        if(b != null)
+            value = b.getInt("scan");
+
+        if(value == 1){
+            IntentIntegrator scan_integrator = new IntentIntegrator(this);
+            /*scan_integrator.setBeepEnabled(false)
+                    .setRequestCode(ISBN_SCAN)
+                    .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
+                    .initiateScan();*/
+            scan_integrator.setRequestCode(ISBN_SCAN).initiateScan();
+        }
+
     }
 
     private void addBookPhoto() {
@@ -207,14 +225,34 @@ public class ManualInsertActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i("state", "onActivityResult");
+        Log.i("isbn", "onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == ISBN_SCAN){
+
+            IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
+            if (scanningResult != null) {
+                String scanContent = scanningResult.getContents();
+                String scanFormat = scanningResult.getFormatName();
+
+                Log.d("isbn", scanContent);
+                Log.d("isbn", scanFormat);
+
+                Toast.makeText(getApplicationContext(),
+                        "format: "+scanFormat+" code: "+scanContent, Toast.LENGTH_LONG).show();
+            }else{
+                Log.d("isbn", "error");
+                Toast.makeText(getApplicationContext(),
+                        "No scan data received!", Toast.LENGTH_SHORT).show();
+            }
+        }
 
         //if image profile is taken by gallery
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             uri = data.getData();
 
-           mBitmap = null;
+            mBitmap = null;
             try {
                 mBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
             } catch (IOException e) {
@@ -243,6 +281,7 @@ public class ManualInsertActivity extends AppCompatActivity {
             uri = Uri.parse(out.getAbsolutePath());
             Log.d("absolutepath", uri.toString());
         }
+
     }
 
     private void submitBook() {

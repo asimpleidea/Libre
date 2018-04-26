@@ -1,5 +1,6 @@
 package mad24.polito.it;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -125,4 +126,5 @@ public class BooksActivity extends AppCompatActivity {
                 setFragment(profileFragment);
         }
     }
+
 }

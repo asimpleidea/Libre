@@ -25,6 +25,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import mad24.polito.it.*;
 import mad24.polito.it.models.*;
@@ -39,8 +41,6 @@ import java.util.List;
 public class BooksFragment extends Fragment {
 
     private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
-    private int REQUEST_CAMERA = 1;
-    private int PICK_IMAGE_REQUEST = 2;
 
     View v;
 
@@ -227,17 +227,28 @@ public class BooksFragment extends Fragment {
 
     //intent to access the camera
     private void scanIntent() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        //save photo on MyFileProvider.CONTENT_URI
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, MyFileContentProvider.CONTENT_URI);
+        /*IntentIntegrator scanIntegrator = new IntentIntegrator(getActivity());
+        scanIntegrator.setDesiredBarcodeFormats(IntentIntegrator.EAN_13);
+        scanIntegrator.setBeepEnabled(false);*/
 
-        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-            //TODO: actual code for scan book
-            //startActivityForResult(intent, REQUEST_CAMERA);
-            Log.d("booksfragment", "camera intent should start");
-            Toast.makeText(getActivity().getBaseContext(), "Camera intent should start", Toast.LENGTH_LONG).show();
-        }
+        //TODO: actual code for scan book
+        //startActivityForResult(intent, REQUEST_CAMERA);
+        Log.d("booksfragment", "camera intent should start");
+//            Toast.makeText(getActivity().getBaseContext(), "Camera intent should start", Toast.LENGTH_LONG).show();
+        Log.d("isbn", "initiating scan");
+        /*IntentIntegrator.forSupportFragment(BooksFragment.this)
+                .setBeepEnabled(false)
+                .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
+                .initiateScan();*/
+
+        Intent intent = new Intent(getActivity(), ManualInsertActivity.class);
+        Bundle b = new Bundle();
+        b.putInt("scan", 1);
+        intent.putExtras(b);
+
+        startActivity(intent);
+
     }
 
     //intent to access the gallery
