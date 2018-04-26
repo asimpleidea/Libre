@@ -61,7 +61,7 @@ public class BooksFragment extends Fragment {
     private int mTotalItemCount = 0;
     private int mLastVisibleItemPosition;
     private boolean mIsLoading = false;
-    private int mPostsPerPage = 20;
+    private int mPostsPerPage = 5;
 
     public BooksFragment() {
         // Required empty public constructor
@@ -113,7 +113,8 @@ public class BooksFragment extends Fragment {
                     mTotalItemCount = mLayoutManager.getItemCount();
                     mLastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
 
-                    if (!mIsLoading && mTotalItemCount <= (mLastVisibleItemPosition)) {
+                    Log.d("debg", "totalItem: "+mTotalItemCount+"; lastvisiblePosition: "+mLastVisibleItemPosition);
+                    if (!mIsLoading && mTotalItemCount <= (mLastVisibleItemPosition+mPostsPerPage)) {
 
                         getBooks(recyclerViewAdapter.getLastItemId());
                         mIsLoading = true;
@@ -131,7 +132,7 @@ public class BooksFragment extends Fragment {
         super.onResume();
     }
 
-    private void getBooks(String nodeId) {
+    private void getBooks(final String nodeId) {
 
         //Log.d("booksfragment", "getting books starting from: "+nodeId);
 
@@ -153,8 +154,14 @@ public class BooksFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<Book> books = new ArrayList<>();
+                boolean flag = false;
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
-                    books.add(bookSnapshot.getValue(Book.class));
+                    if(nodeId == null)
+                        books.add(bookSnapshot.getValue(Book.class));
+                    else
+                        if(flag)
+                            books.add(bookSnapshot.getValue(Book.class));
+                    flag = true;
                 }
 
                 //Log.d("booksfragment", "adding "+books.size()+" books");
