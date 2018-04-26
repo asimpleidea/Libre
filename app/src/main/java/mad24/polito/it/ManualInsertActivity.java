@@ -118,6 +118,7 @@ public class ManualInsertActivity extends AppCompatActivity {
             value = b.getInt("scan");
 
         if(value == 1){
+            getIntent().removeExtra("scan");
             IntentIntegrator scan_integrator = new IntentIntegrator(this);
             scan_integrator.setBeepEnabled(false)
                     .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
