@@ -11,8 +11,7 @@
         android:id="@+id/book_img"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_weight="0"
-        app:srcCompat="@mipmap/ic_launcher" />
+        android:layout_weight="0" />
 
     <LinearLayout
         android:layout_width="match_parent"
