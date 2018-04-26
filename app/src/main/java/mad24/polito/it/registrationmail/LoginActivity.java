@@ -138,7 +138,7 @@ public class LoginActivity extends AppCompatActivity {
                                 progressBar.setVisibility(View.GONE);
 
                                 if (!task.isSuccessful()) {
-                                    new AlertDialog.Builder(getApplicationContext() )
+                                    new AlertDialog.Builder(LoginActivity.this )
                                             .setTitle(R.string.login_login_failed)
                                             .setMessage(R.string.login_wrong_mail_pass)
                                             .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
