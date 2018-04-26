@@ -214,14 +214,14 @@ public class ManualInsertActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             uri = data.getData();
 
-            Bitmap bitmap = null;
+           mBitmap = null;
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                mBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            mImageField.setImageBitmap(bitmap);
+            mImageField.setImageBitmap(mBitmap);
         }
 
         //if image profile is shot by the camera
