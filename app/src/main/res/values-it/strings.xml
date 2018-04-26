@@ -118,10 +118,13 @@
     <string name="login_with_fb">Entra con Facebook</string>
     <string name="signup_with_fb">Registrati con Facebook</string>
     <string name="logout_from_fb">Esci</string>
+    <string name="fb_wait">Un attimo...</string>
+    <string name="fb_wait_message">Stiamo caricando i tuoi dati da Facebook...</string>
+    <string name="fb_error">Ops...</string>
 
     <!-- Error Strings -->
-    <string name="fb_error_get_me">Whoops! An error occurred while trying to fetch your user data!</string>
-    <string name="fb_error_authenticate">We could not authenticate you at this time. Try again later.</string>
+    <string name="fb_error_get_me">Opss! Non siamo riusciti a ottenere i tuoi dati da facebook. Riprova più tardi o prova un altro metodo.</string>
+    <string name="fb_error_authenticate">Non siamo riusciti ad autenticarti. Riprova più tardi o prova un altro metodo.</string>
 
     <string name="login">Login</string>
     <string name="logout">Disconnetti</string>

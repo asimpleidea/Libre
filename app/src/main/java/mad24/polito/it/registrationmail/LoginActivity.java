@@ -1,8 +1,11 @@
 package mad24.polito.it.registrationmail;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
@@ -10,7 +13,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * The facebook authenticator class
      */
-    FacebookAuthenticator FBAuth = null;
+    private FacebookAuthenticator FBAuth = null;
 
 
     @Override
@@ -63,6 +68,7 @@ public class LoginActivity extends AppCompatActivity {
         FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
         FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
         FBAuth.setActionType(FacebookAuthenticator.ActionTypes.LOGIN);
+        FBAuth.setDialogBuilder(new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_AppCompat_DayNight_NoActionBar)));
 
         //-----------------------------------
         //  Set up Email log in
@@ -178,6 +184,8 @@ public class LoginActivity extends AppCompatActivity {
         {
             // Pass the activity result back to Facebook
             Log.d("FBB", "on result activyt");
+
+            //  Pass the activity result back to facebook
             FBAuth.setActivityResult(requestCode, resultCode, data);
         }
 
