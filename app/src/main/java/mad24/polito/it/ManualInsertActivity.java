@@ -1,5 +1,6 @@
 package mad24.polito.it;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,11 +31,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +54,9 @@ public class ManualInsertActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     private StorageReference mStorageRef;
     // [END declare_database_ref]
+
+    ProgressDialog progressDialog;
+    Bitmap mBitmap;
 
     private EditText mTitleField;
     private EditText mAuthorField;
@@ -224,7 +233,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 return;
             }
 
-            Bitmap mBitmap = BitmapFactory.decodeFile(out.getAbsolutePath());
+            mBitmap = BitmapFactory.decodeFile(out.getAbsolutePath());
 
             //set new profile image = shot photo
             mImageField.setImageBitmap(mBitmap);
@@ -265,7 +274,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         DatabaseReference mRef = mDatabase.child("books");
         String bookKey = mRef.push().getKey();
-
+/*
         StorageReference bookCoverRef = mStorageRef.child("bookCovers").child(bookKey);
         bookCoverUri = null;
         bookCoverRef.putFile(uri)
@@ -283,7 +292,10 @@ public class ManualInsertActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Error loading image", Toast.LENGTH_LONG);
                         return;
                     }
-                });
+                });*/
+
+        uploadImage(bookKey);
+
 
         mRef.child(bookKey).setValue(new Book(
                 mTitleField.getText().toString(),
@@ -292,76 +304,61 @@ public class ManualInsertActivity extends AppCompatActivity {
                 bookCoverUri,
                 bookKey));
 
-        finish();
-/*
-        // Disable button so there are no multi-posts
-        setEditingEnabled(false);
-        Toast.makeText(this, "Posting...", Toast.LENGTH_SHORT).show();
-
-        // [START single_value_read]
-        final String userId = getUid();
-        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        // Get user value
-                        Book user = dataSnapshot.getValue(Book.class);
-
-                        // [START_EXCLUDE]
-                        if (user == null) {
-                            // User is null, error out
-                            Log.e(TAG, "User " + userId + " is unexpectedly null");
-                            Toast.makeText(NewPostActivity.this,
-                                    "Error: could not fetch user.",
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            // Write new post
-                            writeNewPost(userId, user.username, title, body);
-                        }
-
-                        // Finish this Activity, back to the stream
-                        setEditingEnabled(true);
-                        finish();
-                        // [END_EXCLUDE]
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                        // [START_EXCLUDE]
-                        setEditingEnabled(true);
-                        // [END_EXCLUDE]
-                    }
-                });
-        // [END single_value_read]
     }
 
-    private void setEditingEnabled(boolean enabled) {
-        mTitleField.setEnabled(enabled);
-        mBodyField.setEnabled(enabled);
-        if (enabled) {
-            mSubmitButton.setVisibility(View.VISIBLE);
-        } else {
-            mSubmitButton.setVisibility(View.GONE);
-        }
-    }
+    private void uploadImage(String bookKey) {
 
-    // [START write_fan_out]
-    private void writeNewPost(String userId, String username, String title, String body) {
-        // Create new post at /user-posts/$userid/$postid and at
-        // /posts/$postid simultaneously
-        String key = mDatabase.child("posts").push().getKey();
-        Post post = new Post(userId, username, title, body);
-        Map<String, Object> postValues = post.toMap();
+        //create reference to images folder and assing a name to the file that will be uploaded
+        StorageReference bookCoverRef = mStorageRef.child("bookCovers").child(bookKey+".jpg");
 
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/posts/" + key, postValues);
-        childUpdates.put("/user-posts/" + userId + "/" + key, postValues);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
-        mDatabase.updateChildren(childUpdates);
-    }
-    // [END write_fan_out]
-*/
+        //creating and showing progress dialog
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMax(100);
+        progressDialog.setMessage("Uploading...");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.show();
+        progressDialog.setCancelable(false);
+
+        //starting upload
+//        UploadTask uploadTask = bookCoverRef.putFile(uri);
+
+        UploadTask uploadTask = bookCoverRef.putBytes(data);
+
+        // Observe state change events such as progress, pause, and resume
+        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                //sets and increments value of progressbar
+                progressDialog.incrementProgressBy((int) progress);
+            }
+        });
+        // Register observers to listen for when the download is done or if it fails
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+                Toast.makeText(ManualInsertActivity.this,"Error in uploading!",Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                Toast.makeText(ManualInsertActivity.this,"Upload successful",Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+                //showing the uploaded image in ImageView using the download url
+                Glide.with(ManualInsertActivity.this).load(downloadUrl).into(mImageField);
+
+                finish();
+
+            }
+        });
 
     }
 }
