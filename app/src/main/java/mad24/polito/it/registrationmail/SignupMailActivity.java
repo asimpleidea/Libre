@@ -20,6 +20,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -122,6 +123,7 @@ public class SignupMailActivity extends AppCompatActivity implements
         FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
         FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
         FBAuth.setActionType(FacebookAuthenticator.ActionTypes.SIGNUP);
+        FBAuth.setDialogBuilder(new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_AppCompat_DayNight_NoActionBar)));
 
         //-----------------------------------
         //  Regular sign up
