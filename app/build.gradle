@@ -61,6 +61,9 @@ dependencies {
     //  Facebook Login/Signup
     implementation 'com.facebook.android:facebook-login:[4,31)'
 
+    // barcode scanner
+    implementation('com.journeyapps:zxing-android-embedded:3.6.0') { transitive = false }
+    implementation 'com.google.zxing:core:3.3.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
