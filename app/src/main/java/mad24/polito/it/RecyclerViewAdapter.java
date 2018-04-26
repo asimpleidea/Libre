@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -64,18 +65,28 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Log.d("bookid", "I'm trying to get this book img: "+bookID);
 
         if(bookID != null) {
-            StorageReference storageReference = mStorageRef.child("bookCovers").child(bookID);
+
+            StorageReference storageReference = mStorageRef.child("bookCovers").child(bookID+".jpg");
+
             /*Glide.with(mContext)
                     .using(new FirebaseImageLoader())
                     .load(storageReference)
                     .into(holder.book_img);*/
-            storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                @Override
-                public void onSuccess(Uri uri) {
-                    String imageURL = uri.toString();
-                    Glide.with(mContext).load(imageURL).into(holder.book_img);
-                }
-            });
+
+            storageReference.getDownloadUrl()
+                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            String imageURL = uri.toString();
+                            Glide.with(mContext).load(imageURL).into(holder.book_img);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            holder.book_img.setImageDrawable(mContext.getResources().getDrawable(R.drawable.default_book_cover));
+                        }
+                    });
         }else{
             holder.book_img.setImageDrawable(mContext.getResources().getDrawable(R.drawable.default_book_cover));
         }

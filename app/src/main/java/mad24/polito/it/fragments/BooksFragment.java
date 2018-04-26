@@ -126,6 +126,11 @@ public class BooksFragment extends Fragment {
         return v;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
     private void getBooks(String nodeId) {
 
         //Log.d("booksfragment", "getting books starting from: "+nodeId);
