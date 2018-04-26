@@ -15,12 +15,13 @@ public class Book {
     public Book() {
     }
 
-    public Book(String title, String author, String isbn, String bookImageLink, String book_id) {
+    public Book(String title, String author, String isbn, String bookImageLink, String book_id, String uid) {
         this.title = title;
         this.author = author;
         this.isbn = isbn;
         this.bookImageLink = bookImageLink;
         this.book_id = book_id;
+        this.user_id = uid;
     }
 
     public Book(String s, String s1, String s2) {
