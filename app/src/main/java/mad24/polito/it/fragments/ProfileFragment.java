@@ -193,13 +193,22 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         imageProfile.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user));
+                        synchronized (semaphoreImage) {
+                            semaphoreImage = true;
+                        }
                     }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
+                synchronized (semaphoreImage) {
+                    semaphoreImage = true;
+                }
             }
         } else {
             imageProfile.setImageBitmap(profileImageBitmap);
+            synchronized (semaphoreImage) {
+                semaphoreImage = true;
+            }
         }
 
         //listener onClick for editing
@@ -255,6 +264,10 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.i("state", "Signout");
+
+                if(getActivity() == null || getActivity().getApplicationContext() == null)
+                    return;
+
                 FirebaseAuth.getInstance().signOut();
 
                 Intent i = new Intent(getActivity().getApplicationContext(), LoginActivity.class);

@@ -3,6 +3,7 @@ package mad24.polito.it.fragments;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -264,14 +266,14 @@ public class BooksFragment extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
-        //Log.d("booksfragment", "onRequestPermissionsResult");
+        Log.d("booksfragment", "onRequestPermissionsResult");
 
         switch (requestCode) {
             case PermissionManager.PERMISSION_READ_EXTERNAL_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if(userChoosenTask.equals("Take Photo"))
+                    if(userChoosenTask.equals("Scan ISBN"))
                         scanIntent();
-                    else if(userChoosenTask.equals("Choose from Library"))
+                    else if(userChoosenTask.equals("Choose manual insert"))
                         manualIntent();
                 } else {
                     Toast.makeText(getActivity().getBaseContext(),

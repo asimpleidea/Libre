@@ -93,6 +93,8 @@
     <!-- TODO: Change this text -->
     <string name="dialog_scan">ISBN scan</string>
     <string name="dialog_manualIns">Manual Insert</string>
+    <string name="manual_insert_error">Error getting info about book</string>
+    <string name="manual_insert_error_retry">Please retry or insert data by hand"</string>
 
 
     <!-- strings for activity_signup_mail -->

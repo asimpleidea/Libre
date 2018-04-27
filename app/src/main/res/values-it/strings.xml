@@ -82,6 +82,17 @@
         <item>Scuola</item>
         <item>Viaggi</item>
     </string-array>
+    <string name="title_activity_books">BooksActivity</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Ricerca</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_profile">Profilo</string>
+
+    <!-- TODO: Change this text -->
+    <string name="dialog_scan">Scansione ISBN</string>
+    <string name="dialog_manualIns">Inserimento manuale</string>
+    <string name="manual_insert_error">Errore acquisendo le informazioni sul libro</string>
+    <string name="manual_insert_error_retry">Riprova o inserisci i dati a mano</string>
 
     //strings for activity_signup_mail
     <string name="passwordPlaceholder">Inserisci la tua password</string>
@@ -110,7 +121,7 @@
     //string for login
     <string name="login_insert_mail">Inserisci la tua mail</string>
     <string name="login_insert_password">Inserisci la tua password</string>
-    <string name="login_auth_failed">Login non riuscito</string>
+    <string name="login_login_failed">Login non riuscito</string>
     <string name="login_wrong_mail_pass">Mail o password errati. Inserisci le tue credenziali e riprova</string>
     <string name="login_or">OPPURE</string>
     <string name="login_forgot_password">Password dimenticata?</string>

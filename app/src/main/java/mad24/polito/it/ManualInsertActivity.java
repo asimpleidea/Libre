@@ -266,12 +266,28 @@ public class ManualInsertActivity extends AppCompatActivity {
                 Log.d("absolutepath", uri.toString());
             } else {
 
+                if(requestCode == 49374 && resultCode != RESULT_OK) {
+                    finish();
+                    return;
+                }
+
+                if( resultCode != RESULT_OK) {
+                    return;
+                }
+
                 //        if(requestCode == ISBN_SCAN){
                 IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
                 if (scanningResult != null) {
                     String scanContent = scanningResult.getContents();
                     String scanFormat = scanningResult.getFormatName();
+
+                    if(scanContent == null || scanFormat == null) {
+                        showDialog(getResources().getString(R.string.manual_insert_error),
+                                getResources().getString(R.string.manual_insert_error_retry) );
+                        return;
+                    }
+
 
                     Log.d("isbn", scanContent);
                     Log.d("isbn", scanFormat);
@@ -316,8 +332,10 @@ public class ManualInsertActivity extends AppCompatActivity {
 
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                showDialog(getResources().getString(R.string.manual_insert_error),
+                                        getResources().getString(R.string.manual_insert_error_retry) );
 
-                                showDialog("Error getting info about book", "Please retry or insert data handly");
+                                return;
                             }
                         }
 
