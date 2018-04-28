@@ -126,6 +126,9 @@ public class ManualInsertActivity extends AppCompatActivity {
             getIntent().removeExtra("scan");
             IntentIntegrator scan_integrator = new IntentIntegrator(this);
             scan_integrator.setBeepEnabled(false)
+//                    .setRequestCode(ISBN_SCAN)
+                    .setCameraId(0)
+                    .setOrientationLocked(false)
                     .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
                     .initiateScan();
         }
@@ -229,9 +232,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i("isbn", "onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
-
 
         //if image profile is taken by gallery
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
@@ -245,113 +246,110 @@ public class ManualInsertActivity extends AppCompatActivity {
             }
 
             mImageField.setImageBitmap(mBitmap);
-        }else {
-            //if image profile is shot by the camera
-            if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
-                File out = new File(getFilesDir(), "newImage.jpg");
+        }
+        //if image profile is shot by the camera
+        if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
+            File out = new File(getFilesDir(), "newImage.jpg");
 
-                if (!out.exists()) {
-                    Toast.makeText(getBaseContext(),
-                            mad24.polito.it.R.string.error_camera, Toast.LENGTH_LONG)
-                            .show();
+            if (!out.exists()) {
+                Toast.makeText(getBaseContext(),
+                        mad24.polito.it.R.string.error_camera, Toast.LENGTH_LONG)
+                        .show();
+                return;
+            }
+
+            mBitmap = BitmapFactory.decodeFile(out.getAbsolutePath());
+
+            //set new profile image = shot photo
+            mImageField.setImageBitmap(mBitmap);
+
+            uri = Uri.parse(out.getAbsolutePath());
+            Log.d("absolutepath", uri.toString());
+        }
+
+        if(requestCode == IntentIntegrator.REQUEST_CODE && resultCode != RESULT_OK) {
+            finish();
+            return;
+        }
+
+        if( resultCode != RESULT_OK) {
+            return;
+        }
+
+        if(requestCode == IntentIntegrator.REQUEST_CODE && resultCode == RESULT_OK) {
+            Log.d("isbn", "requestCode: "+requestCode);
+            Log.d("isbn", "resultCode: "+resultCode);
+
+            IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
+            if (scanningResult != null) {
+                String scanContent = scanningResult.getContents();
+                String scanFormat = scanningResult.getFormatName();
+
+                if (scanContent == null || scanFormat == null) {
+                    showDialog(getResources().getString(R.string.manual_insert_error),
+                            getResources().getString(R.string.manual_insert_error_retry));
                     return;
                 }
 
-                mBitmap = BitmapFactory.decodeFile(out.getAbsolutePath());
+                Log.d("isbn", scanContent);
+                Log.d("isbn", scanFormat);
 
-                //set new profile image = shot photo
-                mImageField.setImageBitmap(mBitmap);
+                Toast.makeText(getApplicationContext(),
+                        "format: " + scanFormat + " code: " + scanContent, Toast.LENGTH_LONG).show();
 
-                uri = Uri.parse(out.getAbsolutePath());
-                Log.d("absolutepath", uri.toString());
-            } else {
+                //get info by isbn
+                try {
+                    mISBNField.setText(scanContent);
+                    JSONObject responseJson = new RetrieveBookGoogle().execute(scanContent).get();
 
-                if(requestCode == 49374 && resultCode != RESULT_OK) {
-                    finish();
-                    return;
-                }
+                    if (responseJson == null) {
+                        Log.i("state", "NULL");
 
-                if( resultCode != RESULT_OK) {
-                    return;
-                }
+                        //alert dialog
+                    } else {
+                        Log.i("state", "OK");
+                        Book book = new Book();
 
-                //        if(requestCode == ISBN_SCAN){
-                IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+                        try {
+                            JSONObject bookInfoJSON = (JSONObject) responseJson.getJSONArray("items").get(0);
+                            JSONObject bookJSON = bookInfoJSON.getJSONObject("volumeInfo");
 
-                if (scanningResult != null) {
-                    String scanContent = scanningResult.getContents();
-                    String scanFormat = scanningResult.getFormatName();
+                            //set title
+                            mTitleField.setText(bookJSON.getString("title"));
 
-                    if(scanContent == null || scanFormat == null) {
-                        showDialog(getResources().getString(R.string.manual_insert_error),
-                                getResources().getString(R.string.manual_insert_error_retry) );
-                        return;
-                    }
+                            //get and set authors
+                            String authors = "";
+                            JSONArray arrayAuthors = bookJSON.getJSONArray("authors");
+                            for (int i = 0; i < arrayAuthors.length(); i++) {
+                                if (i > 0)
+                                    authors += ", ";
 
-
-                    Log.d("isbn", scanContent);
-                    Log.d("isbn", scanFormat);
-
-                    Toast.makeText(getApplicationContext(),
-                            "format: " + scanFormat + " code: " + scanContent, Toast.LENGTH_LONG).show();
-
-
-                    //get info by isbn
-                    try {
-                        mISBNField.setText(scanContent);
-                        JSONObject responseJson = new RetrieveBookGoogle().execute(scanContent).get();
-
-                        if (responseJson == null) {
-                            Log.i("state", "NULL");
-
-                            //alert dialog
-                        } else {
-                            Log.i("state", "OK");
-                            Book book = new Book();
-
-                            try {
-                                JSONObject bookInfoJSON = (JSONObject) responseJson.getJSONArray("items").get(0);
-                                JSONObject bookJSON = bookInfoJSON.getJSONObject("volumeInfo");
-
-                                //set title
-                                mTitleField.setText(bookJSON.getString("title"));
-
-                                //get and set authors
-                                String authors = "";
-                                JSONArray arrayAuthors = bookJSON.getJSONArray("authors");
-                                for(int i=0; i < arrayAuthors.length(); i++) {
-                                    if(i > 0)
-                                        authors += ", ";
-
-                                    authors += arrayAuthors.getString(i);
-                                }
-
-                                mAuthorField.setText(authors);
-
-                                //to get year publication bookJSON.getString("publishedDate");
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                showDialog(getResources().getString(R.string.manual_insert_error),
-                                        getResources().getString(R.string.manual_insert_error_retry) );
-
-                                return;
+                                authors += arrayAuthors.getString(i);
                             }
+
+                            mAuthorField.setText(authors);
+
+                            //to get year publication bookJSON.getString("publishedDate");
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            showDialog(getResources().getString(R.string.manual_insert_error),
+                                    getResources().getString(R.string.manual_insert_error_retry));
+
+                            return;
                         }
-
-                    }  catch (Exception e) {
-                        e.printStackTrace();
-
-                        showDialog("Error getting info about book", "Please retry or insert data handly");
                     }
 
+                } catch (Exception e) {
+                    e.printStackTrace();
 
-                } else {
-                    Log.d("isbn", "error");
-                    Toast.makeText(getApplicationContext(),
-                            "No scan data received!", Toast.LENGTH_SHORT).show();
+                    showDialog("Error getting info about book", "Please retry or insert data handly");
                 }
-//          }
+            } else {
+                Log.d("isbn", "error");
+                Toast.makeText(getApplicationContext(),
+                        "No scan data received!", Toast.LENGTH_SHORT).show();
             }
         }
     }
