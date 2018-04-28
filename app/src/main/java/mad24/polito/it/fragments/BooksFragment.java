@@ -3,22 +3,17 @@ package mad24.polito.it.fragments;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -27,8 +22,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import mad24.polito.it.*;
 import mad24.polito.it.models.*;
@@ -45,10 +38,6 @@ public class BooksFragment extends Fragment {
     private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
 
     View v;
-
-    // Firebase var
-    final FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference mDatabase;
 
     // Android Layout
     private RecyclerView rv;
@@ -77,8 +66,6 @@ public class BooksFragment extends Fragment {
         //Log.d("booksfragment", "onCreateView");
         // Inflate the layout for this fragment
         v =  inflater.inflate(R.layout.fragment_book, container, false);
-
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("books");
 
         rv = (RecyclerView) v.findViewById(R.id.book_list);
         new_book_button = (FloatingActionButton) v.findViewById(R.id.newBookBtn);
