@@ -2,6 +2,8 @@ package mad24.polito.it;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -127,6 +129,12 @@ public class PlaceArrayAdapter
         return filter;
     }
 
+    public ArrayList<PlaceAutocomplete> getListAutocomplete() {
+        return mResultList;
+    }
+
+
+    
     public class PlaceAutocomplete {
 
         public CharSequence placeId;

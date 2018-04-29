@@ -19,6 +19,7 @@
     <string name="invalidPhone">Phone number not valid</string>
     <string name="editprofile_insertValidName">Insert a name longer than 2 chars</string>
     <string name="editprofile_insertValidCity">Insert a valid city</string>
+    <string name="editprofile_selectSuggestion">Select a city by suggestion</string>
     <string name="editprofile_insertValidPhone">Insert a valid phone number</string>
     <string name="showprofile_waitData">Please, wait that data are loaded</string>
     <string name="showprofile_dataNotLoaded">Data has not yet been uploaded</string>
@@ -105,6 +106,7 @@
     <string name="signup_insertValidPassword">Password must be longer than 6 chars</string>
     <string name="signup_insertValidName">Name must be longer than 2 chars</string>
     <string name="signup_insertValidCity">Insert a valid city</string>
+    <string name="signup_selectSuggestion">Select a city by suggestion</string>
     <string name="signup_insertValidPhone">Insert a valid phone number</string>
     <string name="signup_mail_duplicated">Email already associated to an account</string>
     <string name="signup_insert_another_mail">Please insert a different email</string>

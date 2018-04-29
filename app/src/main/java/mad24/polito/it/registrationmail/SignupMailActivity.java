@@ -41,11 +41,7 @@ import mad24.polito.it.models.UserMail;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.AutocompleteFilter;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -106,6 +102,10 @@ public class SignupMailActivity extends AppCompatActivity implements
     //variables for profile image management
     private String userChoosenTask;
     private boolean isPhoto = false;
+
+    private String selectedCity;
+    private String idSelectedCity;
+
     Uri uri = null;
     Bitmap newProfileImage = null;
 
@@ -140,6 +140,9 @@ public class SignupMailActivity extends AppCompatActivity implements
         phone = (EditText) findViewById(R.id.signupMail_phone);
         bio = (EditText) findViewById(R.id.signupMail_bio);
 
+        selectedCity = "";
+        idSelectedCity = "";
+
         //get elements to manage favourite genres
         btnGenre = (Button) findViewById(R.id.signupMail_buttonGenre);
         genresList = getResources().getStringArray(R.array.genres);
@@ -160,9 +163,9 @@ public class SignupMailActivity extends AppCompatActivity implements
         mail.setOnFocusChangeListener(eventFocusChangeListener);
         password.setOnFocusChangeListener(eventFocusChangeListener);
         name.setOnFocusChangeListener(eventFocusChangeListener);
-        city.setOnFocusChangeListener(eventFocusChangeListener);
         phone.setOnFocusChangeListener(eventFocusChangeListener);
         bio.setOnFocusChangeListener(eventFocusChangeListener);
+        city.setOnFocusChangeListener(eventFocusChangeListenerCity);
 
         //set default image
         Drawable d = getResources().getDrawable(R.drawable.unknown_user);
@@ -210,7 +213,7 @@ public class SignupMailActivity extends AppCompatActivity implements
 
                 //check email
                 if(mailString.isEmpty() || !isValidEmailAddress(mailString)) {
-                    TextInputLayout mailLayout = (TextInputLayout) findViewById(R.id.login_mailLayout);
+                    TextInputLayout mailLayout = (TextInputLayout) findViewById(R.id.signupMail_mailLayout);
                     mailLayout.setError(getString(R.string.login_insert_mail));
 
                     isValid = false;
@@ -218,7 +221,7 @@ public class SignupMailActivity extends AppCompatActivity implements
 
                 //check password
                 if(passwordString.length() < 6) {
-                    TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.login_passwordLayout);
+                    TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.signupMail_passwordLayout);
                     passwordLayout.setError(getString(R.string.login_insert_password));
 
                     isValid = false;
@@ -236,6 +239,12 @@ public class SignupMailActivity extends AppCompatActivity implements
                 if(cityString.length() < 2) {
                     TextInputLayout cityLayout = (TextInputLayout) findViewById(R.id.signupMail_cityLayout);
                     cityLayout.setError(getString(R.string.signup_insertValidCity));
+
+                    isValid = false;
+                } else if(selectedCity.equals("") || idSelectedCity.equals("") || !cityString.equals(selectedCity)) {
+                    //check if city is selected by google suggestion
+                    TextInputLayout cityLayout = (TextInputLayout) findViewById(R.id.signupMail_cityLayout);
+                    cityLayout.setError(getString(R.string.signup_selectSuggestion));
 
                     isValid = false;
                 }
@@ -417,7 +426,8 @@ public class SignupMailActivity extends AppCompatActivity implements
                 .addOnConnectionFailedListener(this)
                 .build();
 
-        city.setThreshold(3);
+        city.setThreshold(2);
+
 
         city.setOnItemClickListener(mAutocompleteClickListener);
         mPlaceArrayAdapter = new PlaceArrayAdapter(this, android.R.layout.simple_list_item_1,
@@ -466,15 +476,21 @@ public class SignupMailActivity extends AppCompatActivity implements
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final PlaceArrayAdapter.PlaceAutocomplete item = mPlaceArrayAdapter.getItem(position);
             final String placeId = String.valueOf(item.placeId);
-            Log.i(LOG_TAG, "Selected: " + item.description);
+            /*Log.i(LOG_TAG, "Selected: " + item.description);
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(mGoogleApiClient, placeId);
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
-            Log.i(LOG_TAG, "Fetching details for ID: " + item.placeId);
+            Log.i(LOG_TAG, "Fetching details for ID: " + item.placeId);*/
+
+            selectedCity = item.description.toString();
+            idSelectedCity = item.placeId.toString();
+
+            InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
         }
     };
 
-    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+    /*private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
             = new ResultCallback<PlaceBuffer>() {
         @Override
         public void onResult(PlaceBuffer places) {
@@ -491,7 +507,7 @@ public class SignupMailActivity extends AppCompatActivity implements
 
             }
         }
-    };
+    };*/
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -521,6 +537,33 @@ public class SignupMailActivity extends AppCompatActivity implements
             if (!hasFocus) {
                 InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
                 inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            }
+        }
+    };
+
+    //hide keyboard when you click away the EditText
+    View.OnFocusChangeListener eventFocusChangeListenerCity = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
+                InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                String insertedCity = city.getText().toString();
+                ArrayList<PlaceArrayAdapter.PlaceAutocomplete> list = mPlaceArrayAdapter.getListAutocomplete();
+                if(list.size() > 0) {
+                    for (PlaceArrayAdapter.PlaceAutocomplete element : list) {
+                        if (element.description.equals(insertedCity)) {
+                            selectedCity = element.description.toString();
+                            idSelectedCity = element.placeId.toString();
+                            return;
+                        }
+                    }
+
+                    selectedCity = list.get(0).description.toString();
+                    idSelectedCity = list.get(0).placeId.toString();
+                    city.setText(list.get(0).description);
+                }
             }
         }
     };
@@ -643,6 +686,10 @@ public class SignupMailActivity extends AppCompatActivity implements
 
         //save favourite genres
         outState.putSerializable("genres", checkedItems);
+
+        //save selected city
+        outState.putString("selectedCity", selectedCity);
+        outState.putString("idSelectedCity", idSelectedCity);
     }
 
     @Override
@@ -674,6 +721,10 @@ public class SignupMailActivity extends AppCompatActivity implements
 
         //get favourite genres
         checkedItems = (boolean[]) savedInstanceState.getSerializable("genres");
+
+        //get selected city
+        selectedCity = savedInstanceState.getString("selectedCity");
+        idSelectedCity = savedInstanceState.getString("idSelectedCity");
     }
 
     @Override
@@ -795,7 +846,7 @@ public class SignupMailActivity extends AppCompatActivity implements
 
             DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
             myDatabase.child("users").child(user.getUid())
-                    .setValue(new UserMail(mailString, nameString, cityString, phoneString, bioString, selectedGenres) );
+                    .setValue(new UserMail(mailString, nameString, cityString, idSelectedCity, phoneString, bioString, selectedGenres) );
 
             progressBar.setVisibility(View.GONE);
 

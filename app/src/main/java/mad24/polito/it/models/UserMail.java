@@ -8,6 +8,7 @@ public class UserMail {
     String email;
     String name;
     String city;
+    String idCity;
     String phone;
     String bio;
     ArrayList<Integer> genres;
@@ -16,10 +17,12 @@ public class UserMail {
 
     }
 
-    public UserMail(String email, String name, String city, String phone, String bio, ArrayList<Integer> genres) {
+    public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres) {
         this.email = email;
         this.name = name;
         this.city = city;
+        this.idCity = idCity;
+
         this.phone = phone;
         this.bio = bio;
         this.genres = genres;
@@ -47,6 +50,14 @@ public class UserMail {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getIdCity() {
+        return idCity;
+    }
+
+    public void setIdCity(String idCity) {
+        this.idCity = idCity;
     }
 
     public String getPhone() {

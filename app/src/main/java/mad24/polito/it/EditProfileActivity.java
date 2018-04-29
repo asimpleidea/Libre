@@ -1,6 +1,7 @@
 package mad24.polito.it;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -19,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -99,6 +102,9 @@ public class EditProfileActivity extends AppCompatActivity implements
     private String userChoosenTask;
     private boolean isPhoto = false;
 
+    private String selectedCity;
+    private String idSelectedCity;
+
     private ProgressBar progressBar;
 
     private static final String LOG_TAG = "EditProfileActivity";
@@ -165,6 +171,8 @@ public class EditProfileActivity extends AppCompatActivity implements
             phone.setText(user.getPhone());
             bio.setText(user.getBio());
             city.setText(user.getCity());
+            selectedCity = user.getCity();
+            idSelectedCity = user.getIdCity();
 
             //get favourite genres
             if(user.getGenres() == null)
@@ -222,6 +230,14 @@ public class EditProfileActivity extends AppCompatActivity implements
                 if(newCity.length() < 2) {
                     showDialog(getResources().getString(R.string.invalidCity),
                             getResources().getString(R.string.editprofile_insertValidCity));
+
+                    return;
+                }
+
+                //check if city is selected by google suggestion
+                if(!newCity.equals(selectedCity)) {
+                    showDialog(getResources().getString(R.string.invalidCity),
+                            getResources().getString(R.string.editprofile_selectSuggestion));
 
                     return;
                 }
@@ -405,7 +421,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                         DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
 
                         Task initTask = myDatabase.child("users").child(userAuth.getUid())
-                                .setValue(new UserMail(userAuth.getEmail(), newName, newCity, newPhone,
+                                .setValue(new UserMail(userAuth.getEmail(), newName, newCity, idSelectedCity, newPhone,
                                         newBio, newSelectedGenres) );
 
                         initTask.addOnSuccessListener(new OnSuccessListener() {
@@ -495,7 +511,7 @@ public class EditProfileActivity extends AppCompatActivity implements
         name.setOnFocusChangeListener(eventFocusChangeListener);
         phone.setOnFocusChangeListener(eventFocusChangeListener);
         bio.setOnFocusChangeListener(eventFocusChangeListener);
-        city.setOnFocusChangeListener(eventFocusChangeListener);
+        city.setOnFocusChangeListener(eventFocusChangeListenerCity);
 
         //set listener for genre button
         manageButtonGenre();
@@ -508,7 +524,7 @@ public class EditProfileActivity extends AppCompatActivity implements
                 .addOnConnectionFailedListener(this)
                 .build();
 
-        city.setThreshold(3);
+        city.setThreshold(2);
 
         city.setOnItemClickListener(mAutocompleteClickListener);
         mPlaceArrayAdapter = new PlaceArrayAdapter(this, android.R.layout.simple_list_item_1,
@@ -556,6 +572,10 @@ public class EditProfileActivity extends AppCompatActivity implements
 
         //save favourite genres
         outState.putSerializable("genres", checkedItems);
+
+        //save selected city
+        outState.putString("selectedCity", selectedCity);
+        outState.putString("idSelectedCity", idSelectedCity);
     }
 
     @Override
@@ -606,6 +626,10 @@ public class EditProfileActivity extends AppCompatActivity implements
 
         if(noGenres)
             genres.addView(BuildGenreLayout(getResources().getString(R.string.noFavouriteGenreProfile) ) );
+
+        //get selected city
+        selectedCity = savedInstanceState.getString("selectedCity");
+        idSelectedCity = savedInstanceState.getString("idSelectedCity");
     }
 
     @Override
@@ -745,11 +769,6 @@ public class EditProfileActivity extends AppCompatActivity implements
 
     }
 
-    //method to hide keyboard when you click away on the screen
-    public void hideKeyboard(View view) {
-        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
 
     private AdapterView.OnItemClickListener mAutocompleteClickListener
             = new AdapterView.OnItemClickListener() {
@@ -757,15 +776,21 @@ public class EditProfileActivity extends AppCompatActivity implements
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final PlaceArrayAdapter.PlaceAutocomplete item = mPlaceArrayAdapter.getItem(position);
             final String placeId = String.valueOf(item.placeId);
-            Log.i(LOG_TAG, "Selected: " + item.description);
+            /*Log.i(LOG_TAG, "Selected: " + item.description);
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(mGoogleApiClient, placeId);
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
-            Log.i(LOG_TAG, "Fetching details for ID: " + item.placeId);
+            Log.i(LOG_TAG, "Fetching details for ID: " + item.placeId);*/
+
+            selectedCity = item.description.toString();
+            idSelectedCity = item.placeId.toString();
+
+            InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
         }
     };
 
-    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+    /*private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
             = new ResultCallback<PlaceBuffer>() {
         @Override
         public void onResult(PlaceBuffer places) {
@@ -782,7 +807,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
             }
         }
-    };
+    };*/
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -880,6 +905,35 @@ public class EditProfileActivity extends AppCompatActivity implements
             }
         }
     };
+
+    //hide keyboard when you click away the EditText
+    View.OnFocusChangeListener eventFocusChangeListenerCity = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
+                InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                String insertedCity = city.getText().toString();
+                ArrayList<PlaceArrayAdapter.PlaceAutocomplete> list = mPlaceArrayAdapter.getListAutocomplete();
+                if(list.size() > 0) {
+                    for (PlaceArrayAdapter.PlaceAutocomplete element : list) {
+                        if (element.description.equals(insertedCity)) {
+                            selectedCity = element.description.toString();
+                            idSelectedCity = element.placeId.toString();
+                            return;
+                        }
+                    }
+
+                    selectedCity = list.get(0).description.toString();
+                    idSelectedCity = list.get(0).placeId.toString();
+                    city.setText(list.get(0).description);
+                }
+            }
+        }
+    };
+
+
 
     private void showDialog(String title, String message) {
         new AlertDialog.Builder(EditProfileActivity.this)

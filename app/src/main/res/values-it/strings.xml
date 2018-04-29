@@ -20,6 +20,7 @@
     <string name="invalidPhone">Numero di telefono non valido</string>
     <string name="editprofile_insertValidName">Inserisci un nome di almeno 2 caratteri</string>
     <string name="editprofile_insertValidCity">Inserisci una città valida</string>
+    <string name="editprofile_selectSuggestion">Seleziona una città tramite i suggerimenti</string>
     <string name="editprofile_insertValidPhone">Inserisci un numero di telefono valido</string>
     <string name="showprofile_waitData">Aspetta che i dati vengano caricati</string>
     <string name="showprofile_dataNotLoaded">I dati non sono ancora stati caricati</string>
@@ -102,6 +103,7 @@
     <string name="signup_insertValidPassword">Password di almeno 6 caratteri</string>
     <string name="signup_insertValidName">Nome di almeno 2 caratteri</string>
     <string name="signup_insertValidCity">Inserisci una città valida</string>
+    <string name="signup_selectSuggestion">Seleziona una città tramite i suggerimenti</string>
     <string name="signup_insertValidPhone">Inserisci un numero valido</string>
     <string name="signup_mail_duplicated">Email già associata ad un account</string>
     <string name="signup_insert_another_mail">Inserisci un\'altra email</string>
