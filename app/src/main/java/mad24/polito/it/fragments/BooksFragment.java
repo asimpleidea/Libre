@@ -52,7 +52,7 @@ public class BooksFragment extends Fragment {
     private int mTotalItemCount = 0;
     private int mLastVisibleItemPosition;
     private boolean mIsLoading = false;
-    private int mPostsPerPage = 5;
+    private int mPostsPerPage = 6;
 
     public BooksFragment() {
         // Required empty public constructor
