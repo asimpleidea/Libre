@@ -1,13 +1,19 @@
 package mad24.polito.it.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -15,7 +21,6 @@ import android.widget.EditText;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -56,6 +61,8 @@ public class SearchFragment extends Fragment {
     private String lastItemId = null;
     private boolean continueSearch = true;
 
+    Context context;
+
 
     public SearchFragment() {
         // Required empty public constructor
@@ -68,26 +75,42 @@ public class SearchFragment extends Fragment {
         // Inflate the layout for this fragment
         v = inflater.inflate(mad24.polito.it.R.layout.fragment_search, container, false);
 
-        rv = (RecyclerView) v.findViewById(R.id.search_bookList);
-        searchBar = (EditText) v.findViewById(R.id.search_searchBar);
-        searchButton = (Button) v.findViewById(R.id.search_searchButton);
+        Toolbar mToolbar = (Toolbar) v.findViewById(R.id.search_toolbar);
+        ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
 
+        return v;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        context = getActivity();
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //inflater.inflate(R.menu.menu_search, menu);
+        //MenuItem searchItem = menu.findItem(R.id.search_searchMenu);
+        //searchItem.expandActionView();
+
+        rv = (RecyclerView) v.findViewById(R.id.search_bookList);
         final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
 
-        searchButton.setOnClickListener(new View.OnClickListener() {
+        SearchView searchView = (SearchView) v.findViewById(R.id.search_searchView); //searchItem.getActionView();
+        searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onQueryTextSubmit(final String query) {
                 books = new ArrayList<Book>();
                 recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
                 rv.setAdapter(recyclerViewAdapter);
 
-                final String searchString = searchBar.getText().toString();
                 lastItemId = null;
                 continueSearch = true;
                 //mTotalItemCount = 0;
 
-                getBooks(lastItemId, searchString, mPostsPerPage);
+                getBooks(lastItemId, query, mPostsPerPage);
 
                 rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -99,27 +122,38 @@ public class SearchFragment extends Fragment {
                             mTotalItemCount = mLayoutManager.getItemCount();
                             mLastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
 
-                            Log.d("debug", "totalItem: "+mTotalItemCount+"; lastvisiblePosition: "+mLastVisibleItemPosition);
+                            Log.d("debug", "totalItem: " + mTotalItemCount + "; lastvisiblePosition: " + mLastVisibleItemPosition);
                             if (!mIsLoading && continueSearch) { //mTotalItemCount <= (mLastVisibleItemPosition+mPostsPerPage)) {
 
                                 Log.d("debug", "GET MORE BOOKS");
-                                getBooks(lastItemId, searchString, mPostsPerPage);
+                                getBooks(lastItemId, query, mPostsPerPage);
                                 mIsLoading = true;
                             }
                         }
                     }
                 });
 
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
             }
         });
+        searchView.setQueryHint(getResources().getString(R.string.search_search) );
 
-        return v;
+        super.onCreateOptionsMenu(menu, inflater);
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
+
 
     private void getBooks(final String nodeId, final String keyword, final int remainedQuantity) {
         Query query;
 
-        if(remainedQuantity < 1)
+        if (remainedQuantity < 1)
             return;
 
         Log.d("debug", "GETBOOKS");
@@ -146,15 +180,15 @@ public class SearchFragment extends Fragment {
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     Book book = bookSnapshot.getValue(Book.class);
 
-                    if(nodeId != null && nodeId.equals(book.getBook_id()) )
+                    if (nodeId != null && nodeId.equals(book.getBook_id()))
                         continue;
 
                     //mTotalItemCount++;
 
-                    if(book.getTitle().toLowerCase().contains(keyword)) {
+                    if (book.getTitle().toLowerCase().contains(keyword)) {
                         books.add(book);
                         remained--;
-                    } else if(book.getAuthor().toLowerCase().contains(keyword)) {
+                    } else if (book.getAuthor().toLowerCase().contains(keyword)) {
                         books.add(book);
                         remained--;
                     }
@@ -166,10 +200,10 @@ public class SearchFragment extends Fragment {
                     justLast = false;
                 }
 
-                if(!dataSnapshot.hasChildren() )
+                if (!dataSnapshot.hasChildren())
                     remained = 0;
 
-                if(justLast) {
+                if (justLast) {
                     remained = 0;
                     continueSearch = false;
                 }
@@ -190,18 +224,3 @@ public class SearchFragment extends Fragment {
 
 }
 
-/*
-usersRef.orderByChild("title").startAt("lord").endAt("lord\uf8ff").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                Object obj = snapshot.getValue(Object.class);
-                Log.i("state", "ad");
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
- */

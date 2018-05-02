@@ -8,6 +8,7 @@
     android:minHeight="?attr/actionBarSize"
     android:theme="@style/ToolbarTheme.NoActionBar"
     android:popupTheme="@style/PopupTheme"
+    app:contentInsetStart="0dp"
     >
 
     <RelativeLayout

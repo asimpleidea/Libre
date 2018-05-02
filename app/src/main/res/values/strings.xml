@@ -148,6 +148,10 @@
     <string name="edition_year">Edition Year</string>
     <string name="book_conditions">Book conditions</string>
 
+    <!-- search strings -->
+    <string name="search_search">Search...</string>
+    <string name="search_noResults">No results</string>
+
     <!-- Facebook -->
     <string name="facebook_app_id">102712380576500</string>
     <string name="fb_login_protocol_scheme">fb102712380576500</string>

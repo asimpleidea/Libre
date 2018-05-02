@@ -1,36 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="mad24.polito.it.fragments.SearchFragment">
 
-    <LinearLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/search_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark"
+        app:contentInsetStart="0dp"
+        >
 
-        <EditText
-            android:id="@+id/search_searchBar"
+        <android.support.v7.widget.SearchView
+            android:id="@+id/search_searchView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:hint="Search Text..."
+            android:iconifiedByDefault="false"
+            app:showAsAction="ifRoom|collapseActionView"
+            app:iconifiedByDefault="false"
             />
 
-        <Button
-            android:id="@+id/search_searchButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Search"
-            />
+    </android.support.v7.widget.Toolbar>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_below="@id/search_toolbar"
+        tools:context=".MainActivity">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/search_bookList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
-    </LinearLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/search_bookList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/search_emptyView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/search_noResults"
+                android:textSize="20dp"
+                android:visibility="gone" />
+
+    </RelativeLayout>
 
 </FrameLayout>
