@@ -75,12 +75,12 @@
         </activity>
         <activity
             android:name=".registrationmail.SignupMailActivity"
-            android:label="@string/title_activity_edit_profile"
+            android:label="SignupMailActivity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden|adjustResize"></activity>
         <activity
             android:name=".registrationmail.ResetPasswordMailActivity"
-            android:label="@string/title_activity_edit_profile"
+            android:label="ResetPasswordMailActivity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden|adjustResize"></activity>
         <activity
