@@ -1,5 +1,6 @@
 package mad24.polito.it.fragments;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -140,7 +142,7 @@ public class ProfileFragment extends Fragment {
         if(profileImageBitmap == null) {
             StorageReference ref = FirebaseStorage.getInstance().getReference().child("profile_pictures/" + userAuth.getUid() + ".jpg");
             try {
-                final File localFile = File.createTempFile("Images", "bmp");
+                final File localFile = File.createTempFile("Images", ".bmp");
                 ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
@@ -151,7 +153,9 @@ public class ProfileFragment extends Fragment {
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        profile_img.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user));
+                        Activity activity = getActivity();
+                        if(activity != null && isAdded())
+                            profile_img.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user));
                     }
                 });
             } catch (IOException e) {

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp">
+
+        <RelativeLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="10dp">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/frag_profile_image"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:civ_border_width="1dp"
+                app:civ_border_color="@android:color/black"
+                android:layout_gravity="center_horizontal"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/photoButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:clickable="true"
+                android:src="@drawable/ic_mode_edit_black_24dp"
+                app:backgroundTint="@null"
+                app:fabSize="mini"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/posted_book_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="35dp">
+
+        </android.support.v7.widget.RecyclerView>
+    </LinearLayout>
+
+</FrameLayout>
