@@ -90,6 +90,22 @@
 
                 </android.support.design.widget.TextInputLayout>
 
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp">
+
+                    <EditText
+                        android:id="@+id/manual_ins_publisher"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/book_publisher"
+                        android:inputType="text" />
+
+                </android.support.design.widget.TextInputLayout>
+
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
