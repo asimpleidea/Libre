@@ -108,6 +108,7 @@ public class SearchFragment extends Fragment {
                     if(oldQuery.equals(query))
                         return false;
 
+                    //update current and old query
                     currentQuery = query;
                     oldQuery = query;
 
