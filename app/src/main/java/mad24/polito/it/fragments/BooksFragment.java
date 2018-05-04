@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -52,7 +51,7 @@ public class BooksFragment extends Fragment {
     private int mTotalItemCount = 0;
     private int mLastVisibleItemPosition;
     private boolean mIsLoading = false;
-    private int mPostsPerPage = 6;
+    private int mBooksPerPage = 6;
 
     public BooksFragment() {
         // Required empty public constructor
@@ -105,7 +104,7 @@ public class BooksFragment extends Fragment {
                     mLastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
 
                     Log.d("debg", "totalItem: "+mTotalItemCount+"; lastvisiblePosition: "+mLastVisibleItemPosition);
-                    if (!mIsLoading && mTotalItemCount <= (mLastVisibleItemPosition+mPostsPerPage)) {
+                    if (!mIsLoading && mTotalItemCount <= (mLastVisibleItemPosition+ mBooksPerPage)) {
 
                         getBooks(recyclerViewAdapter.getLastItemId());
                         mIsLoading = true;
@@ -133,13 +132,13 @@ public class BooksFragment extends Fragment {
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
-                    .limitToFirst(mPostsPerPage);
+                    .limitToFirst(mBooksPerPage);
         else
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
                     .startAt(nodeId)
-                    .limitToFirst(mPostsPerPage);
+                    .limitToFirst(mBooksPerPage);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

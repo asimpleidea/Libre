@@ -17,6 +17,12 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
@@ -24,12 +30,14 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import mad24.polito.it.models.Book;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
 
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
     private StorageReference mStorageRef;
     private StorageReference coverRef;
 
@@ -95,6 +103,41 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public int getItemCount() {
         return mData.size();
+    }
+
+    public void retreiveBooks(List<String> books_id) {
+
+        Query query;
+
+        for(String b : books_id){
+
+            query = FirebaseDatabase.getInstance().getReference()
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
+                    .child(b);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    Book book = dataSnapshot.getValue(Book.class);
+                    /*for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
+                        books.add(bookSnapshot.getValue(Book.class));
+                    }*/
+
+
+
+                    //Log.d("booksfragment", "adding "+books.size()+" books");
+                    mData.add(book);
+                    notifyItemInserted(mData.size());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+        }
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
