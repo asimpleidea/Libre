@@ -8,9 +8,12 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,6 +33,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
@@ -39,9 +43,14 @@ import com.google.gson.Gson;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import mad24.polito.it.EditProfileActivity;
 import mad24.polito.it.R;
+import mad24.polito.it.RecyclerViewAdapter;
+import mad24.polito.it.ShowProfileActivity;
+import mad24.polito.it.models.Book;
 import mad24.polito.it.registrationmail.LoginActivity;
 import mad24.polito.it.models.UserMail;
 
@@ -52,128 +61,81 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class ProfileFragment extends Fragment {
 
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
+
+    View v;
+
+    // Android Layout
+    private RecyclerView rv;
+    private RecyclerViewAdapter recyclerViewAdapter;
+
+    // Array lists
+    private List<Book> books;
+
+    FirebaseUser userAuth;
+
+    de.hdodenhof.circleimageview.CircleImageView profile_img;
+    private Bitmap profileImageBitmap;
+
+    // Recycler view management
+    private int mTotalItemCount = 0;
+    private int mLastVisibleItemPosition;
+    private boolean mIsLoading = false;
+    private int mBooksPerPage = 6;
+
     public ProfileFragment() {
         // Required empty public constructor
     }
-
-    private int EDIT_PROFILE = 1;
-
-    ImageButton editImage;
-
-    de.hdodenhof.circleimageview.CircleImageView imageProfile;
-
-    private TextView name;
-    private TextView phone;
-    private TextView mail;
-    private TextView bio;
-    private TextView city;
-
-    private String[] genresList;
-    private LinearLayout genres;
-
-    private Button buttonLogoutProfile;
-
-    SharedPreferences prefs;
-    SharedPreferences.Editor editor;
-
-    FirebaseUser userAuth;
-    UserMail user;
-    FirebaseDatabase database;
-
-    Bitmap profileImageBitmap = null;
-
-    Boolean semaphoreData = false;
-    Boolean semaphoreImage = false;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(mad24.polito.it.R.layout.fragment_profile, container, false);
+        v = inflater.inflate(mad24.polito.it.R.layout.fragment_profile, container, false);
+
+        rv = (RecyclerView) v.findViewById(R.id.posted_book_list);
+
+        final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        rv.setLayoutManager(mLayoutManager);
+
+        books = new ArrayList<Book>();
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
+        rv.setAdapter(recyclerViewAdapter);
+
+        getBooks(null);
+
+        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (dy > 0) {
+                    mTotalItemCount = mLayoutManager.getItemCount();
+                    mLastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
+
+                    Log.d("debg", "totalItem: "+mTotalItemCount+"; lastvisiblePosition: "+mLastVisibleItemPosition);
+                    if (!mIsLoading && mTotalItemCount <= (mLastVisibleItemPosition+ mBooksPerPage)) {
+
+                        getBooks(recyclerViewAdapter.getLastItemId());
+                        mIsLoading = true;
+                    }
+                }
+            }
+        });
+
+        return v;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        profile_img = (de.hdodenhof.circleimageview.CircleImageView) v.findViewById(R.id.frag_profile_image);
+
         //get user
         userAuth = FirebaseAuth.getInstance().getCurrentUser();
-
-        //check if logged, if not go to login activity
-        if (userAuth == null) {
-            Intent i = new Intent(getActivity().getApplicationContext(), LoginActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-
-            FragmentManager fm = getActivity().getSupportFragmentManager();
-            for(int j = 0; j < fm.getBackStackEntryCount(); ++j)
-                fm.popBackStack();
-
-        }
-
-        //get shared preferences
-        prefs = getActivity().getSharedPreferences("profile", MODE_PRIVATE);
-        editor = prefs.edit();
-
-        //button to edit profile
-        editImage = (ImageButton) getView().findViewById(mad24.polito.it.R.id.showprofile_imageEdit);
-
-        //image profile
-        imageProfile = (de.hdodenhof.circleimageview.CircleImageView) getView().findViewById(mad24.polito.it.R.id.showImageProfile);
-
-        //get edit fields
-        name = (TextView) getView().findViewById(mad24.polito.it.R.id.showName);
-        phone = (TextView) getView().findViewById(mad24.polito.it.R.id.showPhone);
-        mail = (TextView) getView().findViewById(mad24.polito.it.R.id.showMail);
-        bio = (TextView) getView().findViewById(mad24.polito.it.R.id.showBio);
-        city = (TextView) getView().findViewById(mad24.polito.it.R.id.showCity);
-
-        genres = (LinearLayout) getView().findViewById(mad24.polito.it.R.id.show_favourite_genres_list);
-        genresList = getResources().getStringArray(mad24.polito.it.R.array.genres);
-
-        //get data from Firebase Database
-        database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference("users");
-
-        usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                //get User object
-                user = snapshot.getValue(UserMail.class);
-
-                if(user == null)
-                    return;
-
-                //set fields
-                name.setText(user.getName());
-                phone.setText(user.getPhone());
-                mail.setText(user.getEmail());
-                bio.setText(user.getBio());
-                city.setText(user.getCity());
-
-                //set favourite genres
-                genres.removeAllViews();
-                if(user.getGenres() == null)
-                    genres.addView(BuildGenreLayout(getResources().getString(R.string.noFavouriteGenreProfile) ) );
-                else {
-                    for (Integer genreIndex : user.getGenres()) {
-                        if(getContext() != null) {
-                            genres.addView(BuildGenreLayout(genresList[genreIndex]));
-                        }
-                    }
-                }
-
-                synchronized (semaphoreData) {
-                    semaphoreData = true;
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                showDialog(getResources().getString(R.string.invalidName),
-                        getResources().getString(R.string.editprofile_insertValidName));
-            }
-        });
 
         if(profileImageBitmap == null) {
             StorageReference ref = FirebaseStorage.getInstance().getReference().child("profile_pictures/" + userAuth.getUid() + ".jpg");
@@ -183,148 +145,81 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                         profileImageBitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                        imageProfile.setImageBitmap(profileImageBitmap);
+                        profile_img.setImageBitmap(profileImageBitmap);
 
-                        synchronized (semaphoreImage) {
-                            semaphoreImage = true;
-                        }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        imageProfile.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user));
-                        synchronized (semaphoreImage) {
-                            semaphoreImage = true;
-                        }
+                        profile_img.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user));
                     }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
-                synchronized (semaphoreImage) {
-                    semaphoreImage = true;
-                }
             }
         } else {
-            imageProfile.setImageBitmap(profileImageBitmap);
-            synchronized (semaphoreImage) {
-                semaphoreImage = true;
-            }
+            profile_img.setImageBitmap(profileImageBitmap);
         }
 
-        //listener onClick for editing
-        editImage.setOnClickListener(new View.OnClickListener() {
+        profile_img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //check if data are loaded
-                synchronized (semaphoreData) {
-                    if(!semaphoreData) {
-                        showDialog(getResources().getString(R.string.showprofile_dataNotLoaded),
-                                getResources().getString(R.string.showprofile_waitData));
-                        return;
-                    }
-                }
+                Intent intent = new Intent(getActivity(), ShowProfileActivity.class);
 
-                //check if profile image is loaded
-                synchronized (semaphoreImage) {
-                    if(!semaphoreImage) {
-                        showDialog(getResources().getString(R.string.showprofile_dataNotLoaded),
-                                getResources().getString(R.string.showprofile_waitData));
-                        return;
-                    }
-                }
-
-                //convert in JSON the User object
-                Gson gson = new Gson();
-                String userJson = gson.toJson(user);
-
-                //save on sharedPreferences the User object
-                editor.putString("user", userJson);
-
-                //save profile image if not the standard one
-                if(profileImageBitmap != null) {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                    byte[] b = baos.toByteArray();
-                    String encoded = Base64.encodeToString(b, Base64.DEFAULT);
-                    editor.putString("profileImage", encoded);
-                } else {
-                    editor.putString("profileImage", "unknown");
-                }
-
-                editor.commit();
-
-                Intent intent = new Intent(getActivity().getApplicationContext(), EditProfileActivity.class);
-                startActivityForResult(intent, EDIT_PROFILE);
-            }
-        });
-
-        //listener onClick for logout
-        buttonLogoutProfile = (Button) getView().findViewById(mad24.polito.it.R.id.buttonLogoutProfile);
-        buttonLogoutProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i("state", "Signout");
-
-                if(getActivity() == null || getActivity().getApplicationContext() == null)
-                    return;
-
-                FirebaseAuth.getInstance().signOut();
-
-                Intent i = new Intent(getActivity().getApplicationContext(), LoginActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i);
-
-                FragmentManager fm = getActivity().getSupportFragmentManager();
-                for(int j = 0; j < fm.getBackStackEntryCount(); ++j)
-                    fm.popBackStack();
-
+                startActivity(intent);
             }
         });
 
     }
 
-    private TextView BuildGenreLayout(final String name) {
-        TextView genre = new TextView(getContext());
-        genre.setText(name);
-        genre.setTextSize(this.getResources().getDimension(mad24.polito.it.R.dimen.genre_item));
-        genre.setTextColor(this.getResources().getColor(mad24.polito.it.R.color.black));
+    private void getBooks(final String nodeId) {
 
-        return genre;
-    }
+        //Log.d("booksfragment", "getting books starting from: "+nodeId);
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i("state", "onActivityResult");
-        super.onActivityResult(requestCode, resultCode, data);
+        Query query;
 
-        if (requestCode == EDIT_PROFILE && resultCode == getActivity().RESULT_OK) {
-            //if something has been modified
-            if (data.getBooleanExtra("modified", false))
-                Toast.makeText(getContext().getApplicationContext(), mad24.polito.it.R.string.saved, Toast.LENGTH_SHORT).show();
-
-            if (data.getBooleanExtra("imageModified", false)) {
-                //get profile image
-                String encoded = data.getStringExtra("profileImage");
-                if(encoded != null) {
-                    byte[] imageAsBytes = Base64.decode(encoded.getBytes(), Base64.DEFAULT);
-                    profileImageBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
-                    imageProfile.setImageBitmap(profileImageBitmap);
-                }
-            }
+        if(nodeId == null) {
+            query = FirebaseDatabase.getInstance().getReference()
+                    .child(FIREBASE_DATABASE_LOCATION_USERS)
+                    .child(FirebaseAuth.getInstance().getUid())
+                    .child("books")
+                    .orderByKey()
+                    .limitToFirst(mBooksPerPage);
+        }else{
+            query = FirebaseDatabase.getInstance().getReference()
+                    .child(FIREBASE_DATABASE_LOCATION_USERS)
+                    .child(FirebaseAuth.getInstance().getUid())
+                    .child("books")
+                    .orderByKey()
+                    .startAt(books.size()-1)
+                    .limitToFirst(mBooksPerPage);
         }
 
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<String> books = new ArrayList<>();
+                boolean flag = false;
+                for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
+                    if(nodeId == null)
+                        books.add(bookSnapshot.getValue(String.class));
+                    else
+                    if(flag)
+                        books.add(bookSnapshot.getValue(String.class));
+                    flag = true;
+                }
+
+                Log.d("books", "adding "+books.size()+" books");
+                recyclerViewAdapter.retreiveBooks(books);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                mIsLoading = false;
+            }
+        });
+
+
     }
 
-    private void showDialog(String title, String message) {
-        new AlertDialog.Builder(getContext())
-                .setTitle(title)
-                .setMessage(message)
-                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
-    }
 }

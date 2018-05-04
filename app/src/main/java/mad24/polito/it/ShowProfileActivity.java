@@ -1,27 +1,51 @@
 package mad24.polito.it;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 
-
-import  mad24.polito.it.R;
+import mad24.polito.it.models.UserMail;
 import mad24.polito.it.registrationmail.LoginActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 
 public class ShowProfileActivity extends AppCompatActivity {
+
+    private int EDIT_PROFILE = 1;
 
     ImageView editImage;
 
@@ -41,21 +65,43 @@ public class ShowProfileActivity extends AppCompatActivity {
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
 
+    FirebaseUser userAuth;
+    UserMail user;
+    FirebaseDatabase database;
+
+    Bitmap profileImageBitmap = null;
+
+    Boolean semaphoreData = false;
+    Boolean semaphoreImage = false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(mad24.polito.it.R.layout.activity_show_profile);
 
+        //get user
+        userAuth = FirebaseAuth.getInstance().getCurrentUser();
+
         //check if logged, if not go to login activity
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            startActivity(new Intent(ShowProfileActivity.this, LoginActivity.class));
-            finish();
+        if (userAuth == null) {
+            Intent i = new Intent(ShowProfileActivity.this, LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+
+            FragmentManager fm = getSupportFragmentManager();
+            for(int j = 0; j < fm.getBackStackEntryCount(); ++j)
+                fm.popBackStack();
+
         }
 
+        //get shared preferences
+        prefs = getSharedPreferences("profile", MODE_PRIVATE);
+        editor = prefs.edit();
 
         //button to edit profile
-        editImage = (ImageView) findViewById(mad24.polito.it.R.id.showprofile_imageEdit);
+        editImage = (ImageButton) findViewById(mad24.polito.it.R.id.showprofile_imageEdit);
 
         //image profile
         imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(mad24.polito.it.R.id.showImageProfile);
@@ -70,26 +116,147 @@ public class ShowProfileActivity extends AppCompatActivity {
         genres = (LinearLayout) findViewById(mad24.polito.it.R.id.show_favourite_genres_list);
         genresList = getResources().getStringArray(mad24.polito.it.R.array.genres);
 
+        //get data from Firebase Database
+        database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("users");
+
+        usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                //get User object
+                user = snapshot.getValue(UserMail.class);
+
+                if(user == null)
+                    return;
+
+                //set fields
+                name.setText(user.getName());
+                phone.setText(user.getPhone());
+                mail.setText(user.getEmail());
+                bio.setText(user.getBio());
+                city.setText(user.getCity());
+
+                //set favourite genres
+                genres.removeAllViews();
+                if(user.getGenres() == null)
+                    genres.addView(BuildGenreLayout(getResources().getString(R.string.noFavouriteGenreProfile) ) );
+                else {
+                    for (Integer genreIndex : user.getGenres()) {
+                            genres.addView(BuildGenreLayout(genresList[genreIndex]));
+                    }
+                }
+
+                synchronized (semaphoreData) {
+                    semaphoreData = true;
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                showDialog(getString(R.string.invalidName),
+                        getString(R.string.editprofile_insertValidName));
+            }
+        });
+
+        if(profileImageBitmap == null) {
+            StorageReference ref = FirebaseStorage.getInstance().getReference().child("profile_pictures/" + userAuth.getUid() + ".jpg");
+            try {
+                final File localFile = File.createTempFile("Images", "bmp");
+                ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        profileImageBitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                        imageProfile.setImageBitmap(profileImageBitmap);
+
+                        synchronized (semaphoreImage) {
+                            semaphoreImage = true;
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        imageProfile.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user));
+                        synchronized (semaphoreImage) {
+                            semaphoreImage = true;
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+                synchronized (semaphoreImage) {
+                    semaphoreImage = true;
+                }
+            }
+        } else {
+            imageProfile.setImageBitmap(profileImageBitmap);
+            synchronized (semaphoreImage) {
+                semaphoreImage = true;
+            }
+        }
+
         //listener onClick for editing
         editImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), EditProfileActivity.class);
-                startActivity(intent);
+                //check if data are loaded
+                synchronized (semaphoreData) {
+                    if(!semaphoreData) {
+                        showDialog(getString(R.string.showprofile_dataNotLoaded),
+                                getString(R.string.showprofile_waitData));
+                        return;
+                    }
+                }
+
+                //check if profile image is loaded
+                synchronized (semaphoreImage) {
+                    if(!semaphoreImage) {
+                        showDialog(getString(R.string.showprofile_dataNotLoaded),
+                                getString(R.string.showprofile_waitData));
+                        return;
+                    }
+                }
+
+                //convert in JSON the User object
+                Gson gson = new Gson();
+                String userJson = gson.toJson(user);
+
+                //save on sharedPreferences the User object
+                editor.putString("user", userJson);
+
+                //save profile image if not the standard one
+                if(profileImageBitmap != null) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] b = baos.toByteArray();
+                    String encoded = Base64.encodeToString(b, Base64.DEFAULT);
+                    editor.putString("profileImage", encoded);
+                } else {
+                    editor.putString("profileImage", "unknown");
+                }
+
+                editor.commit();
+
+                Intent intent = new Intent(ShowProfileActivity.this, EditProfileActivity.class);
+                startActivityForResult(intent, EDIT_PROFILE);
             }
         });
 
-        buttonLogoutProfile = (Button) findViewById(R.id.buttonLogoutProfile);
+        //listener onClick for logout
+        buttonLogoutProfile = (Button) findViewById(mad24.polito.it.R.id.buttonLogoutProfile);
         buttonLogoutProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("state", "Signout");
+
                 FirebaseAuth.getInstance().signOut();
 
                 Intent i = new Intent(ShowProfileActivity.this, LoginActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
-                finish();
+
+                FragmentManager fm =getSupportFragmentManager();
+                for(int j = 0; j < fm.getBackStackEntryCount(); ++j)
+                    fm.popBackStack();
+
             }
         });
 
@@ -177,7 +344,7 @@ public class ShowProfileActivity extends AppCompatActivity {
     }
 
     private TextView BuildGenreLayout(final String name) {
-        TextView genre = new TextView(getApplicationContext());
+        TextView genre = new TextView(this);
         genre.setText(name);
         genre.setTextSize(this.getResources().getDimension(mad24.polito.it.R.dimen.genre_item));
         genre.setTextColor(this.getResources().getColor(mad24.polito.it.R.color.black));
@@ -185,4 +352,39 @@ public class ShowProfileActivity extends AppCompatActivity {
         return genre;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i("state", "onActivityResult");
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == EDIT_PROFILE && resultCode == RESULT_OK) {
+            //if something has been modified
+            if (data.getBooleanExtra("modified", false))
+                Toast.makeText(this, mad24.polito.it.R.string.saved, Toast.LENGTH_SHORT).show();
+
+            if (data.getBooleanExtra("imageModified", false)) {
+                //get profile image
+                String encoded = data.getStringExtra("profileImage");
+                if(encoded != null) {
+                    byte[] imageAsBytes = Base64.decode(encoded.getBytes(), Base64.DEFAULT);
+                    profileImageBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+                    imageProfile.setImageBitmap(profileImageBitmap);
+                }
+            }
+        }
+
+    }
+
+    private void showDialog(String title, String message) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
 }
