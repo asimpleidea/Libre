@@ -1,7 +1,9 @@
 package mad24.polito.it.fragments;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -13,11 +15,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,8 +41,7 @@ public class SearchFragment extends Fragment {
 
     View v;
 
-    EditText searchBar;
-    Button searchButton;
+    SearchView searchView;
 
     // Android Layout
     private RecyclerView rv;
@@ -51,15 +49,16 @@ public class SearchFragment extends Fragment {
 
     // Array lists
     private List<Book> books;
-    private String userChoosenTask;
 
     // Recycler view management
-    private int mTotalItemCount = 0;
-    private int mLastVisibleItemPosition;
-    private boolean mIsLoading = false;
-    private int mPostsPerPage = 6;
+    private Boolean mIsLoading = false;
+    private int mPostsPerPage = 6;      //TODO set to 50
     private String lastItemId = null;
     private boolean continueSearch = true;
+
+    private String currentQuery = new String("");
+
+    LinearLayoutManager mLayoutManager;
 
     Context context;
 
@@ -78,6 +77,7 @@ public class SearchFragment extends Fragment {
         Toolbar mToolbar = (Toolbar) v.findViewById(R.id.search_toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
 
+        searchView = (SearchView) v.findViewById(R.id.search_searchView);
         return v;
     }
 
@@ -95,54 +95,108 @@ public class SearchFragment extends Fragment {
         //searchItem.expandActionView();
 
         rv = (RecyclerView) v.findViewById(R.id.search_bookList);
-        final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
 
-        SearchView searchView = (SearchView) v.findViewById(R.id.search_searchView); //searchItem.getActionView();
         searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+            String oldQuery = new String("");
+
             @Override
             public boolean onQueryTextSubmit(final String query) {
-                books = new ArrayList<Book>();
-                recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
-                rv.setAdapter(recyclerViewAdapter);
+                synchronized (currentQuery) {
+                    //if you click search button more than one time
+                    if(oldQuery.equals(query))
+                        return false;
 
-                lastItemId = null;
-                continueSearch = true;
-                //mTotalItemCount = 0;
+                    //update current and old query
+                    currentQuery = query;
+                    oldQuery = query;
 
-                getBooks(lastItemId, query, mPostsPerPage);
+                    //hide keyboard and suggestions
+                    searchView.clearFocus();
 
-                rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    books = new ArrayList<Book>();
+                    recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
+                    rv.setAdapter(recyclerViewAdapter);
 
-                    @Override
-                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                        super.onScrolled(recyclerView, dx, dy);
+                    lastItemId = null;
+                    continueSearch = true;
 
-                        if (dy > 0) {
-                            mTotalItemCount = mLayoutManager.getItemCount();
-                            mLastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
+                    getBooks(lastItemId, query, mPostsPerPage);
 
-                            Log.d("debug", "totalItem: " + mTotalItemCount + "; lastvisiblePosition: " + mLastVisibleItemPosition);
-                            if (!mIsLoading && continueSearch) { //mTotalItemCount <= (mLastVisibleItemPosition+mPostsPerPage)) {
+                    rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
-                                Log.d("debug", "GET MORE BOOKS");
-                                getBooks(lastItemId, query, mPostsPerPage);
-                                mIsLoading = true;
+                        @Override
+                        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                            super.onScrolled(recyclerView, dx, dy);
+
+                            if (dy > 0) {
+
+                                if (!mIsLoading && continueSearch) {
+
+                                    Log.d("debug", "GET MORE BOOKS");
+                                    getBooks(lastItemId, query, mPostsPerPage);
+                                    mIsLoading = true;
+                                }
+
                             }
                         }
-                    }
-                });
+                    });
 
 
-                return true;
+                    return true;
+                }
+
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
+            public boolean onQueryTextChange(final String query) {
+                if(query.length() < 3)
+                    return false;
+
+                synchronized (currentQuery) {
+                    currentQuery = query;
+
+                    books = new ArrayList<Book>();
+                    recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
+                    rv.setAdapter(recyclerViewAdapter);
+
+                    lastItemId = null;
+                    continueSearch = true;
+
+
+                    getBooks(lastItemId, query, mPostsPerPage);
+
+
+                    rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+                        @Override
+                        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                            super.onScrolled(recyclerView, dx, dy);
+
+                            if (dy > 0) {
+
+                                if (!mIsLoading && continueSearch) {
+
+                                    Log.d("debug", "GET MORE BOOKS");
+                                    getBooks(lastItemId, query, mPostsPerPage);
+                                    mIsLoading = true;
+                                }
+
+                            }
+                        }
+                    });
+
+
+                    return true;
+                }
+
             }
         });
-        searchView.setQueryHint(getResources().getString(R.string.search_search) );
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
 
         super.onCreateOptionsMenu(menu, inflater);
 
@@ -151,12 +205,14 @@ public class SearchFragment extends Fragment {
 
 
     private void getBooks(final String nodeId, final String keyword, final int remainedQuantity) {
-        Query query;
+        final Query query;
 
         if (remainedQuantity < 1)
             return;
 
         Log.d("debug", "GETBOOKS");
+
+        v.findViewById(R.id.search_emptyView).setVisibility(View.GONE);
 
         if (nodeId == null)
             query = FirebaseDatabase.getInstance().getReference()
@@ -183,8 +239,7 @@ public class SearchFragment extends Fragment {
                     if (nodeId != null && nodeId.equals(book.getBook_id()))
                         continue;
 
-                    //mTotalItemCount++;
-
+                    //search for a matching
                     if (book.getTitle().toLowerCase().contains(keyword)) {
                         books.add(book);
                         remained--;
@@ -200,23 +255,38 @@ public class SearchFragment extends Fragment {
                     justLast = false;
                 }
 
-                if (!dataSnapshot.hasChildren())
+                if (!dataSnapshot.hasChildren()) {
                     remained = 0;
+                    continueSearch = false;
+                }
 
                 if (justLast) {
                     remained = 0;
                     continueSearch = false;
                 }
 
-                recyclerViewAdapter.addAll(books);
+                //if query is changed --> abort operation
+                synchronized (currentQuery) {
+                    if(!currentQuery.equals(keyword)) {
+                        continueSearch = false;
+                        mIsLoading = false;
+                        return;
+                    } else
+                        recyclerViewAdapter.addAll(books);
+                }
 
                 //if not much books are found
                 getBooks(lastItemId, keyword, remained);
                 mIsLoading = false;
+
+                if(mLayoutManager.getItemCount() < 1) {
+                    v.findViewById(R.id.search_emptyView).setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                continueSearch = false;
                 mIsLoading = false;
             }
         });
