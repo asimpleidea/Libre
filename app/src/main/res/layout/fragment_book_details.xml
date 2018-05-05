@@ -1,27 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.viewbook.BookDetailsFragment">
+    tools:context=".fragments.viewbook.BookDetailsFragment">-->
 
     <android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.viewbook.BookDetailsFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:paddingBottom="50dp">
+
+            <TextView
+                android:id="@+id/bookTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:shadowColor="@color/colorWhite"
+                android:shadowDx="1.2"
+                android:shadowDy="1.2"
+                android:text="TextView"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                tools:text="The Stand" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textSize="20sp"
+                tools:text="By Stephen King" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="7dp"
+                    android:text="3.4"
+                    android:textSize="32sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <me.zhanghai.android.materialratingbar.MaterialRatingBar
+                        style="@style/Widget.MaterialRatingBar.RatingBar.Indicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="18dp"
+                        android:layout_marginTop="2dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:rating="3.4"
+                        android:stepSize=".1" />
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Based on 5532 ratings from GoodReads" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce scelerisque, odio vitae ullamcorper efficitur, erat sapien venenatis diam, quis mattis nisi odio vel ligula. Pellentesque id nibh sed felis dictum tincidunt id sit amet felis. Duis pharetra massa nec nibh consectetur mattis. Nulla molestie urna vitae venenatis commodo. Vestibulum et elementum nisl. Praesent venenatis erat et commodo fringilla. Etiam semper ultricies eros, ac vulputate sem venenatis ut.
+
+Nulla in lectus ligula. Vivamus porta sollicitudin nibh, quis facilisis nisi lacinia quis. Duis fringilla tortor a consectetur pretium. Curabitur eu justo et urna vulputate faucibus. Integer ultrices porta nulla sit amet elementum. Nullam eu ullamcorper turpis, sed viverra erat. Aliquam aliquet, diam sit amet tincidunt tristique, eros augue commodo dui, venenatis gravida leo nunc ut turpis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula lectus nec lacinia ultricies. Morbi est velit, congue quis ornare ut, elementum sit amet magna. " />
+
+        </LinearLayout>
+
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="300dp"
-        android:text=" Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur scelerisque tristique quam vitae dignissim. Etiam at accumsan lorem. Nulla lorem lorem, auctor vel pretium bibendum, facilisis vitae velit. Nam rutrum lorem ut nisi tempor, sed fermentum tortor fermentum. In porta pharetra eleifend. Aliquam erat volutpat. Quisque a interdum velit. Fusce bibendum nulla ut orci pretium bibendum. Aliquam imperdiet luctus congue. Mauris ipsum velit, pharetra in nulla at, convallis elementum ex. Donec eget risus scelerisque, finibus nulla id, ultrices sem. Sed aliquam, dui non bibendum dapibus, mauris lectus elementum erat, a semper tortor augue in ante. Etiam hendrerit vulputate enim a iaculis.
-
-Nullam et nibh urna. Nam aliquam placerat egestas. Etiam vehicula diam nec erat cursus, id accumsan dui pretium. Praesent quis vulputate mauris. Phasellus maximus mi elementum sem feugiat rhoncus. Ut nec quam congue, interdum lacus sed, varius mauris. Praesent vehicula porttitor lobortis. Sed vel neque eget lorem lacinia gravida in feugiat nisl. Nunc finibus diam sem, id sodales velit vehicula vel. Morbi consectetur, sapien eu dignissim vehicula, purus justo suscipit lacus, eu laoreet elit nisl et justo.
-
-Pellentesque turpis magna, scelerisque eget fringilla ut, ultricies consectetur sapien. In sit amet rhoncus dui. Morbi justo dui, interdum et blandit ut, accumsan semper augue. Fusce vitae tortor sit amet tellus varius vestibulum id non leo. Vivamus vehicula orci in tellus imperdiet, ac tristique est malesuada. Sed nec euismod ligula. Donec blandit urna eget tortor convallis, eget volutpat leo congue. Sed eu iaculis quam. In hac habitasse platea dictumst. Aliquam velit turpis, laoreet sit amet fringilla eget, rutrum ac elit. Etiam eleifend, sem a gravida accumsan, tellus dui elementum odio, sed faucibus ligula velit quis ligula. Ut sollicitudin rutrum orci molestie feugiat. Ut dignissim justo eu purus dignissim pharetra. Nullam in nulla ut libero mollis maximus. Morbi justo est, tristique id ligula vitae, ornare accumsan felis.
-
-Vestibulum blandit nisi sed turpis tempor, in pharetra orci ultrices. Morbi vitae metus dapibus, hendrerit nibh vitae, pellentesque erat. Vestibulum efficitur lorem justo, a sagittis ante auctor a. Aenean eget varius quam. Integer elit ipsum, facilisis id sapien et, vulputate elementum neque. Nam ullamcorper quam in enim venenatis, ut commodo tellus lobortis. Nullam sit amet urna varius, ornare mi at, euismod nulla. Cras bibendum tortor at elit pellentesque luctus. Morbi porttitor erat eu metus consequat mollis. Donec elit magna, pellentesque non felis et, suscipit euismod quam. Sed vitae ex placerat, congue elit et, sodales lorem. Curabitur rutrum porttitor euismod. Nam eget elit sed diam gravida maximus vel a nisl. Phasellus eleifend, turpis vel imperdiet commodo, nisi augue efficitur erat, ac convallis mi neque a turpis. Nam nec nibh eu massa sagittis pharetra. Vestibulum tempor elit orci, sed varius odio tristique eu. " />
     </android.support.v4.widget.NestedScrollView>
-</FrameLayout>
+<!--</FrameLayout>-->

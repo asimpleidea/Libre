@@ -28,6 +28,7 @@ public class ViewBookFragment extends Fragment
     private ViewPager viewPager = null;
     private TabLayout Tabs = null;
     private View view = null;
+    private BookDetailsFragment Details = null;
 
     private final int BOOK_DETAILS = 0;
     private final int BOOK_OWNERS = 1;
@@ -68,6 +69,19 @@ public class ViewBookFragment extends Fragment
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d("VIEWBOOK", "destroyed view");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("VIEWBOOK", "destroyed fragment");
+
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -82,6 +96,8 @@ public class ViewBookFragment extends Fragment
         // Inflate the layout for this fragment
         /*return inflater.inflate(R.layout.fragment_view_book, container, false);*/
         view = inflater.inflate(R.layout.fragment_view_book, container, false);
+
+        Details = new BookDetailsFragment();
 
         setUpViewPager();
 
@@ -145,6 +161,7 @@ public class ViewBookFragment extends Fragment
             public void onTabReselected(TabLayout.Tab tab) {}
 
         });
+        Log.d("VIEWBOOK", "SetUpTabs called");
     }
 
     private void setUpViewPager()
@@ -161,18 +178,9 @@ public class ViewBookFragment extends Fragment
         //------------------------------------
 
         ViewPageAdapter.addFragment(new BookDetailsFragment(), "Cacca");
-        /*ViewPageAdapter.addFrag(new DummyFragment(
-                ContextCompat.getColor(this, R.color.cyan_50)), "Cyan");
-
-        adapter.addFrag(new DummyFragment(
-                ContextCompat.getColor(this, R.color.amber_50)), "Amber");
-
-        adapter.addFrag(new DummyFragment(
-                ContextCompat.getColor(this, R.color.purple_50)), "Purple");*/
-
         viewPager.setAdapter(ViewPageAdapter);
         viewPager.setCurrentItem(BOOK_DETAILS, true);
-
+        Log.d("VIEWBOOK", "SetUpViewPager called");
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -181,6 +189,7 @@ public class ViewBookFragment extends Fragment
             mListener.onFragmentInteraction(uri);
         }
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -197,6 +206,7 @@ public class ViewBookFragment extends Fragment
     @Override
     public void onDetach() {
         super.onDetach();
+
         mListener = null;
     }
 

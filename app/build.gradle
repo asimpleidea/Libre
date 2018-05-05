@@ -52,6 +52,9 @@ dependencies {
     // barcode scanner
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
     implementation 'com.google.zxing:core:3.3.0'
+
+    //  Rating
+    implementation 'me.zhanghai.android.materialratingbar:library:1.2.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

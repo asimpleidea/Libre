@@ -298,7 +298,7 @@ public class BooksFragment extends Fragment {
         //  Show me the book
         //----------------------------------
 
-        ((BooksActivity) getActivity()).setFragment(b, null);
+        ((BooksActivity) getActivity()).setFragment(b, "viewbook");
     }
 
     @Override
