@@ -106,6 +106,7 @@ public class ManualInsertActivity extends AppCompatActivity {
         submit_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                Log.d("anotherbug", "submit clicked");
                 submitBook();
             }
         });
@@ -355,6 +356,7 @@ public class ManualInsertActivity extends AppCompatActivity {
     }
 
     private void submitBook() {
+//        Log.d("anotherbug", "in submitBook");
         final String title = mTitleField.getText().toString();
         final String author = mAuthorField.getText().toString();
         final String isbn = mISBNField.getText().toString();
@@ -385,9 +387,10 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         DatabaseReference mRef = mDatabase.child("books");
         String bookKey = mRef.push().getKey();
-
-        uploadImage(bookKey);
-
+//        Log.d("anotherbug", (mBitmap==null)?"no image":"there is something!");
+        if(mBitmap != null)
+            uploadImage(bookKey);
+//        Log.d("anotherbug", "uploading book");
         mRef.child(bookKey).setValue(new Book(
                 mTitleField.getText().toString(),
                 mAuthorField.getText().toString(),
@@ -396,7 +399,13 @@ public class ManualInsertActivity extends AppCompatActivity {
                 bookKey,
                 FirebaseAuth.getInstance().getUid()));
 
-        //Log.d("user_id",  FirebaseAuth.getInstance().getUid());
+//        Log.d("anotherbug", "book uploaded");
+        mRef = mDatabase.child("users");
+
+        mRef.child(FirebaseAuth.getInstance().getUid()).child("books").child(bookKey).setValue(true);
+
+        finish();
+        //Log.d("anotherbug", "user updated");
     }
 
     private void uploadImage(String bookKey) {
@@ -448,7 +457,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 //showing the uploaded image in ImageView using the download url
                 Glide.with(ManualInsertActivity.this).load(downloadUrl).into(mImageField);
 
-                finish();
+                //finish();
 
             }
         });
