@@ -25,6 +25,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import mad24.polito.it.R;
@@ -178,7 +179,7 @@ public class SearchFragment extends Fragment {
 
                                 if (!mIsLoading && continueSearch) {
 
-                                    Log.d("debug", "GET MORE BOOKS");
+                                    //Log.d("debug", "GET MORE BOOKS");
                                     getBooks(lastItemId, query, mPostsPerPage);
                                     mIsLoading = true;
                                 }
@@ -210,7 +211,7 @@ public class SearchFragment extends Fragment {
         if (remainedQuantity < 1)
             return;
 
-        Log.d("debug", "GETBOOKS");
+        //Log.d("debug", "GETBOOKS");
 
         v.findViewById(R.id.search_emptyView).setVisibility(View.GONE);
 
@@ -218,13 +219,13 @@ public class SearchFragment extends Fragment {
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
-                    .limitToFirst(mPostsPerPage);
+                    .limitToLast(mPostsPerPage);
         else
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
-                    .startAt(nodeId)
-                    .limitToFirst(mPostsPerPage);
+                    .endAt(nodeId)
+                    .limitToLast(mPostsPerPage);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -232,9 +233,11 @@ public class SearchFragment extends Fragment {
                 List<Book> books = new ArrayList<>();
                 int remained = remainedQuantity;
                 boolean justLast = true;
+                boolean first = true;
 
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     Book book = bookSnapshot.getValue(Book.class);
+                    //Log.d("debug", "BOOK TITLE: "+book.getTitle());
 
                     if (nodeId != null && nodeId.equals(book.getBook_id()))
                         continue;
@@ -246,12 +249,18 @@ public class SearchFragment extends Fragment {
                     } else if (book.getAuthor().toLowerCase().contains(keyword)) {
                         books.add(book);
                         remained--;
+                    } else if(book.getPublisher() != null && book.getPublisher().toLowerCase().contains(keyword)) {
+                        books.add(book);
+                        remained--;
                     }
 
-                    //check match on publisher
                     //check match on genre
 
-                    lastItemId = book.getBook_id();
+                    if(first) {
+                        lastItemId = book.getBook_id();
+                        first = false;
+                    }
+
                     justLast = false;
                 }
 
@@ -271,8 +280,11 @@ public class SearchFragment extends Fragment {
                         continueSearch = false;
                         mIsLoading = false;
                         return;
-                    } else
+                    } else {
+                        //more recent books go first
+                        Collections.reverse(books);
                         recyclerViewAdapter.addAll(books);
+                    }
                 }
 
                 //if not much books are found

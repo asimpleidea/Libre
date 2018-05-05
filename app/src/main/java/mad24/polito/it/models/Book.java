@@ -1,5 +1,7 @@
 package mad24.polito.it.models;
 
+import java.util.Date;
+
 public class Book {
 
     private String user_id;
@@ -9,19 +11,30 @@ public class Book {
     private String author;
     private String isbn;
     private String location;
+    private String publisher;
+    private String editionYear;
+    private String condition;
 
     private String bookImageLink;
+
+    private Date date;
 
     public Book() {
     }
 
-    public Book(String title, String author, String isbn, String bookImageLink, String book_id, String uid) {
+    public Book(String title, String author, String isbn, String publisher,
+                String editionYear, String condition, String bookImageLink, String book_id, String uid, Date date) {
         this.title = title;
         this.author = author;
         this.isbn = isbn;
+        this.publisher = publisher;
+        this.editionYear = editionYear;
+        this.condition = condition;
+
         this.bookImageLink = bookImageLink;
         this.book_id = book_id;
         this.user_id = uid;
+        this.date = date;
     }
 
     public String getIsbn() {
@@ -46,6 +59,14 @@ public class Book {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
     }
 
     public String getLocation() {
@@ -78,5 +99,29 @@ public class Book {
 
     public void setBookImageLink(String bookImageLink) {
         this.bookImageLink = bookImageLink;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public String getEditionYear() {
+        return editionYear;
+    }
+
+    public void setEditionYear(String editionYear) {
+        this.editionYear = editionYear;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }

@@ -26,6 +26,7 @@ import mad24.polito.it.*;
 import mad24.polito.it.models.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -132,13 +133,13 @@ public class BooksFragment extends Fragment {
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
-                    .limitToFirst(mBooksPerPage);
+                    .limitToLast(mBooksPerPage);
         else
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
-                    .startAt(nodeId)
-                    .limitToFirst(mBooksPerPage);
+                    .endAt(nodeId)
+                    .limitToLast(mBooksPerPage);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -146,13 +147,25 @@ public class BooksFragment extends Fragment {
                 List<Book> books = new ArrayList<>();
                 boolean flag = false;
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
-                    if(nodeId == null)
-                        books.add(bookSnapshot.getValue(Book.class));
-                    else
-                        if(flag)
-                            books.add(bookSnapshot.getValue(Book.class));
-                    flag = true;
+                    Book book = bookSnapshot.getValue(Book.class);
+                    //Log.d("debug", "BOOK TITLE: "+book.getTitle() );
+
+                    //not add "nodeId" book because it's already inserted
+                    if (nodeId != null && nodeId.equals(book.getBook_id()))
+                        continue;
+
+                    books.add(book);
+
+                    /*if(nodeId == null)
+                        books.add(book);
+                    else if(flag)
+                        books.add(book);
+
+                    flag = true;*/
                 }
+
+                //more recent books go first
+                Collections.reverse(books);
 
                 //Log.d("booksfragment", "adding "+books.size()+" books");
                 recyclerViewAdapter.addAll(books);

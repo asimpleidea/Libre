@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -71,6 +72,10 @@ public class ManualInsertActivity extends AppCompatActivity {
     private EditText mTitleField;
     private EditText mAuthorField;
     private EditText mISBNField;
+    private EditText mPublisherField;
+    private EditText mEditionYearField;
+    private EditText mBookConditionField;
+
     private Button submit_btn;
     private TextView mCancel;
     private ImageView mImageField;
@@ -93,6 +98,9 @@ public class ManualInsertActivity extends AppCompatActivity {
         mTitleField = (EditText) findViewById(R.id.manual_ins_book_title);
         mAuthorField = (EditText) findViewById(R.id.manual_ins_book_author);
         mISBNField = (EditText) findViewById(R.id.manual_ins_isbn);
+        mPublisherField = (EditText) findViewById(R.id.manual_ins_publisher);
+        mEditionYearField = (EditText) findViewById(R.id.manual_ins_book_editionYear);
+        mBookConditionField = (EditText) findViewById(R.id.manual_ins_book_conditions);
 
         mCancel = (TextView) findViewById(R.id.cancelEdit);
         mCancel.setOnClickListener(new View.OnClickListener() {
@@ -106,7 +114,6 @@ public class ManualInsertActivity extends AppCompatActivity {
         submit_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Log.d("anotherbug", "submit clicked");
                 submitBook();
             }
         });
@@ -331,7 +338,8 @@ public class ManualInsertActivity extends AppCompatActivity {
 
                             mAuthorField.setText(authors);
 
-                            //to get year publication bookJSON.getString("publishedDate");
+                            //set edition year
+                            mEditionYearField.setText(bookJSON.getString("publishedDate") );
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -356,7 +364,6 @@ public class ManualInsertActivity extends AppCompatActivity {
     }
 
     private void submitBook() {
-//        Log.d("anotherbug", "in submitBook");
         final String title = mTitleField.getText().toString();
         final String author = mAuthorField.getText().toString();
         final String isbn = mISBNField.getText().toString();
@@ -387,25 +394,27 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         DatabaseReference mRef = mDatabase.child("books");
         String bookKey = mRef.push().getKey();
-//        Log.d("anotherbug", (mBitmap==null)?"no image":"there is something!");
-        if(mBitmap != null)
-            uploadImage(bookKey);
-//        Log.d("anotherbug", "uploading book");
+        Date date = new Date();
+        //String bookKey = (0 - date.getTime()) +"_"+ mRef.push().getKey();
+
+        uploadImage(bookKey);
+
         mRef.child(bookKey).setValue(new Book(
                 mTitleField.getText().toString(),
                 mAuthorField.getText().toString(),
                 mISBNField.getText().toString(),
+                mPublisherField.getText().toString(),
+                mEditionYearField.getText().toString(),
+                mBookConditionField.getText().toString(),
                 bookCoverUri,
                 bookKey,
-                FirebaseAuth.getInstance().getUid()));
+                FirebaseAuth.getInstance().getUid(),
+                date));
 
-//        Log.d("anotherbug", "book uploaded");
-        mRef = mDatabase.child("users");
+        //set priority?
+        //mRef.child(bookKey).setPriority(0 - (new Date().getTime())); //(new Date().getTime()/1000));
 
-        mRef.child(FirebaseAuth.getInstance().getUid()).child("books").child(bookKey).setValue(true);
-
-        finish();
-        //Log.d("anotherbug", "user updated");
+        //Log.d("user_id",  FirebaseAuth.getInstance().getUid());
     }
 
     private void uploadImage(String bookKey) {
@@ -420,7 +429,7 @@ public class ManualInsertActivity extends AppCompatActivity {
         //creating and showing progress dialog
         progressDialog = new ProgressDialog(this);
         progressDialog.setMax(100);
-        progressDialog.setMessage("Uploading...");
+        progressDialog.setMessage(getResources().getText(R.string.manualInsert_uploading));
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.show();
         progressDialog.setCancelable(false);
@@ -444,7 +453,7 @@ public class ManualInsertActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle unsuccessful uploads
-                Toast.makeText(ManualInsertActivity.this,"Error in uploading!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(ManualInsertActivity.this, getResources().getText(R.string.manualInsert_uploadError),Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -452,12 +461,12 @@ public class ManualInsertActivity extends AppCompatActivity {
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                Toast.makeText(ManualInsertActivity.this,"Upload successful",Toast.LENGTH_SHORT).show();
+                Toast.makeText(ManualInsertActivity.this, getResources().getText(R.string.manualInsert_uploadSuccessful),Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
                 //showing the uploaded image in ImageView using the download url
                 Glide.with(ManualInsertActivity.this).load(downloadUrl).into(mImageField);
 
-                //finish();
+                finish();
 
             }
         });

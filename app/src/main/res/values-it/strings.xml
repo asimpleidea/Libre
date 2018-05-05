@@ -136,17 +136,23 @@
     <string name="book_author">Autore</string>
     <string name="book_genre">Genere</string>
     <string name="book_isbn">ISBN</string>
+    <string name="book_publisher">Editore</string>
     <string name="bookSend">Invia</string>
 
     <!-- book insert errors -->
     <string name="required">Necessario!</string>
     <string name="ISBN_explain">L\'ISBN è un codice di 13 cifre!</string>
-    <string name="edition_year">Anno di edizione</string>
+    <string name="edition_year">Anno pubblicazione</string>
     <string name="book_conditions">Condizioni del libro</string>
 
     <!-- search strings -->
     <string name="search_search">Cerca...</string>
     <string name="search_noResults">Nessun risultato</string>
+
+    <!--upload strings -->
+    <string name="manualInsert_uploadSuccessful">Caricato con successo</string>
+    <string name="manualInsert_uploadError">Errore durante il carimento!</string>
+    <string name="manualInsert_uploading">Caricamento...</string>
 
     <string name="login_with_fb">Entra con Facebook</string>
     <string name="signup_with_fb">Registrati con Facebook</string>
