@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -138,8 +139,12 @@ public class BooksFragment extends Fragment {
                     case MotionEvent.ACTION_CANCEL:
                     case MotionEvent.ACTION_UP:
 
+                        //  TODO: remove these two lines when in production.
                         if(PreventTap) Log.d("TOUCHME", "DID NOT HANDLE IT BECAUSE IT WAS A SCROLL");
                         else Log.d("TOUCHME", "GOING TO SHOW YOU THE BOOK...");
+
+                        //  Was it a legitimate tap?
+                        if(!PreventTap) viewBook();
 
                         //  Reset
                         PreventTap = false;
@@ -178,15 +183,10 @@ public class BooksFragment extends Fragment {
                 return false;
             }
 
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e)
-            {
-            }
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) { }
 
             @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) { }
         });
 
         new_book_button.setOnClickListener(new View.OnClickListener() {
@@ -284,6 +284,21 @@ public class BooksFragment extends Fragment {
                 mIsLoading = false;
             }
         });
+    }
+
+    private void viewBook()
+    {
+        //----------------------------------
+        //  Init
+        //----------------------------------
+
+        ViewBookFragment b = new ViewBookFragment();
+
+        //----------------------------------
+        //  Show me the book
+        //----------------------------------
+
+        ((BooksActivity) getActivity()).setFragment(b, null);
     }
 
     @Override

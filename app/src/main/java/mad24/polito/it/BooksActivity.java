@@ -17,6 +17,7 @@ import mad24.polito.it.fragments.BooksFragment;
 import mad24.polito.it.fragments.ChatFragment;
 import mad24.polito.it.fragments.ProfileFragment;
 import mad24.polito.it.fragments.SearchFragment;
+import mad24.polito.it.fragments.ViewBookFragment;
 
 public class BooksActivity extends AppCompatActivity {
 
@@ -28,7 +29,7 @@ public class BooksActivity extends AppCompatActivity {
     private ChatFragment chatFragment;
     private ProfileFragment profileFragment;
 
-    private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment};
+    private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment, ViewBookFragment};
     private CurrentFragment currentFragment;
 
     private TextView mTextMessage;
@@ -97,11 +98,32 @@ public class BooksActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    /**
+     * Sets a fragment with back stack.
+     * NOTE: I created this new signature because I didn't want to mess with others' code, and having to rewrite everything.
+     * NOTE: this is public because some fragments, like BooksFragment, need to set other fragments
+     * and provide a back mechanism.
+     * So, if you need to set a back stack, use this method. Otherwise, call Marco's one.
+     * @param fragment the fragment to be called
+     * @param back the string which identifies the backstack (can also be null)
+     */
+    public void setFragment(Fragment fragment, String back)
+    {
+        currentFragment = CurrentFragment.valueOf(fragment.getClass().getSimpleName());
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(mad24.polito.it.R.id.main_frame, fragment)
+                            .addToBackStack(back)
+                            .commit();
+    }
+
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
         //Log.d("currFrag", "Saving: "+ currentFragment.ordinal());
+        //  TODO: this needs to be modified in case we were on a ViewBookFragment
         outState.putInt("fragment", currentFragment.ordinal());
     }
 
@@ -125,6 +147,7 @@ public class BooksActivity extends AppCompatActivity {
                 break;
             case 3:
                 setFragment(profileFragment);
+                break;
         }
     }
 
