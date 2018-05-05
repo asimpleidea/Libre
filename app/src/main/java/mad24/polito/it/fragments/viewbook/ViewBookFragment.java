@@ -123,7 +123,8 @@ public class ViewBookFragment extends Fragment
             @Override
             public void onTabSelected(TabLayout.Tab tab)
             {
-                viewPager.setCurrentItem(tab.getPosition());
+                viewPager.setCurrentItem(tab.getPosition(), true);
+
                 switch (tab.getPosition()) {
                     case BOOK_DETAILS:
                         Log.d("VIEWBOOK", "Show book's details");
@@ -159,6 +160,7 @@ public class ViewBookFragment extends Fragment
         //  Add other fragments
         //------------------------------------
 
+        ViewPageAdapter.addFragment(new BookDetailsFragment(), "Cacca");
         /*ViewPageAdapter.addFrag(new DummyFragment(
                 ContextCompat.getColor(this, R.color.cyan_50)), "Cyan");
 
@@ -168,7 +170,8 @@ public class ViewBookFragment extends Fragment
         adapter.addFrag(new DummyFragment(
                 ContextCompat.getColor(this, R.color.purple_50)), "Purple");*/
 
-        //viewPager.setAdapter(adapter);
+        viewPager.setAdapter(ViewPageAdapter);
+        viewPager.setCurrentItem(BOOK_DETAILS, true);
 
     }
 

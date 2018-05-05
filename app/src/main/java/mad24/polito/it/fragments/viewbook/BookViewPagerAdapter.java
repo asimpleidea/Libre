@@ -9,8 +9,8 @@ import java.util.List;
 
 public class BookViewPagerAdapter extends FragmentPagerAdapter
 {
-    private final List<Fragment> mFragmentList  = new ArrayList<>();
-    private final List<String> mFragmentTitleList = new ArrayList<>();
+    private final List<Fragment> FragmentList = new ArrayList<>();
+    private final List<String> FragmentTitleList = new ArrayList<>();
 
     public BookViewPagerAdapter(FragmentManager manager)
     {
@@ -20,24 +20,24 @@ public class BookViewPagerAdapter extends FragmentPagerAdapter
     @Override
     public Fragment getItem(int position)
     {
-        return mFragmentList.get(position);
+        return FragmentList.get(position);
     }
 
     @Override
     public int getCount()
     {
-        return mFragmentList.size();
+        return FragmentList.size();
     }
 
     public void addFragment(Fragment fragment, String title)
     {
-        mFragmentList.add(fragment);
-        mFragmentTitleList.add(title);
+        FragmentList.add(fragment);
+        FragmentTitleList.add(title);
     }
 
     @Override
     public CharSequence getPageTitle(int position)
     {
-        return mFragmentTitleList.get(position);
+        return FragmentTitleList.get(position);
     }
 }
