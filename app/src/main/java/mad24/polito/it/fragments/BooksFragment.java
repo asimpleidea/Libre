@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -37,6 +38,13 @@ public class BooksFragment extends Fragment {
 
     private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
 
+    /**
+     * Distance threshold.
+     * When this threshold is passed, we consider this touch to actually be a scroll, *NOT* a tap.
+     * TODO: Get a good threshold value here. From previous tests 20 seems too low; 100 seems to suit it better
+     */
+    private final float SCROLL_THRESHOLD = 100;
+
     View v;
 
     // Android Layout
@@ -53,6 +61,31 @@ public class BooksFragment extends Fragment {
     private int mLastVisibleItemPosition;
     private boolean mIsLoading = false;
     private int mBooksPerPage = 6;
+
+    /**
+     * Finger position on X axys
+     */
+    private float FingerX = 0;
+
+    /**
+     * Finger Position on Y axys
+     */
+    private float FingerY = 0;
+
+    /**
+     * Should we handle the tap event?
+     */
+    private boolean PreventTap = false;
+
+    /**
+     * Distance in the Y axis between scrolling
+     */
+    private float DY = 0;
+
+    /**
+     * Distance in the X axis between scrolling
+     */
+    private float DX = 0;
 
     public BooksFragment() {
         // Required empty public constructor
@@ -81,7 +114,80 @@ public class BooksFragment extends Fragment {
 
         books = new ArrayList<Book>();
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
+
         rv.setAdapter(recyclerViewAdapter);
+
+        //  Set on click listener
+        rv.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e)
+            {
+                switch (e.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+
+                        //  Don't update if we're not handling the event
+                        if(!PreventTap)
+                        {
+                            //  Update values
+                            FingerX = e.getX();
+                            FingerY = e.getY();
+                        }
+
+                        break;
+                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_UP:
+
+                        if(PreventTap) Log.d("TOUCHME", "DID NOT HANDLE IT BECAUSE IT WAS A SCROLL");
+                        else Log.d("TOUCHME", "GOING TO SHOW YOU THE BOOK...");
+
+                        //  Reset
+                        PreventTap = false;
+
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+
+                        //  Don't do anything if already preventing the scroll
+                        if(!PreventTap)
+                        {
+                            //  Get finger's current position
+                            float   x = e.getX(),
+                                    y = e.getY(),
+                                    dy = Math.abs(FingerY - y),
+                                    dx = Math.abs(FingerX - x);
+
+                            //  Update displacements
+                            DY += dy;
+                            DX += dx;
+
+                            //  Is the user scrolling?
+                            if(DY > SCROLL_THRESHOLD || DX > SCROLL_THRESHOLD)
+                            {
+                                //  Reset everything
+                                PreventTap = true;
+                                DX = 0;
+                                DY = 0;
+
+                                Log.d("TOUCHME", "USER IS SCROLLING");
+                            }
+                        }
+
+                        break;
+                }
+
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e)
+            {
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
 
         new_book_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,6 +275,7 @@ public class BooksFragment extends Fragment {
 
                 //Log.d("booksfragment", "adding "+books.size()+" books");
                 recyclerViewAdapter.addAll(books);
+
                 mIsLoading = false;
             }
 
