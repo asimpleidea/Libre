@@ -167,6 +167,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         tabLayout = view.findViewById(R.id.tabLayout);
 
         //------------------------------------
+        //  Set Icons
+        //------------------------------------
+
+        //  NOTE: the book icon *must* be selected at init. Others must be UNselected
+        /*tabLayout.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
+        tabLayout.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected);
+        tabLayout.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected);*/
+
+        //------------------------------------
         //  Set tabs behaviour
         //------------------------------------
 
@@ -176,21 +185,42 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
             public void onTabSelected(TabLayout.Tab tab)
             {
                 viewPager.setCurrentItem(tab.getPosition(), true);
+
                 switch (tab.getPosition()) {
                     case BOOK_DETAILS:
                         Log.d("VIEWBOOK", "Show book's details");
+                        tabLayout.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
                         break;
                     case BOOK_OWNER:
                         Log.d("VIEWBOOK", "Show book's owners");
+                        tabLayout.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_selected);
                         break;
                     case BOOK_MAP:
                         Log.d("VIEWBOOK", "Show book's map");
+                        tabLayout.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_selected);
                         break;
                 }
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) { }
+            public void onTabUnselected(TabLayout.Tab tab)
+            {
+                switch (tab.getPosition())
+                {
+                    case BOOK_DETAILS:
+                        Log.d("VIEWBOOK", "Show book's details");
+                        tabLayout.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected);
+                        break;
+                    case BOOK_OWNER:
+                        Log.d("VIEWBOOK", "Show book's owners");
+                        tabLayout.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected);
+                        break;
+                    case BOOK_MAP:
+                        Log.d("VIEWBOOK", "Show book's map");
+                        tabLayout.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected);
+                        break;
+                }
+            }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
