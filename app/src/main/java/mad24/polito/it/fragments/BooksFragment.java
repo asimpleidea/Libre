@@ -298,16 +298,7 @@ public class BooksFragment extends Fragment {
         //  Show me the book
         //----------------------------------
 
-        b.setLoadingListener(new FragmentLoadingListener()
-        {
-            @Override
-            public void onFragmentLoaded()
-            {
-                ((BooksActivity) getActivity()).setFragment(b, "viewbook");
-                Log.d("VIEWBOOK", "onFragmentLoaded from lambda");
-            }
-        });
-
+        ((BooksActivity) getActivity()).setFragment(b, "viewbook");
     }
 
     @Override

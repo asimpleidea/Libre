@@ -3,6 +3,8 @@ package mad24.polito.it.fragments.viewbook;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -10,9 +12,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import mad24.polito.it.R;
 import mad24.polito.it.fragments.FragmentLoadingListener;
+import mad24.polito.it.fragments.FragmentWithLoadingListener;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -22,7 +26,7 @@ import mad24.polito.it.fragments.FragmentLoadingListener;
  * Use the {@link ViewBookFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ViewBookFragment extends Fragment
+public class ViewBookFragment extends Fragment implements FragmentWithLoadingListener
 {
     private BookViewPagerAdapter ViewPageAdapter = null;
     private ViewPager viewPager = null;
@@ -69,11 +73,6 @@ public class ViewBookFragment extends Fragment
         return fragment;
     }
 
-    public void setLoadingListener(FragmentLoadingListener loadingListener)
-    {
-        LoadingListener = loadingListener;
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -98,11 +97,13 @@ public class ViewBookFragment extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             Bundle savedInstanceState)
+    {
+
         // Inflate the layout for this fragment
-        /*return inflater.inflate(R.layout.fragment_view_book, container, false);*/
         view = inflater.inflate(R.layout.fragment_view_book, container, false);
 
+        Log.d("VIEWBOOK", "onCreateView");
         Details = new BookDetailsFragment();
 
         setUpViewPager();
@@ -110,7 +111,25 @@ public class ViewBookFragment extends Fragment
         setUpTabs();
 
         //  Done! We finished the loading!
-        if(LoadingListener != null) LoadingListener.onFragmentLoaded();
+        if(LoadingListener != null)
+        {
+            LoadingListener.onFragmentLoaded();
+            Log.d("VIEWBOOK", "Event raised successfully");
+        }
+
+        new CountDownTimer(3000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                //mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
+            }
+
+            public void onFinish() {
+                Log.d("VIEWBOOK", "count down finished");
+                ((ProgressBar)view.findViewById(R.id.loadingScreen)).setVisibility(View.GONE);
+                ((AppBarLayout)view.findViewById(R.id.main_appbar)).setVisibility(View.VISIBLE);
+                ((ViewPager)view.findViewById(R.id.viewPager)).setVisibility(View.VISIBLE);
+            }
+        }.start();
 
         /*final FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.main_frame);
         frameLayout.setBackgroundColor(0xe6f2a2);*/
@@ -213,6 +232,12 @@ public class ViewBookFragment extends Fragment
         super.onDetach();
 
         mListener = null;
+    }
+
+    @Override
+    public void setLoadingListener(FragmentLoadingListener loadingListener)
+    {
+        LoadingListener = loadingListener;
     }
 
     /**

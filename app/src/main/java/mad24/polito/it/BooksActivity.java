@@ -14,15 +14,11 @@ import android.widget.TextView;
 
 import mad24.polito.it.fragments.BooksFragment;
 import mad24.polito.it.fragments.ChatFragment;
-import mad24.polito.it.fragments.FragmentLoadingListener;
 import mad24.polito.it.fragments.ProfileFragment;
 import mad24.polito.it.fragments.SearchFragment;
-import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 
 public class BooksActivity  extends AppCompatActivity
-                            /*implements FragmentLoadingListener*/
 {
-
     private BottomNavigationView mMainNav;
     private FrameLayout mMainFrame;
 
@@ -31,13 +27,7 @@ public class BooksActivity  extends AppCompatActivity
     private ChatFragment chatFragment;
     private ProfileFragment profileFragment;
 
-    /*@Override
-    public void onFragmentLoaded()
-    {
-        Log.d("VIEWBOOK", "onFragmentLoaded called!");
-    }*/
-
-    private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment, ViewBookFragment};
+    private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment, ViewBookFragment, LoadingScreenFragment};
     private CurrentFragment currentFragment;
 
     private TextView mTextMessage;
@@ -95,7 +85,7 @@ public class BooksActivity  extends AppCompatActivity
         setFragment(booksFragment);
     }
 
-    private void setFragment(Fragment fragment) {
+    public void setFragment(Fragment fragment) {
 
         currentFragment = CurrentFragment.valueOf(fragment.getClass().getSimpleName());
 
@@ -124,7 +114,6 @@ public class BooksActivity  extends AppCompatActivity
                             .addToBackStack(back)
                             .commit();
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
