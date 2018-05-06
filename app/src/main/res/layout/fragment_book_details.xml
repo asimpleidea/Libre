@@ -101,39 +101,109 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:fontFamily="@font/opensans_light"
+                android:shadowColor="@color/black"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"
+                android:text="206 Views"
+                android:textColor="@color/cardview_dark_background"
+                android:textSize="19sp" />
+
             <com.borjabravo.readmoretextview.ReadMoreTextView
                 android:id="@+id/bookDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce scelerisque, odio vitae ullamcorper efficitur, erat sapien venenatis diam, quis mattis nisi odio vel ligula. Pellentesque id nibh sed felis dictum tincidunt id sit amet felis. Duis pharetra massa nec nibh consectetur mattis. Nulla molestie urna vitae venenatis commodo. Vestibulum et elementum nisl. Praesent venenatis erat et commodo fringilla. Etiam semper ultricies eros, ac vulputate sem venenatis ut.
 
 Nulla in lectus ligula. Vivamus porta sollicitudin nibh, quis facilisis nisi lacinia quis. Duis fringilla tortor a consectetur pretium. Curabitur eu justo et urna vulputate faucibus. Integer ultrices porta nulla sit amet elementum. Nullam eu ullamcorper turpis, sed viverra erat. Aliquam aliquet, diam sit amet tincidunt tristique, eros augue commodo dui, venenatis gravida leo nunc ut turpis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula lectus nec lacinia ultricies. Morbi est velit, congue quis ornare ut, elementum sit amet magna. "
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                app:trimLines="7"
-                app:trimCollapsedText="More..."
                 app:showTrimExpandedText="false"
-                android:layout_marginTop="10dp"
-                />
+                app:trimCollapsedText="More..."
+                app:trimLines="7" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/textView2"
-                    android:layout_width="10dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="ISBN:" />
+                    android:text="ISBN:"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/textView6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="123456789012"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="123456789012" />
+                    android:text="Year"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="2016"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Editor"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Penguin"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
             </LinearLayout>
 
         </LinearLayout>
