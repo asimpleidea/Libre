@@ -292,13 +292,22 @@ public class BooksFragment extends Fragment {
         //  Init
         //----------------------------------
 
-        ViewBookFragment b = new ViewBookFragment();
+        final ViewBookFragment b = new ViewBookFragment();
 
         //----------------------------------
         //  Show me the book
         //----------------------------------
 
-        ((BooksActivity) getActivity()).setFragment(b, "viewbook");
+        b.setLoadingListener(new FragmentLoadingListener()
+        {
+            @Override
+            public void onFragmentLoaded()
+            {
+                ((BooksActivity) getActivity()).setFragment(b, "viewbook");
+                Log.d("VIEWBOOK", "onFragmentLoaded from lambda");
+            }
+        });
+
     }
 
     @Override

@@ -7,17 +7,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import mad24.polito.it.fragments.BooksFragment;
 import mad24.polito.it.fragments.ChatFragment;
+import mad24.polito.it.fragments.FragmentLoadingListener;
 import mad24.polito.it.fragments.ProfileFragment;
 import mad24.polito.it.fragments.SearchFragment;
 import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 
-public class BooksActivity extends AppCompatActivity {
+public class BooksActivity  extends AppCompatActivity
+                            /*implements FragmentLoadingListener*/
+{
 
     private BottomNavigationView mMainNav;
     private FrameLayout mMainFrame;
@@ -26,6 +30,12 @@ public class BooksActivity extends AppCompatActivity {
     private SearchFragment searchFragment;
     private ChatFragment chatFragment;
     private ProfileFragment profileFragment;
+
+    /*@Override
+    public void onFragmentLoaded()
+    {
+        Log.d("VIEWBOOK", "onFragmentLoaded called!");
+    }*/
 
     private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment, ViewBookFragment};
     private CurrentFragment currentFragment;

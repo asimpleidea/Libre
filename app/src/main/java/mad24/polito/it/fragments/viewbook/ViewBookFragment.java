@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import mad24.polito.it.R;
+import mad24.polito.it.fragments.FragmentLoadingListener;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,7 +24,6 @@ import mad24.polito.it.R;
  */
 public class ViewBookFragment extends Fragment
 {
-
     private BookViewPagerAdapter ViewPageAdapter = null;
     private ViewPager viewPager = null;
     private TabLayout Tabs = null;
@@ -34,6 +34,7 @@ public class ViewBookFragment extends Fragment
     private final int BOOK_OWNERS = 1;
     private final int BOOK_MAP = 2;
 
+    private FragmentLoadingListener LoadingListener = null;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -66,6 +67,11 @@ public class ViewBookFragment extends Fragment
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public void setLoadingListener(FragmentLoadingListener loadingListener)
+    {
+        LoadingListener = loadingListener;
     }
 
     @Override
@@ -103,9 +109,8 @@ public class ViewBookFragment extends Fragment
 
         setUpTabs();
 
-
-
-
+        //  Done! We finished the loading!
+        if(LoadingListener != null) LoadingListener.onFragmentLoaded();
 
         /*final FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.main_frame);
         frameLayout.setBackgroundColor(0xe6f2a2);*/
