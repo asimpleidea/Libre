@@ -171,7 +171,7 @@ public class ViewBookFragment extends Fragment
         //------------------------------------
 
         viewPager = view.findViewById(R.id.viewPager);
-        ViewPageAdapter = new BookViewPagerAdapter(getActivity().getSupportFragmentManager());
+        ViewPageAdapter = new BookViewPagerAdapter(getChildFragmentManager());
 
         //------------------------------------
         //  Add other fragments
