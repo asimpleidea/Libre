@@ -33,10 +33,17 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private TabLayout Tabs = null;
     private View view = null;
     private BookDetailsFragment Details = null;
+    private BookOwnerFragment Owner = null;
+    private BookMapFragment Map = null;
+    private TabLayout tabLayout = null;
 
     private final int BOOK_DETAILS = 0;
-    private final int BOOK_OWNERS = 1;
+    private final int BOOK_OWNER = 1;
     private final int BOOK_MAP = 2;
+
+    private final String BOOK_DETAILS_TITLE = "Details";
+    private final String BOOK_OWNER_TITLE = "Owner";
+    private final String BOOK_MAP_TITLE = "Map";
 
     private FragmentLoadingListener LoadingListener = null;
 
@@ -104,7 +111,12 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         view = inflater.inflate(R.layout.fragment_view_book, container, false);
 
         Log.d("VIEWBOOK", "onCreateView");
-        Details = new BookDetailsFragment();
+
+        setUpDetails();
+
+        setUpOwner();
+
+        setUpMap();
 
         setUpViewPager();
 
@@ -152,7 +164,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         //  Init
         //------------------------------------
 
-        TabLayout tabLayout = view.findViewById(R.id.tabLayout);
+        tabLayout = view.findViewById(R.id.tabLayout);
 
         //------------------------------------
         //  Set tabs behaviour
@@ -164,12 +176,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
             public void onTabSelected(TabLayout.Tab tab)
             {
                 viewPager.setCurrentItem(tab.getPosition(), true);
-
                 switch (tab.getPosition()) {
                     case BOOK_DETAILS:
                         Log.d("VIEWBOOK", "Show book's details");
                         break;
-                    case BOOK_OWNERS:
+                    case BOOK_OWNER:
                         Log.d("VIEWBOOK", "Show book's owners");
                         break;
                     case BOOK_MAP:
@@ -201,10 +212,52 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         //  Add other fragments
         //------------------------------------
 
-        ViewPageAdapter.addFragment(new BookDetailsFragment(), "Cacca");
+        ViewPageAdapter.addFragment(Details, BOOK_DETAILS_TITLE);
+        ViewPageAdapter.addFragment(Owner, BOOK_OWNER_TITLE);
+        ViewPageAdapter.addFragment(Map, BOOK_MAP_TITLE);
+
+        //------------------------------------
+        //  Set adapter and current item
+        //------------------------------------
+
         viewPager.setAdapter(ViewPageAdapter);
         viewPager.setCurrentItem(BOOK_DETAILS, true);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
+        {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
+
+            }
+
+            @Override
+            public void onPageSelected(int position)
+            {
+                tabLayout.getTabAt(position).select();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
         Log.d("VIEWBOOK", "SetUpViewPager called");
+    }
+
+    private void setUpDetails()
+    {
+        Details = new BookDetailsFragment();
+    }
+
+    private void setUpOwner()
+    {
+        Owner = new BookOwnerFragment();
+    }
+
+    private void setUpMap()
+    {
+        Map = new BookMapFragment();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
