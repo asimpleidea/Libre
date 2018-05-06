@@ -55,6 +55,9 @@ dependencies {
 
     //  Rating
     implementation 'me.zhanghai.android.materialratingbar:library:1.2.0'
+
+    //  Read more... textview
+    implementation 'com.borjabravo:readmoretextview:2.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
