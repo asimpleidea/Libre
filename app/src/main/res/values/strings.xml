@@ -158,6 +158,10 @@
     <string name="manualInsert_uploadError">Error in uploading!</string>
     <string name="manualInsert_uploading">Uploading...</string>
 
+    <!--error getting coordinates-->
+    <string name="coordinates_error">Error</string>
+    <string name="coordinates_errorGettingInfo">Error getting user informations</string>
+
     <!-- Facebook -->
     <string name="facebook_app_id">102712380576500</string>
     <string name="fb_login_protocol_scheme">fb102712380576500</string>

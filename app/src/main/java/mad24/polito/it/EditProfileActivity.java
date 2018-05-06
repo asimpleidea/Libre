@@ -418,53 +418,75 @@ public class EditProfileActivity extends AppCompatActivity implements
                 //if all checks are positive
                 if(isModified) {
                     try {
-                        DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
+                        //get coordinates
+                        Places.GeoDataApi.getPlaceById(mGoogleApiClient, idSelectedCity)
+                                .setResultCallback(new ResultCallback<PlaceBuffer>() {
+                                    @Override
+                                    public void onResult(PlaceBuffer places) {
+                                        if (places.getStatus().isSuccess()) {
+                                            final Place myPlace = places.get(0);
+                                            LatLng queriedLocation = myPlace.getLatLng();
+                                            Double lat = queriedLocation.latitude;
+                                            Double lon = queriedLocation.longitude;
 
-                        Task initTask = myDatabase.child("users").child(userAuth.getUid())
-                                .setValue(new UserMail(userAuth.getEmail(), newName, newCity, idSelectedCity, newPhone,
-                                        newBio, newSelectedGenres) );
+                                            DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
 
-                        initTask.addOnSuccessListener(new OnSuccessListener() {
-                            @Override
-                            public void onSuccess(Object o) {
-                                //check if upload on database and/or storage have finished
-                                synchronized (semaphore) {
-                                    semaphore--;
+                                            Task initTask = myDatabase.child("users").child(userAuth.getUid())
+                                                    .setValue(new UserMail(userAuth.getEmail(), newName, newCity, idSelectedCity, newPhone,
+                                                            newBio, newSelectedGenres, lat, lon) );
 
-                                    if (semaphore <= 0) {
-                                        progressBar.setVisibility(View.GONE);
+                                            initTask.addOnSuccessListener(new OnSuccessListener() {
+                                                @Override
+                                                public void onSuccess(Object o) {
+                                                    //check if upload on database and/or storage have finished
+                                                    synchronized (semaphore) {
+                                                        semaphore--;
 
-                                        String encoded = "";
-                                        if(profileImageBitmap != null) {
-                                            //store bitmap in sharedPreferences
-                                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                            profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                                            byte[] b = baos.toByteArray();
-                                            encoded = Base64.encodeToString(b, Base64.DEFAULT);
-                                        }
+                                                        if (semaphore <= 0) {
+                                                            progressBar.setVisibility(View.GONE);
 
-                                        Intent resultIntent = new Intent();
-                                        resultIntent.putExtra("modified", true);
-                                        resultIntent.putExtra("imageModified", (uri != null));
-                                        if(!encoded.equals(""))
-                                            resultIntent.putExtra("profileImage", encoded);
+                                                            String encoded = "";
+                                                            if(profileImageBitmap != null) {
+                                                                //store bitmap in sharedPreferences
+                                                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                                                profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                                                byte[] b = baos.toByteArray();
+                                                                encoded = Base64.encodeToString(b, Base64.DEFAULT);
+                                                            }
 
-                                        setResult(Activity.RESULT_OK, resultIntent);
-                                        finish();
-                                    }
+                                                            Intent resultIntent = new Intent();
+                                                            resultIntent.putExtra("modified", true);
+                                                            resultIntent.putExtra("imageModified", (uri != null));
+                                                            if(!encoded.equals(""))
+                                                                resultIntent.putExtra("profileImage", encoded);
+
+                                                            setResult(Activity.RESULT_OK, resultIntent);
+                                                            finish();
+                                                        }
+                                                    }
+
+                                                }
+                                            });
+
+                                            initTask.addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    progressBar.setVisibility(View.GONE);
+
+                                                    //if image profile saving fails
+                                                    showDialog(getResources().getString(R.string.signup_error),
+                                                            getResources().getString(R.string.signup_retry));
+                                                }
+                                            });
+                                } else {
+                                    progressBar.setVisibility(View.GONE);
+
+                                    //if image profile saving fails
+                                    showDialog(getResources().getString(R.string.signup_error),
+                                            getResources().getString(R.string.signup_retry));
                                 }
 
-                            }
-                        });
-
-                        initTask.addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                progressBar.setVisibility(View.GONE);
-
-                                //if image profile saving fails
-                                showDialog(getResources().getString(R.string.signup_error),
-                                        getResources().getString(R.string.signup_retry));
+                                places.release();
                             }
                         });
                     } catch (Exception e) {
@@ -801,11 +823,9 @@ public class EditProfileActivity extends AppCompatActivity implements
             }
             // Selecting the first object buffer.
             final Place place = places.get(0);
-            CharSequence attributions = places.getAttributions();
-
-            if (attributions != null) {
-
-            }
+            LatLng latlng = place.getLatLng();
+            Log.v("Latitude is", "" + latlng.latitude);
+            Log.v("Longitude is", "" + latlng.longitude);
         }
     };*/
 

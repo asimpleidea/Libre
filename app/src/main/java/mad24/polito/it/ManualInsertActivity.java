@@ -3,6 +3,7 @@ package mad24.polito.it;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,7 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.signin.internal.Storage;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,20 +42,16 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import mad24.polito.it.models.Book;
+import mad24.polito.it.models.UserMail;
+import mad24.polito.it.registrationmail.LoginActivity;
 
 public class ManualInsertActivity extends AppCompatActivity {
 
@@ -83,6 +81,9 @@ public class ManualInsertActivity extends AppCompatActivity {
     private String userChoosenTask;
     private Uri uri;
     private String bookCoverUri;
+
+    private Double lat = null;
+    private Double lon = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +141,30 @@ public class ManualInsertActivity extends AppCompatActivity {
                     .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
                     .initiateScan();
         }
+
+        FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
+
+        //get data from Firebase Database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("users");
+
+        //get coordinates
+        usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                //get User object
+                UserMail user = snapshot.getValue(UserMail.class);
+
+                //get coordinates
+                lat = user.getLat();
+                lon = user.getLon();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                return;
+            }
+        });
 
     }
 
@@ -392,6 +417,21 @@ public class ManualInsertActivity extends AppCompatActivity {
             return;
         }
 
+        //if coordinates are not set
+        if(lat == null || lon == null) {
+            new AlertDialog.Builder(ManualInsertActivity.this)
+                    .setTitle(getResources().getString(R.string.coordinates_error))
+                    .setMessage(getResources().getString(R.string.coordinates_errorGettingInfo))
+                    .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+            return;
+        }
+
         DatabaseReference mRef = mDatabase.child("books");
         String bookKey = mRef.push().getKey();
         Date date = new Date();
@@ -411,8 +451,20 @@ public class ManualInsertActivity extends AppCompatActivity {
                 FirebaseAuth.getInstance().getUid(),
                 date));
 
-        //set priority?
-        //mRef.child(bookKey).setPriority(0 - (new Date().getTime())); //(new Date().getTime()/1000));
+        GeoFire geoFire = new GeoFire(mDatabase.child("locationBooks"));
+
+        SharedPreferences prefs = getSharedPreferences("location", MODE_PRIVATE);
+        geoFire.setLocation(bookKey, new GeoLocation(lat, lon), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+                    System.out.println("Location saved on server successfully!");
+                }
+            }
+        });
+
 
         //Log.d("user_id",  FirebaseAuth.getInstance().getUid());
     }

@@ -41,7 +41,10 @@ import mad24.polito.it.models.UserMail;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -830,31 +833,55 @@ public class SignupMailActivity extends AppCompatActivity implements
         });
     }
 
-    private void createUserOnDabase(String mailString, String nameString, String cityString,
-                                   String phoneString, String bioString) {
-        FirebaseUser user = auth.getCurrentUser();
+    private void createUserOnDabase(final String mailString, final String nameString, final String cityString,
+                                   final String phoneString, final String bioString) {
+        final FirebaseUser user = auth.getCurrentUser();
 
         //add new user in Firebase Database
         try {
-            //get genre strings
-            ArrayList<Integer> selectedGenres = new ArrayList<Integer>();
+            //get coordinates
+            Places.GeoDataApi.getPlaceById(mGoogleApiClient, idSelectedCity)
+                .setResultCallback(new ResultCallback<PlaceBuffer>() {
+                    @Override
+                    public void onResult(PlaceBuffer places) {
+                        if (places.getStatus().isSuccess()) {
+                            final Place myPlace = places.get(0);
+                            LatLng queriedLocation = myPlace.getLatLng();
+                            Double lat = queriedLocation.latitude;
+                            Double lon = queriedLocation.longitude;
 
-            for (int i = 0; i < genresList.length; i++) {
-                if (checkedItems[i] == true)
-                    selectedGenres.add(i);
-            }
+                            //get genre strings
+                            ArrayList<Integer> selectedGenres = new ArrayList<Integer>();
 
-            DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
-            myDatabase.child("users").child(user.getUid())
-                    .setValue(new UserMail(mailString, nameString, cityString, idSelectedCity, phoneString, bioString, selectedGenres) );
+                            for (int i = 0; i < genresList.length; i++) {
+                                if (checkedItems[i] == true)
+                                    selectedGenres.add(i);
+                            }
 
-            progressBar.setVisibility(View.GONE);
+                            DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
+                            myDatabase.child("users").child(user.getUid())
+                                    .setValue(new UserMail(mailString, nameString, cityString, idSelectedCity,
+                                            phoneString, bioString, selectedGenres, lat, lon) );
 
-            //start BooksActivity and finish SignUpMailActivity
-            Intent i = new Intent(getApplicationContext(), BooksActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //This will clear all the activities on top of "BooksActivity"
-            startActivity(i);
-            finish();
+                            progressBar.setVisibility(View.GONE);
+
+                            //start BooksActivity and finish SignUpMailActivity
+                            Intent i = new Intent(getApplicationContext(), BooksActivity.class);
+                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //This will clear all the activities on top of "BooksActivity"
+                            startActivity(i);
+                            finish();
+
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+
+                            //if image profile saving fails
+                            showDialog(getResources().getString(R.string.signup_error),
+                                    getResources().getString(R.string.signup_retry));
+                        }
+
+                        places.release();
+                    }
+            });
 
         } catch (Exception e) {
             progressBar.setVisibility(View.GONE);

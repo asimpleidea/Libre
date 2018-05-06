@@ -13,10 +13,13 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import mad24.polito.it.fragments.BooksFragment;
 import mad24.polito.it.fragments.ChatFragment;
 import mad24.polito.it.fragments.ProfileFragment;
 import mad24.polito.it.fragments.SearchFragment;
+import mad24.polito.it.registrationmail.LoginActivity;
 
 public class BooksActivity extends AppCompatActivity {
 
@@ -83,7 +86,18 @@ public class BooksActivity extends AppCompatActivity {
         BottomNavigationViewHelper.disableShiftMode(navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        setFragment(booksFragment);
+        FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
+
+        //check if logged, if not, go to login activity
+        if (userAuth == null) {
+            Intent i = new Intent(BooksActivity.this, LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+
+            finish();
+        }
+
+       setFragment(booksFragment);
     }
 
     private void setFragment(Fragment fragment) {
