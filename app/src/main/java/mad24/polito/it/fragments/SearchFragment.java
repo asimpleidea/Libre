@@ -4,7 +4,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -13,7 +12,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +33,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import mad24.polito.it.R;
 import mad24.polito.it.RecyclerViewAdapter;
@@ -285,17 +282,23 @@ public class SearchFragment extends Fragment {
 
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     Book book = bookSnapshot.getValue(Book.class);
+                    String keywordLowerCase = keyword.toLowerCase();
 
                     //search for a matching
-                    if (book.getTitle().toLowerCase().contains(keyword)) {
+                    if (book.getTitle().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getTitle().toLowerCase()) ) {
                         recyclerViewAdapter.add(book);
                         remained--;
-                    } else if (book.getAuthor().toLowerCase().contains(keyword)) {
+                    } else if (book.getAuthor().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getAuthor().toLowerCase()) ) {
                         recyclerViewAdapter.add(book);
                         remained--;
-                    } else if(book.getPublisher() != null && book.getPublisher().toLowerCase().contains(keyword)) {
+                    } else if(book.getIsbn().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getIsbn().toLowerCase()) ) {
                         recyclerViewAdapter.add(book);
                         remained--;
+                    } else if(book.getPublisher() != null && !book.getPublisher().isEmpty()) {
+                        if(book.getPublisher().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getPublisher().toLowerCase()) ) {
+                            recyclerViewAdapter.add(book);
+                            remained--;
+                        }
                     }
 
                     //check match on genre
@@ -307,6 +310,8 @@ public class SearchFragment extends Fragment {
                 getBooks(keyword, remained);
                 if(mLayoutManager.getItemCount() < 1) {
                     v.findViewById(R.id.search_emptyView).setVisibility(View.VISIBLE);
+                } else {
+                    v.findViewById(R.id.search_emptyView).setVisibility(View.GONE);
                 }
 
                 mIsLoading = false;

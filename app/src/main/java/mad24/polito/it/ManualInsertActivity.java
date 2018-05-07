@@ -47,11 +47,13 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 
 import mad24.polito.it.models.Book;
 import mad24.polito.it.models.UserMail;
 import mad24.polito.it.registrationmail.LoginActivity;
+import mad24.polito.it.registrationmail.SignupMailActivity;
 
 public class ManualInsertActivity extends AppCompatActivity {
 
@@ -84,6 +86,10 @@ public class ManualInsertActivity extends AppCompatActivity {
 
     private Double lat = null;
     private Double lon = null;
+
+    private Button btnGenre;
+    private String[] genresList;                                    //all genres list
+    boolean[] checkedItems;                                         //checked genres
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +131,14 @@ public class ManualInsertActivity extends AppCompatActivity {
                 addBookPhoto();
             }
         });
+
+        //get elements to manage favourite genres
+        btnGenre = (Button) findViewById(R.id.manual_ins_buttonGenre);
+        genresList = getResources().getStringArray(R.array.genres);
+        checkedItems = new boolean[genresList.length];
+
+        //set event to manage favourite genres
+        manageButtonGenre();
 
         Bundle b = getIntent().getExtras();
         int value = -1; // or other values
@@ -432,6 +446,14 @@ public class ManualInsertActivity extends AppCompatActivity {
             return;
         }
 
+        //get genre strings
+        ArrayList<Integer> selectedGenres = new ArrayList<Integer>();
+
+        for (int i = 0; i < genresList.length; i++) {
+            if (checkedItems[i] == true)
+                selectedGenres.add(i);
+        }
+
         DatabaseReference mRef = mDatabase.child("books");
         String bookKey = mRef.push().getKey();
         Date date = new Date();
@@ -449,7 +471,8 @@ public class ManualInsertActivity extends AppCompatActivity {
                 bookCoverUri,
                 bookKey,
                 FirebaseAuth.getInstance().getUid(),
-                date));
+                date,
+                selectedGenres));
 
         GeoFire geoFire = new GeoFire(mDatabase.child("locationBooks"));
 
@@ -473,6 +496,20 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         //create reference to images folder and assing a name to the file that will be uploaded
         StorageReference bookCoverRef = mStorageRef.child("bookCovers").child(bookKey+".jpg");
+
+        //the shortest side must be 180px
+        Bitmap b = mBitmap; //BitmapFactory.decodeFile(uri.toString());
+        float scale;
+        if(b.getWidth() > b.getHeight()) {
+            scale = (float)b.getHeight() / 180;
+        } else {
+            scale = (float)b.getWidth() / 180;
+        }
+
+        if(scale < 1)
+            scale = 1;
+
+        mBitmap = Bitmap.createScaledBitmap(b, (int)((float)b.getWidth()/scale), (int)((float)b.getHeight()/scale), true);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -525,6 +562,32 @@ public class ManualInsertActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //save uri photo/image
+        if(uri != null)
+            outState.putString("book_cover_URI", uri.toString());
+
+        //save favourite genres
+        outState.putSerializable("book_genres", checkedItems);
+
+        return;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        //get profile image
+        uri = Uri.parse(savedInstanceState.getString("book_cover_URI"));
+
+        //get favourite genres
+        checkedItems = (boolean[]) savedInstanceState.getSerializable("book_genres");
+        return;
+    }
+
     private void showDialog(String title, String message) {
         new AlertDialog.Builder(getApplicationContext())
                 .setTitle(title)
@@ -536,5 +599,55 @@ public class ManualInsertActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    //event clicking the button to choose favourite genres
+    private void manageButtonGenre() {
+        btnGenre.setOnClickListener(new View.OnClickListener() {
+            boolean[] oldSelectedGenres = new boolean[genresList.length];
+
+            @Override
+            public void onClick(View view) {
+                oldSelectedGenres = new boolean[genresList.length];
+
+                for(int i=0; i < genresList.length; i++) {
+                    if(checkedItems[i] == true)
+                        oldSelectedGenres[i] = true;
+                }
+
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(ManualInsertActivity.this);
+                mBuilder.setTitle(R.string.title_genre_alertdialog);
+                mBuilder.setMultiChoiceItems(genresList, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    //called every time you click a checkbox
+                    public void onClick(DialogInterface dialogInterface, int position, boolean isChecked) {
+                    }
+                });
+
+                mBuilder.setCancelable(false);
+
+                //called when you click "ok" button
+                mBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                    }
+                });
+
+                mBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        for(int i=0; i < genresList.length; i++) {
+                            checkedItems[i] = oldSelectedGenres[i];
+                        }
+
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                final AlertDialog mDialog = mBuilder.create();
+
+                mDialog.show();
+            }
+        });
     }
 }

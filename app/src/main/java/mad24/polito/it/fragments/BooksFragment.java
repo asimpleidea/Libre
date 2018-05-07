@@ -190,7 +190,7 @@ public class BooksFragment extends Fragment {
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     Book book = bookSnapshot.getValue(Book.class);
 
-                    Log.d("debug", "TITLE: "+book.getTitle());
+                    //Log.d("debug", "TITLE: "+book.getTitle());
 
                     synchronized (actualItemCount) {
                         recyclerViewAdapter.add(book);

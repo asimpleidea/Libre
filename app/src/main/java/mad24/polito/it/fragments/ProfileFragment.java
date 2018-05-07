@@ -77,6 +77,7 @@ public class ProfileFragment extends Fragment {
     FirebaseUser userAuth;
 
     de.hdodenhof.circleimageview.CircleImageView profile_img;
+    android.support.design.widget.FloatingActionButton profile_button;
     private Bitmap profileImageBitmap;
 
     // Recycler view management
@@ -134,6 +135,7 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         profile_img = (de.hdodenhof.circleimageview.CircleImageView) v.findViewById(R.id.frag_profile_image);
+        profile_button = (android.support.design.widget.FloatingActionButton) v.findViewById(R.id.frag_profile_photoButton);
 
         //get user
         userAuth = FirebaseAuth.getInstance().getCurrentUser();
@@ -165,6 +167,15 @@ public class ProfileFragment extends Fragment {
         }
 
         profile_img.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), ShowProfileActivity.class);
+
+                startActivity(intent);
+            }
+        });
+
+        profile_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), ShowProfileActivity.class);
