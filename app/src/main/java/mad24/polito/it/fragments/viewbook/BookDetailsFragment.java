@@ -324,7 +324,7 @@ public class BookDetailsFragment extends Fragment
 
                     //  VERY WEIRD! Glide doesn't like it if it is not wrapped in a url!
                     URL u = new URL(Goodreads.getAuthorImageUrl());
-                    Glide.with(getContext()).load(u.toString()).into((ImageView) RootView.findViewById(R.id.authorImage));
+                    Glide.with(getContext()).load(u.toString()).into((CircleImageView) RootView.findViewById(R.id.authorImage));
                 }
             }
 
