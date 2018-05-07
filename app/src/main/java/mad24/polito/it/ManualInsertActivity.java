@@ -566,10 +566,6 @@ public class ManualInsertActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        //save uri photo/image
-        if(uri != null)
-            outState.putString("book_cover_URI", uri.toString());
-
         //save favourite genres
         outState.putSerializable("book_genres", checkedItems);
 
@@ -579,9 +575,6 @@ public class ManualInsertActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-        //get profile image
-        uri = Uri.parse(savedInstanceState.getString("book_cover_URI"));
 
         //get favourite genres
         checkedItems = (boolean[]) savedInstanceState.getSerializable("book_genres");
