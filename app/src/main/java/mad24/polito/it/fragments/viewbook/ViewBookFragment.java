@@ -291,7 +291,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 
     private void setUpOwner()
     {
+        Bundle b = new Bundle();
+        b.putString("owner", TheBook.getUser_id());
+
         Owner = new BookOwnerFragment();
+        Owner.setArguments(b);
     }
 
     private void setUpMap()

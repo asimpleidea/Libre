@@ -4,9 +4,16 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import mad24.polito.it.R;
 
@@ -18,7 +25,12 @@ import mad24.polito.it.R;
  * Use the {@link BookOwnerFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BookOwnerFragment extends Fragment {
+public class BookOwnerFragment extends Fragment
+{
+    private String UID = null;
+    private DatabaseReference DB = null;
+
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -55,9 +67,28 @@ public class BookOwnerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
+        if (getArguments() != null)
+        {
+            UID = getArguments().getString("owner");
+            DB = FirebaseDatabase.getInstance().getReference()
+                    .child("users/" + UID);
+
+            DB.addListenerForSingleValueEvent(new ValueEventListener()
+            {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot)
+                {
+                    Log.d("VIEWBOOK", "onDataChange: " + dataSnapshot.child("name").getValue());
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
         }
     }
 
