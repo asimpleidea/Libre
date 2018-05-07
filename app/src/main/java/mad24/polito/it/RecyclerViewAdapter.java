@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 import mad24.polito.it.models.Book;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
@@ -40,6 +41,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
     private StorageReference mStorageRef;
     private StorageReference coverRef;
+    private BooksActivity booksActivity = null;
 
     Context mContext;
     List<Book> mData;
@@ -49,6 +51,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.mData = mData;
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
+    }
+
+    public void setBooksActivity(BooksActivity activity)
+    {
+        booksActivity = activity;
     }
 
     @Override
@@ -98,6 +105,30 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }else{
             holder.book_img.setImageDrawable(mContext.getResources().getDrawable(R.drawable.default_book_cover));
         }
+
+        //--------------------------------------
+        //  Set item touch listener
+        //--------------------------------------
+
+        holder.itemView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+                    //----------------------------------
+                    //  Init
+                    //----------------------------------
+
+                    final ViewBookFragment b = new ViewBookFragment();
+
+                    //----------------------------------
+                    //  Show me the book
+                    //----------------------------------
+
+                    booksActivity.setFragment(b, "ViewBook");
+            }
+        });
     }
 
     @Override

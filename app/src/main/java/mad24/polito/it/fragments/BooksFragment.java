@@ -116,6 +116,9 @@ public class BooksFragment extends Fragment {
         books = new ArrayList<Book>();
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
 
+        //  This is needed in order to set the new fragment without using new code!
+        recyclerViewAdapter.setBooksActivity((BooksActivity) getActivity());
+
         rv.setAdapter(recyclerViewAdapter);
 
         //  Set on click listener
@@ -139,15 +142,19 @@ public class BooksFragment extends Fragment {
                     case MotionEvent.ACTION_CANCEL:
                     case MotionEvent.ACTION_UP:
 
-                        //  TODO: remove these two lines when in production.
-                        if(PreventTap) Log.d("TOUCHME", "DID NOT HANDLE IT BECAUSE IT WAS A SCROLL");
-                        else Log.d("TOUCHME", "GOING TO SHOW YOU THE BOOK...");
-
                         //  Was it a legitimate tap?
-                        if(!PreventTap) viewBook();
+                        if(PreventTap)
+                        {
+                            Log.d("VIEWBOOK", "DID NOT HANDLE IT BECAUSE IT WAS A SCROLL");
 
-                        //  Reset
-                        PreventTap = false;
+                            //  It was a scroll, so reset it...
+                            PreventTap = false;
+
+                            //  ... and return true, so that no click is triggered
+                            return true;
+                        }
+
+                        //  No need to reset: if you're here it means that you actually tapped.
 
                         break;
                     case MotionEvent.ACTION_MOVE:
@@ -173,7 +180,7 @@ public class BooksFragment extends Fragment {
                                 DX = 0;
                                 DY = 0;
 
-                                Log.d("TOUCHME", "USER IS SCROLLING");
+                                Log.d("VIEWBOOK", "USER IS SCROLLING");
                             }
                         }
 
@@ -183,7 +190,10 @@ public class BooksFragment extends Fragment {
                 return false;
             }
 
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) { }
+            public void onTouchEvent(RecyclerView rv, MotionEvent e)
+            {
+                Log.d("VIEWBOOK", "called me");
+            }
 
             @Override
             public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) { }
@@ -223,6 +233,7 @@ public class BooksFragment extends Fragment {
 
         return v;
     }
+
 
     @Override
     public void onResume() {
@@ -284,21 +295,6 @@ public class BooksFragment extends Fragment {
                 mIsLoading = false;
             }
         });
-    }
-
-    private void viewBook()
-    {
-        //----------------------------------
-        //  Init
-        //----------------------------------
-
-        final ViewBookFragment b = new ViewBookFragment();
-
-        //----------------------------------
-        //  Show me the book
-        //----------------------------------
-
-        ((BooksActivity) getActivity()).setFragment(b, "viewbook");
     }
 
     @Override

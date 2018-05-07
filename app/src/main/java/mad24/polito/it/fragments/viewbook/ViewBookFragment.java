@@ -143,18 +143,6 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
             }
         }.start();
 
-        /*final FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.main_frame);
-        frameLayout.setBackgroundColor(0xe6f2a2);*/
-
-        /*RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.dummyfrag_scrollableview);
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity().getBaseContext());
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setHasFixedSize(true);
-
-        DessertAdapter adapter = new DessertAdapter(getContext());
-        recyclerView.setAdapter(adapter);*/
-
         return view;
     }
 
@@ -165,15 +153,6 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         //------------------------------------
 
         tabLayout = view.findViewById(R.id.tabLayout);
-
-        //------------------------------------
-        //  Set Icons
-        //------------------------------------
-
-        //  NOTE: the book icon *must* be selected at init. Others must be UNselected
-        /*tabLayout.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
-        tabLayout.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected);
-        tabLayout.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected);*/
 
         //------------------------------------
         //  Set tabs behaviour
