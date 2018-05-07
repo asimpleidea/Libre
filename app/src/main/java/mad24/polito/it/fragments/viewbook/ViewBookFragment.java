@@ -14,9 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.google.gson.Gson;
+
 import mad24.polito.it.R;
 import mad24.polito.it.fragments.FragmentLoadingListener;
 import mad24.polito.it.fragments.FragmentWithLoadingListener;
+import mad24.polito.it.models.Book;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,12 +33,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 {
     private BookViewPagerAdapter ViewPageAdapter = null;
     private ViewPager viewPager = null;
-    private TabLayout Tabs = null;
     private View view = null;
     private BookDetailsFragment Details = null;
     private BookOwnerFragment Owner = null;
     private BookMapFragment Map = null;
-    private TabLayout tabLayout = null;
+    private TabLayout Tabs = null;
 
     private final int BOOK_DETAILS = 0;
     private final int BOOK_OWNER = 1;
@@ -44,17 +46,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private final String BOOK_DETAILS_TITLE = "Details";
     private final String BOOK_OWNER_TITLE = "Owner";
     private final String BOOK_MAP_TITLE = "Map";
+    private final String BUNDLE_KEY = "book";
 
     private FragmentLoadingListener LoadingListener = null;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Book TheBook = null;
 
     private OnFragmentInteractionListener mListener;
 
@@ -67,16 +63,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment ViewBookFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ViewBookFragment newInstance(String param1, String param2) {
+    public static ViewBookFragment newInstance(String param1) {
         ViewBookFragment fragment = new ViewBookFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+
+        /*Bundle args = new Bundle();
+        fragment.setArguments(args);*/
+
         return fragment;
     }
 
@@ -96,9 +91,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
+        //  Get the arguments
+        if (getArguments() != null)
+        {
+            TheBook = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
         }
     }
 
@@ -152,13 +149,13 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         //  Init
         //------------------------------------
 
-        tabLayout = view.findViewById(R.id.tabLayout);
+        Tabs = view.findViewById(R.id.tabLayout);
 
         //------------------------------------
         //  Set tabs behaviour
         //------------------------------------
 
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
+        Tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
         {
             @Override
             public void onTabSelected(TabLayout.Tab tab)
@@ -168,15 +165,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                 switch (tab.getPosition()) {
                     case BOOK_DETAILS:
                         Log.d("VIEWBOOK", "Show book's details");
-                        tabLayout.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
+                        Tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
                         break;
                     case BOOK_OWNER:
                         Log.d("VIEWBOOK", "Show book's owners");
-                        tabLayout.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_selected);
+                        Tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_selected);
                         break;
                     case BOOK_MAP:
                         Log.d("VIEWBOOK", "Show book's map");
-                        tabLayout.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_selected);
+                        Tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_selected);
                         break;
                 }
             }
@@ -188,15 +185,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                 {
                     case BOOK_DETAILS:
                         Log.d("VIEWBOOK", "Show book's details");
-                        tabLayout.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected);
+                        Tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected);
                         break;
                     case BOOK_OWNER:
                         Log.d("VIEWBOOK", "Show book's owners");
-                        tabLayout.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected);
+                        Tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected);
                         break;
                     case BOOK_MAP:
                         Log.d("VIEWBOOK", "Show book's map");
-                        tabLayout.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected);
+                        Tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected);
                         break;
                 }
             }
@@ -242,7 +239,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
             @Override
             public void onPageSelected(int position)
             {
-                tabLayout.getTabAt(position).select();
+                Tabs.getTabAt(position).select();
             }
 
             @Override

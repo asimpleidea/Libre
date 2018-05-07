@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -27,6 +28,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,18 +117,28 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v)
             {
+                //----------------------------------
+                //  Init
+                //----------------------------------
 
-                    //----------------------------------
-                    //  Init
-                    //----------------------------------
+                //  TODO: check if passing object as JSON makes sense: what if the object is too large?
+                //  Pass the book's data here, so we won't have to download everything again
+                //  Doing as JSON, so I won't have to write too many .putString etc :D
+                Bundle args = new Bundle();
+                args.putString("book", new Gson().toJson(mData.get(holder.getAdapterPosition())));
 
-                    final ViewBookFragment b = new ViewBookFragment();
+                //----------------------------------
+                //  Start the fragment
+                //----------------------------------
 
-                    //----------------------------------
-                    //  Show me the book
-                    //----------------------------------
+                final ViewBookFragment b = new ViewBookFragment();
+                b.setArguments(args);
 
-                    booksActivity.setFragment(b, "ViewBook");
+                //----------------------------------
+                //  Show me the book
+                //----------------------------------
+
+                booksActivity.setFragment(b, "ViewBook");
             }
         });
     }
