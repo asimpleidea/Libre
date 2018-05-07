@@ -195,6 +195,9 @@
     <!-- View Book -->
     <string name="read_more">More...</string>
     <string name="book_by">By </string>
+    <string name="book_language">Language</string>
+    <string name="book_pages">%1$d Pages</string>
+    <string name="book_ratings_count">%1$d ratings on GoodReads</string>
     <!-- /View Book -->
 
 </resources>

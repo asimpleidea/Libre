@@ -37,16 +37,31 @@
                 android:textSize="35sp" />
 
             <!-- Book Author -->
-            <TextView
-                android:id="@+id/bookAuthor"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/opensans_light"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowColor="@color/black"
-                android:shadowRadius=".5"
-                android:textSize="20sp" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/authorImage"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/book4"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/bookAuthor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/opensans_light"
+                    android:shadowColor="@color/black"
+                    android:shadowDx="1"
+                    android:shadowDy="1"
+                    android:shadowRadius=".5"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/goodReadsReview"
@@ -83,7 +98,6 @@
                         android:isIndicator="true"
                         app:mrb_progressTint="#f7ec1d"
                         android:numStars="5"
-                        android:rating="3.4"
                         android:stepSize=".1" />
 
                     <TextView
@@ -135,6 +149,38 @@
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:text="@string/book_language"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/bookLanguage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/bookPages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="@string/book_isbn"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
@@ -158,16 +204,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="@string/edition_year"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/bookYear"
+                    android:id="@+id/bookPublicationYear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -182,7 +226,6 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="@string/book_publisher"
                     android:textColor="@color/black"
                     android:textSize="16sp" />

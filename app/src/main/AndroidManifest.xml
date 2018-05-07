@@ -100,7 +100,6 @@
             </intent-filter>
             -->
         </activity>
-        <activity android:name=".SignUpActivity" />
 
         <!-- Facebook Login/Signup -->
         <meta-data
