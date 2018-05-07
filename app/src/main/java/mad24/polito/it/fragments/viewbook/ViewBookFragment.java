@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -12,8 +13,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 
 import mad24.polito.it.R;
@@ -38,6 +45,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private BookOwnerFragment Owner = null;
     private BookMapFragment Map = null;
     private TabLayout Tabs = null;
+    private StorageReference Storage = null;
 
     private final int BOOK_DETAILS = 0;
     private final int BOOK_OWNER = 1;
@@ -51,6 +59,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private FragmentLoadingListener LoadingListener = null;
 
     private Book TheBook = null;
+    private String JSONBook = null;
 
     private OnFragmentInteractionListener mListener;
 
@@ -95,8 +104,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         //  Get the arguments
         if (getArguments() != null)
         {
+            JSONBook = getArguments().getString(BUNDLE_KEY);
             TheBook = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
+            Storage = FirebaseStorage.getInstance().getReference().child("bookCovers").child(TheBook.getBook_id() + ".jpg");
         }
+
     }
 
     @Override
@@ -106,6 +118,23 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_view_book, container, false);
+
+        //  Load the Image
+        Storage.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
+        {
+            @Override
+            public void onSuccess(Uri uri)
+            {
+                Glide.with(getActivity().getApplicationContext()).load(uri).into((ImageView) view.findViewById(R.id.bookCover));
+            }
+        }).addOnFailureListener(new OnFailureListener()
+        {
+            @Override
+            public void onFailure(@NonNull Exception e)
+            {
+
+            }
+        });
 
         Log.d("VIEWBOOK", "onCreateView");
 
@@ -253,7 +282,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 
     private void setUpDetails()
     {
+        Bundle b = new Bundle();
+        b.putString(BUNDLE_KEY, JSONBook);
+
         Details = new BookDetailsFragment();
+        Details.setArguments(b);
     }
 
     private void setUpOwner()

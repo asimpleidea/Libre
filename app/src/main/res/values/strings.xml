@@ -192,4 +192,9 @@
 
     <!-- /Facebook -->
 
+    <!-- View Book -->
+    <string name="read_more">More...</string>
+    <string name="book_by">By </string>
+    <!-- /View Book -->
+
 </resources>

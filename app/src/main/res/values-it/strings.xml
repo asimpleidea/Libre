@@ -165,6 +165,9 @@
     <string name="fb_error_get_me">Opss! Non siamo riusciti a ottenere i tuoi dati da facebook. Riprova più tardi o prova un altro metodo.</string>
     <string name="fb_error_authenticate">Non siamo riusciti ad autenticarti. Riprova più tardi o prova un altro metodo.</string>
 
-
+    <!-- View Book -->
+    <string name="read_more">Altro...</string>
+    <string name="book_by">Di </string>
+    <!-- /View Book -->
 
 </resources>

@@ -144,13 +144,12 @@
             >
 
             <ImageView
-                android:id="@+id/main.backdrop"
+                android:id="@+id/bookCover"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:fitsSystemWindows="true"
                 android:cropToPadding="true"
-                android:src="@drawable/book4"
                 app:layout_collapseMode="parallax"
                 />
 

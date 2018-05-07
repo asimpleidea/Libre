@@ -7,8 +7,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
 
 import mad24.polito.it.R;
+import mad24.polito.it.models.Book;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,7 +22,12 @@ import mad24.polito.it.R;
  * Use the {@link BookDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BookDetailsFragment extends Fragment {
+public class BookDetailsFragment extends Fragment
+{
+    private Book Data = null;
+    private final String BUNDLE_KEY = "book";
+    private View RootView = null;
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -55,17 +64,36 @@ public class BookDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
+        if (getArguments() != null)
+        {
+            Data = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             Bundle savedInstanceState)
+    {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_book_details, container, false);
+        RootView = inflater.inflate(R.layout.fragment_book_details, container, false);
+
+        // Set the title
+        ((TextView) RootView.findViewById(R.id.bookTitle)).setText(Data.getTitle());
+
+        //  Set the author
+        //  TODO: get it from GoodReads
+        ((TextView) RootView.findViewById(R.id.bookAuthor)).setText(new String(getResources().getString(R.string.book_by) + " " + Data.getAuthor()));
+
+        //  Set the description
+        ((TextView) RootView.findViewById(R.id.bookDescription)).setText("CACCA");
+
+        //  Set the year
+        ((TextView) RootView.findViewById(R.id.bookYear)).setText(Data.getEditionYear());
+
+        //  Set the publisher
+        ((TextView) RootView.findViewById(R.id.bookPublisher)).setText(Data.getPublisher());
+        return RootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
