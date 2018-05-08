@@ -18,8 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -27,10 +25,8 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
+
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,7 +37,7 @@ import com.google.gson.Gson;
 import mad24.polito.it.R;
 import mad24.polito.it.models.Book;
 import mad24.polito.it.models.UserMail;
-import mad24.polito.it.registrationmail.User;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,15 +49,6 @@ import mad24.polito.it.registrationmail.User;
  */
 public class BookMapFragment extends Fragment
 {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private View RootView = null;
     private MapView mMapView = null;
     private GoogleMap googleMap = null;
@@ -74,10 +61,10 @@ public class BookMapFragment extends Fragment
     private LatLng UserLocation = null;
     private final int PERMISSION_REQUEST_LOCATION = 20;
 
+    //private OnFragmentInteractionListener mListener;
 
-    private OnFragmentInteractionListener mListener;
-
-    public BookMapFragment() {
+    public BookMapFragment()
+    {
         // Required empty public constructor
     }
 
@@ -90,12 +77,10 @@ public class BookMapFragment extends Fragment
      * @return A new instance of fragment BookMapFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static BookMapFragment newInstance(String param1, String param2) {
+    public static BookMapFragment newInstance(String param1, String param2)
+    {
         BookMapFragment fragment = new BookMapFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+
         return fragment;
     }
 
@@ -285,68 +270,9 @@ public class BookMapFragment extends Fragment
         if(Owner == null || Coordinates == null) loadAndInjectData();
         else askForPermission();
 
-        /*try
-        {
-            Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-            criteria.setPowerRequirement(Criteria.POWER_LOW);
-            criteria.setAltitudeRequired(false);
-            criteria.setBearingRequired(false);
-            criteria.setSpeedRequired(false);
-            criteria.setCostAllowed(true);
-            criteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
-            criteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
-
-            LocationManager locManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-
-            locManager.requestSingleUpdate(criteria, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location)
-                {
-                    Log.d("VIEWBOOK", "on lcation changed");
-                    if(location != null)
-                    {
-                        Log.d("VIEWBOOK", "location is not null");
-                    }
-                }
-
-                @Override
-                public void onStatusChanged(String s, int i, Bundle bundle)
-                {
-                    Log.d("VIEWBOOK", "on status changed");
-                }
-
-                @Override
-                public void onProviderEnabled(String s)
-                {
-                    Log.d("VIEWBOOK", "on provider enabled");
-                }
-
-                @Override
-                public void onProviderDisabled(String s)
-                {
-                    Log.d("VIEWBOOK", "on provider disabled");
-                }
-            }, null);
-        }
-        catch (SecurityException s)
-        {
-            Log.d("VIEWBOOK", "on exception");
-        }*/
-
-        //Location location = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
         return RootView;
     }
 
-
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -362,7 +288,7 @@ public class BookMapFragment extends Fragment
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        //mListener = null;
     }
 
     /**
