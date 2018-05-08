@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.Xml;
 import android.view.LayoutInflater;
@@ -52,6 +53,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import mad24.polito.it.R;
+import mad24.polito.it.fragments.FragmentLoadingListener;
+import mad24.polito.it.fragments.FragmentWithLoadingListener;
 import mad24.polito.it.models.Book;
 import me.zhanghai.android.materialratingbar.MaterialRatingBar;
 
@@ -63,7 +66,7 @@ import me.zhanghai.android.materialratingbar.MaterialRatingBar;
  * Use the {@link BookDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BookDetailsFragment extends Fragment
+public class BookDetailsFragment extends Fragment implements FragmentWithLoadingListener
 {
     private Book Data = null;
     private final String BUNDLE_KEY = "book";
@@ -72,42 +75,24 @@ public class BookDetailsFragment extends Fragment
     private final int GOODREADS_BOOK_FIELDS = 9;
     private final int GOODREADS_AUTHOR_FIELDS = 3;
     private boolean AlreadyQueried = false;
+    private FragmentLoadingListener LoadingListener = null;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
+    //private OnFragmentInteractionListener mListener;
 
     public BookDetailsFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment BookDetailsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static BookDetailsFragment newInstance(String param1, String param2) {
+    public static BookDetailsFragment newInstance()
+    {
         BookDetailsFragment fragment = new BookDetailsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null)
@@ -126,10 +111,11 @@ public class BookDetailsFragment extends Fragment
         try
         {
             // UGLY hardcoded string. Gonna edit it later...
-            u = new URL("https://www.goodreads.com/book/isbn?&key=rGvCtASV1hvUEwo1pldorA&isbn=" + /*Data.getIsbn()*/ "9781444720730");
+            u = new URL("https://www.goodreads.com/book/isbn?&key=rGvCtASV1hvUEwo1pldorA&isbn=" + /*Data.getIsbn()*/  "1444720732");
         }
         catch(MalformedURLException m)
         {
+            injectData();
             return;
         }
 
@@ -308,6 +294,8 @@ public class BookDetailsFragment extends Fragment
                 }
             }
 
+            inputXML.close();
+
         }
         catch (IOException e)
         {
@@ -396,7 +384,11 @@ public class BookDetailsFragment extends Fragment
         }
 
         //  Data loaded!
-        //  TODO: raise finished event!
+        if(LoadingListener != null)
+        {
+            String cover = Goodreads != null ? Goodreads.getImageUrl() : null;
+            LoadingListener.onFragmentLoaded(cover);
+        }
     }
 
     @Override
@@ -406,6 +398,7 @@ public class BookDetailsFragment extends Fragment
         // Inflate the layout for this fragment
         RootView = inflater.inflate(R.layout.fragment_book_details, container, false);
 
+        //  Do we have data ready?
         if(Goodreads == null)
         {
             if(!AlreadyQueried) grabDataFromGoodreads();
@@ -443,8 +436,15 @@ public class BookDetailsFragment extends Fragment
     public void onDetach()
     {
         super.onDetach();
-        mListener = null;
+        //mListener = null;
     }
+
+    @Override
+    public void setLoadingListener(FragmentLoadingListener loadingListener)
+    {
+        LoadingListener = loadingListener;
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this
@@ -458,6 +458,6 @@ public class BookDetailsFragment extends Fragment
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        //void onFragmentInteraction(Uri uri);
     }
 }

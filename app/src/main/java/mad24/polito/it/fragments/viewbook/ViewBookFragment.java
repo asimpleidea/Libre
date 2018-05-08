@@ -3,8 +3,6 @@ package mad24.polito.it.fragments.viewbook;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -17,10 +15,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
 
 import mad24.polito.it.R;
@@ -45,7 +42,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private BookOwnerFragment Owner = null;
     private BookMapFragment Map = null;
     private TabLayout Tabs = null;
-    private StorageReference Storage = null;
+    private boolean AlreadyVisible = false;
 
     private final int BOOK_DETAILS = 0;
     private final int BOOK_OWNER = 1;
@@ -63,7 +60,8 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 
     private OnFragmentInteractionListener mListener;
 
-    public ViewBookFragment() {
+    public ViewBookFragment()
+    {
         // Required empty public constructor
     }
 
@@ -85,15 +83,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     }
 
     @Override
-    public void onDestroyView() {
+    public void onDestroyView()
+    {
         super.onDestroyView();
-        Log.d("VIEWBOOK", "destroyed view");
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
-        Log.d("VIEWBOOK", "destroyed fragment");
 
     }
 
@@ -106,7 +104,6 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         {
             JSONBook = getArguments().getString(BUNDLE_KEY);
             TheBook = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
-            Storage = FirebaseStorage.getInstance().getReference().child("bookCovers").child(TheBook.getBook_id() + ".jpg");
         }
 
     }
@@ -115,28 +112,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_view_book, container, false);
 
-        //  Load the Image
-        Storage.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
+        //  Load the book cover
+        if(TheBook.getBookImageLink() != null && !TheBook.getBookImageLink().isEmpty())
         {
-            @Override
-            public void onSuccess(Uri uri)
-            {
-                Glide.with(getActivity().getApplicationContext()).load(uri).into((ImageView) view.findViewById(R.id.bookCover));
-            }
-        }).addOnFailureListener(new OnFailureListener()
-        {
-            @Override
-            public void onFailure(@NonNull Exception e)
-            {
+            Glide.with(getActivity().getApplicationContext()).load(TheBook.getBookImageLink()).into((ImageView) view.findViewById(R.id.bookCover));
+        }
 
-            }
-        });
-
-        Log.d("VIEWBOOK", "onCreateView");
 
         setUpDetails();
 
@@ -154,20 +138,6 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
             LoadingListener.onFragmentLoaded();
             Log.d("VIEWBOOK", "Event raised successfully");
         }
-
-        new CountDownTimer(3000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-                //mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
-            }
-
-            public void onFinish() {
-                Log.d("VIEWBOOK", "count down finished");
-                ((ProgressBar)view.findViewById(R.id.loadingScreen)).setVisibility(View.GONE);
-                ((AppBarLayout)view.findViewById(R.id.main_appbar)).setVisibility(View.VISIBLE);
-                ((ViewPager)view.findViewById(R.id.viewPager)).setVisibility(View.VISIBLE);
-            }
-        }.start();
 
         return view;
     }
@@ -287,6 +257,53 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 
         Details = new BookDetailsFragment();
         Details.setArguments(b);
+        Details.setLoadingListener(new FragmentLoadingListener() {
+            @Override
+            public void onFragmentLoaded()
+            {
+                //  Nothing...
+            }
+
+            @Override
+            public void onFragmentLoaded(String arg)
+            {
+                if(AlreadyVisible) return;
+
+                //  Has no image?
+                ImageView cover = view.findViewById(R.id.bookCover);
+                if(TheBook.getBookImageLink() == null || (TheBook.getBookImageLink() != null && TheBook.getBookImageLink().length() < 1))
+                {
+                    Glide.with(getContext()).load(arg)
+                            .listener(new RequestListener<String, GlideDrawable>() {
+                                @Override
+                                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource)
+                                {
+                                    showFragment();
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource)
+                                {
+                                    showFragment();
+                                    return false;
+                                }
+                            }).into((ImageView) view.findViewById(R.id.bookCover));
+
+                    TheBook.setBookImageLink(arg);
+                }
+
+                else showFragment();
+            }
+        });
+    }
+
+    private void showFragment()
+    {
+        ((ProgressBar)view.findViewById(R.id.loadingScreen)).setVisibility(View.GONE);
+        ((AppBarLayout)view.findViewById(R.id.main_appbar)).setVisibility(View.VISIBLE);
+        ((ViewPager)view.findViewById(R.id.viewPager)).setVisibility(View.VISIBLE);
+        AlreadyVisible = true;
     }
 
     private void setUpOwner()

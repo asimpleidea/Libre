@@ -169,7 +169,7 @@ public class BookMapFragment extends Fragment
 
         mMapView.onResume(); // needed to get the map to display immediately
 
-        if(Owner == null && Coordinates == null) loadAndInjectData();
+        if(Owner == null || Coordinates == null) loadAndInjectData();
         else injectData();
 
         return RootView;
