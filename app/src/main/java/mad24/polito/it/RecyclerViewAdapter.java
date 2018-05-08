@@ -141,6 +141,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //  Show me the book
                 //----------------------------------
 
+                booksActivity.setViewBookFragment(b);
                 booksActivity.setFragment(b, "ViewBook");
             }
         });

@@ -62,9 +62,7 @@ public class GoodreadsBook
         return Language;
     }
 
-    public void setLanguage(String language) {
-        Language = language;
-    }
+    public void setLanguage(String language) { Language = language; }
 
     public String getDescription() {
         return Description;

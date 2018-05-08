@@ -103,6 +103,12 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
 
     private void grabDataFromGoodreads()
     {
+        if(Data.getIsbn() == null || (Data.getIsbn() != null && Data.getIsbn().isEmpty()))
+        {
+            injectData();
+            return;
+        }
+
         //  If data is there then go get GoodReads!
         RequestQueue queue = Volley.newRequestQueue(getActivity().getApplicationContext());
 
@@ -111,7 +117,7 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
         try
         {
             // UGLY hardcoded string. Gonna edit it later...
-            u = new URL("https://www.goodreads.com/book/isbn?&key=rGvCtASV1hvUEwo1pldorA&isbn=" + /*Data.getIsbn()*/  "1444720732");
+            u = new URL("https://www.goodreads.com/book/isbn?&key=rGvCtASV1hvUEwo1pldorA&isbn=" + Data.getIsbn());
         }
         catch(MalformedURLException m)
         {
@@ -222,7 +228,11 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
                 //  Language code
                 if (node.getNodeName().equalsIgnoreCase("language_code"))
                 {
-                    Goodreads.setLanguage(node.getTextContent());
+                    String lang = null;
+                    if(node.getTextContent().equalsIgnoreCase("eng")) lang = getString(R.string.english_language);
+                    else lang = getString(R.string.italian_language);
+
+                    Goodreads.setLanguage(lang);
                     ++done;
                 }
 
@@ -330,7 +340,7 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
         if(year != null && year.length() > 0)
         {
             TextView t = RootView.findViewById(R.id.bookPublicationYear);
-            t.setText(year);
+            t.setText(String.format(getString(R.string.published_in), year));
             ((LinearLayout) t.getParent()).setVisibility(View.VISIBLE);
         }
 
@@ -340,7 +350,7 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
         if(publisher != null && publisher.length() > 0)
         {
             TextView t = RootView.findViewById(R.id.bookPublisher);
-            t.setText(publisher);
+            t.setText(String.format(getString(R.string.published_by), publisher));
             ((LinearLayout) t.getParent()).setVisibility(View.VISIBLE);
         }
 

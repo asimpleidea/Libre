@@ -201,6 +201,12 @@
     <string name="owner_picture">Owner\'s picture</string>
     <string name="book_conditions_user">"%1$s"</string>
     <string name="my_position">My position</string>
+    <string name="english_language">English</string>
+    <string name="italian_language">Italian</string>
+    <string name="published_by">Published by %1$s</string>
+    <string name="published_in">Published in %1$s</string>
+    <string name="title_activity_view_book">ViewBookActivity</string>
+    <string name="action_settings">Settings</string>
     <!-- /View Book -->
 
 </resources>

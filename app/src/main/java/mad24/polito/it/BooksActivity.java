@@ -16,6 +16,7 @@ import mad24.polito.it.fragments.BooksFragment;
 import mad24.polito.it.fragments.ChatFragment;
 import mad24.polito.it.fragments.ProfileFragment;
 import mad24.polito.it.fragments.SearchFragment;
+import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 
 public class BooksActivity  extends AppCompatActivity
 {
@@ -26,8 +27,9 @@ public class BooksActivity  extends AppCompatActivity
     private SearchFragment searchFragment;
     private ChatFragment chatFragment;
     private ProfileFragment profileFragment;
+    private ViewBookFragment ViewBook;
 
-    private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment, ViewBookFragment, LoadingScreenFragment};
+    private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment, ViewBookFragment};
     private CurrentFragment currentFragment;
 
     private TextView mTextMessage;
@@ -115,11 +117,16 @@ public class BooksActivity  extends AppCompatActivity
                             .commit();
     }
 
+    public void setViewBookFragment(ViewBookFragment Vb)
+    {
+        ViewBook = Vb;
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        //Log.d("currFrag", "Saving: "+ currentFragment.ordinal());
+        Log.d("VIEWBOOK", "Saving: "+ currentFragment.getClass().toString());
         //  TODO: this needs to be modified in case we were on a ViewBookFragment
         outState.putInt("fragment", currentFragment.ordinal());
     }
@@ -144,6 +151,12 @@ public class BooksActivity  extends AppCompatActivity
                 break;
             case 3:
                 setFragment(profileFragment);
+                break;
+            case 4:
+            {
+                if(ViewBook == null) Log.d("VIEWBOOK", "Viewbook is null");
+                Log.d("VIEWBOOK", "here");
+            }
                 break;
         }
     }

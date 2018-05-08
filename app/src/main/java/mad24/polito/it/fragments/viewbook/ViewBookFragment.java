@@ -1,8 +1,10 @@
 package mad24.polito.it.fragments.viewbook;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -20,6 +22,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
 
+import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;
 import mad24.polito.it.fragments.FragmentLoadingListener;
 import mad24.polito.it.fragments.FragmentWithLoadingListener;
@@ -96,7 +99,8 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         //  Get the arguments
@@ -105,7 +109,6 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
             JSONBook = getArguments().getString(BUNDLE_KEY);
             TheBook = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
         }
-
     }
 
     @Override
@@ -271,31 +274,44 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 
                 //  Has no image?
                 ImageView cover = view.findViewById(R.id.bookCover);
-                if(TheBook.getBookImageLink() == null || (TheBook.getBookImageLink() != null && TheBook.getBookImageLink().length() < 1))
+                if(TheBook.getBookImageLink() == null || (TheBook.getBookImageLink() != null && TheBook.getBookImageLink().isEmpty()))
                 {
-                    Glide.with(getContext()).load(arg)
-                            .listener(new RequestListener<String, GlideDrawable>() {
-                                @Override
-                                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource)
-                                {
-                                    showFragment();
-                                    return false;
-                                }
+                    if(arg != null)
+                    {
+                        Glide.with(getContext()).load(arg)
+                                .listener(new RequestListener<String, GlideDrawable>() {
+                                    @Override
+                                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource)
+                                    {
+                                        showFragment();
+                                        return false;
+                                    }
 
-                                @Override
-                                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource)
-                                {
-                                    showFragment();
-                                    return false;
-                                }
-                            }).into((ImageView) view.findViewById(R.id.bookCover));
+                                    @Override
+                                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource)
+                                    {
+                                        showFragment();
+                                        return false;
+                                    }
+                                }).into(cover);
 
-                    TheBook.setBookImageLink(arg);
+                        TheBook.setBookImageLink(arg);
+                    }
+                    else
+                    {
+                        cover.setImageDrawable(getResources().getDrawable(R.drawable.default_book_cover));
+                        showFragment();
+                    }
                 }
-
                 else showFragment();
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
     }
 
     private void showFragment()
