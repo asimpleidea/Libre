@@ -119,6 +119,8 @@ public class BookOwnerFragment extends Fragment
 
     private void injectUser()
     {
+        if(User == null) return;
+
         //  Put the owner's pic
         if(OwnerImage == null)
         {
