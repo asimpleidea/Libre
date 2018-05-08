@@ -124,25 +124,20 @@ public class BookMapFragment extends Fragment
     {
         if (TheBook == null) return;
 
-        Log.d("VIEWBOOK", "Asking for permissions...");
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED /*&& ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED*/)
         {
-            Log.d("VIEWBOOK", "Not permission, getting...");
             ActivityCompat.requestPermissions(getActivity(),
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSION_REQUEST_LOCATION);
         }
         else
         {
-            Log.d("VIEWBOOK", "Already have granted.");
             getLocation();
         }
     }
 
     private void getLocation()
     {
-        Log.d("VIEWBOOK", "Getting current location");
-
         try
         {
             //  The criteria. This is probably not the most recommended method by Google, but we're short on time so...
@@ -166,7 +161,6 @@ public class BookMapFragment extends Fragment
                 {
                     if(location != null)
                     {
-                        Log.d("VIEWBOOK", "location is not null: lat:" + location.getLatitude() + ", long: " + location.getLongitude());
                         UserLocation = new LatLng(location.getLatitude(), location.getLongitude());
                     }
                     injectData();
@@ -175,25 +169,21 @@ public class BookMapFragment extends Fragment
                 @Override
                 public void onStatusChanged(String s, int i, Bundle bundle)
                 {
-                    Log.d("VIEWBOOK", "on status changed");
                 }
 
                 @Override
                 public void onProviderEnabled(String s)
                 {
-                    Log.d("VIEWBOOK", "on provider enabled");
                 }
 
                 @Override
                 public void onProviderDisabled(String s)
                 {
-                    Log.d("VIEWBOOK", "on provider disabled");
                 }
             }, null);
         }
         catch (SecurityException s)
         {
-            Log.d("VIEWBOOK", "on exception");
             injectData();
         }
     }
@@ -215,7 +205,6 @@ public class BookMapFragment extends Fragment
 
     private void injectData()
     {
-        Log.d("VIEWBOOK", "Injecting data...");
         try
         {
             MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -231,7 +220,6 @@ public class BookMapFragment extends Fragment
                 @Override
                 public void onMapReady(GoogleMap mMap)
                 {
-                    Log.d("VIEWBOOK", "Map is ready");
                     googleMap = mMap;
 
                     // For showing a move to my location button
@@ -252,7 +240,6 @@ public class BookMapFragment extends Fragment
         }
         catch(SecurityException s)
         {
-            Log.d("VIEWBOOK", "NO permissions");
         }
     }
 
