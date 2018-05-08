@@ -1,14 +1,25 @@
 package mad24.polito.it.fragments.viewbook;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -16,7 +27,10 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,6 +41,7 @@ import com.google.gson.Gson;
 import mad24.polito.it.R;
 import mad24.polito.it.models.Book;
 import mad24.polito.it.models.UserMail;
+import mad24.polito.it.registrationmail.User;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,6 +70,10 @@ public class BookMapFragment extends Fragment
     private UserMail Owner = null;
     private LatLng Coordinates = null;
     private DatabaseReference DB = null;
+    private FusedLocationProviderClient LocationClient = null;
+    private LatLng UserLocation = null;
+    private final int PERMISSION_REQUEST_LOCATION = 20;
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -83,11 +102,9 @@ public class BookMapFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null)
-        {
+        if (getArguments() != null) {
             TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
-            if(TheBook != null)
-            {
+            if (TheBook != null) {
                 UID = TheBook.getUser_id();
                 DB = FirebaseDatabase.getInstance().getReference()
                         .child("users/" + UID);
@@ -95,18 +112,17 @@ public class BookMapFragment extends Fragment
         }
     }
 
-    private void loadAndInjectData()
-    {
-        DB.addListenerForSingleValueEvent(new ValueEventListener()
-        {
+    private void loadAndInjectData() {
+        if (TheBook == null) return;
+
+        DB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 Owner = dataSnapshot.getValue(UserMail.class);
-                if(dataSnapshot.hasChild("lat") && dataSnapshot.hasChild("lon"))
+                if (dataSnapshot.hasChild("lat") && dataSnapshot.hasChild("lon"))
                 {
                     Coordinates = new LatLng(dataSnapshot.child("lat").getValue(Double.class), dataSnapshot.child("lon").getValue(Double.class));
-                    injectData();
+                    askForPermission();
                 }
 
             }
@@ -119,8 +135,102 @@ public class BookMapFragment extends Fragment
         });
     }
 
+    private void askForPermission()
+    {
+        if (TheBook == null) return;
+
+        Log.d("VIEWBOOK", "Asking for permissions...");
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED /*&& ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED*/)
+        {
+            Log.d("VIEWBOOK", "Not permission, getting...");
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_REQUEST_LOCATION);
+        }
+        else
+        {
+            Log.d("VIEWBOOK", "Already have granted.");
+            getLocation();
+        }
+    }
+
+    private void getLocation()
+    {
+        Log.d("VIEWBOOK", "Getting current location");
+
+        try
+        {
+            //  The criteria. This is probably not the most recommended method by Google, but we're short on time so...
+            //  you know... done is better than perfect...
+            Criteria criteria = new Criteria();
+            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+            criteria.setPowerRequirement(Criteria.POWER_LOW);
+            criteria.setAltitudeRequired(false);
+            criteria.setBearingRequired(false);
+            criteria.setSpeedRequired(false);
+            criteria.setCostAllowed(true);
+            criteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
+            criteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
+
+            LocationManager locManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+
+            locManager.requestSingleUpdate(criteria, new LocationListener()
+            {
+                @Override
+                public void onLocationChanged(Location location)
+                {
+                    if(location != null)
+                    {
+                        Log.d("VIEWBOOK", "location is not null: lat:" + location.getLatitude() + ", long: " + location.getLongitude());
+                        UserLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    }
+                    injectData();
+                }
+
+                @Override
+                public void onStatusChanged(String s, int i, Bundle bundle)
+                {
+                    Log.d("VIEWBOOK", "on status changed");
+                }
+
+                @Override
+                public void onProviderEnabled(String s)
+                {
+                    Log.d("VIEWBOOK", "on provider enabled");
+                }
+
+                @Override
+                public void onProviderDisabled(String s)
+                {
+                    Log.d("VIEWBOOK", "on provider disabled");
+                }
+            }, null);
+        }
+        catch (SecurityException s)
+        {
+            Log.d("VIEWBOOK", "on exception");
+            injectData();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode)
+        {
+            case PERMISSION_REQUEST_LOCATION:
+            {
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) getLocation();
+                else injectData();
+            }
+            break;
+        }
+    }
+
     private void injectData()
     {
+        Log.d("VIEWBOOK", "Injecting data...");
         try
         {
             MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -134,20 +244,23 @@ public class BookMapFragment extends Fragment
         {
             mMapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
-                public void onMapReady(GoogleMap mMap) {
+                public void onMapReady(GoogleMap mMap)
+                {
+                    Log.d("VIEWBOOK", "Map is ready");
                     googleMap = mMap;
 
                     // For showing a move to my location button
-                    //googleMap.setMyLocationEnabled(true);
+                    googleMap.setMyLocationEnabled(true);
 
-                    Log.d("VIEWBOOK", "Latitude: " + Coordinates.latitude);
-                    Log.d("VIEWBOOK", "Longitude: " + Coordinates.longitude);
-                    // For dropping a marker at a point on the Map
-                    LatLng sydney = new LatLng(Coordinates.latitude, Coordinates.longitude);
-                    googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker Title").snippet("Marker Description"));
+                    /*if(UserLocation != null)
+                    {
+                        googleMap.addMarker(new MarkerOptions().position(UserLocation).title(getString(R.string.my_position)));
+                    }*/
+
+                    googleMap.addMarker(new MarkerOptions().position(Coordinates).title(TheBook.getTitle()));
 
                     // For zooming automatically to the location of the marker
-                    CameraPosition cameraPosition = new CameraPosition.Builder().target(sydney).zoom(12).build();
+                    CameraPosition cameraPosition = new CameraPosition.Builder().target(Coordinates).zoom(15).build();
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                 }
             });
@@ -170,10 +283,63 @@ public class BookMapFragment extends Fragment
         mMapView.onResume(); // needed to get the map to display immediately
 
         if(Owner == null || Coordinates == null) loadAndInjectData();
-        else injectData();
+        else askForPermission();
+
+        /*try
+        {
+            Criteria criteria = new Criteria();
+            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+            criteria.setPowerRequirement(Criteria.POWER_LOW);
+            criteria.setAltitudeRequired(false);
+            criteria.setBearingRequired(false);
+            criteria.setSpeedRequired(false);
+            criteria.setCostAllowed(true);
+            criteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
+            criteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
+
+            LocationManager locManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+
+            locManager.requestSingleUpdate(criteria, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location)
+                {
+                    Log.d("VIEWBOOK", "on lcation changed");
+                    if(location != null)
+                    {
+                        Log.d("VIEWBOOK", "location is not null");
+                    }
+                }
+
+                @Override
+                public void onStatusChanged(String s, int i, Bundle bundle)
+                {
+                    Log.d("VIEWBOOK", "on status changed");
+                }
+
+                @Override
+                public void onProviderEnabled(String s)
+                {
+                    Log.d("VIEWBOOK", "on provider enabled");
+                }
+
+                @Override
+                public void onProviderDisabled(String s)
+                {
+                    Log.d("VIEWBOOK", "on provider disabled");
+                }
+            }, null);
+        }
+        catch (SecurityException s)
+        {
+            Log.d("VIEWBOOK", "on exception");
+        }*/
+
+        //Location location = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         return RootView;
     }
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

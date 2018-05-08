@@ -200,6 +200,7 @@
     <string name="book_ratings_count">%1$d ratings on GoodReads</string>
     <string name="owner_picture">Owner\'s picture</string>
     <string name="book_conditions_user">"%1$s"</string>
+    <string name="my_position">My position</string>
     <!-- /View Book -->
 
 </resources>

@@ -173,6 +173,7 @@
     <string name="book_ratings_count">%1$d voti su GoodReads</string>
     <string name="owner_picture">Proprietario</string>
     <string name="book_conditions_user">"%1$s"</string>
+    <string name="my_position">La mia posizione</string>
     <!-- /View Book -->
 
 </resources>

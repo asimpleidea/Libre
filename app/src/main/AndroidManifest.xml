@@ -18,7 +18,7 @@
         android:required="false" />
 
     <!-- Necessary for HTTP requests, such as querying Facebook for user's data -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!--<uses-permission android:name="android.permission.INTERNET" />-->
 
     <application
         android:allowBackup="true"
