@@ -17,10 +17,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import mad24.polito.it.R;
 import mad24.polito.it.models.Book;
+import mad24.polito.it.models.UserMail;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,7 +36,8 @@ import mad24.polito.it.models.Book;
  * Use the {@link BookMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BookMapFragment extends Fragment {
+public class BookMapFragment extends Fragment
+{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -40,10 +47,14 @@ public class BookMapFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private View view = null;
+    private View RootView = null;
     private MapView mMapView = null;
     private GoogleMap googleMap = null;
     private Book TheBook = null;
+    private String UID = null;
+    private UserMail Owner = null;
+    private LatLng Coordinates = null;
+    private DatabaseReference DB = null;
 
     private OnFragmentInteractionListener mListener;
 
@@ -75,25 +86,46 @@ public class BookMapFragment extends Fragment {
         if (getArguments() != null)
         {
             TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
+            if(TheBook != null)
+            {
+                UID = TheBook.getUser_id();
+                DB = FirebaseDatabase.getInstance().getReference()
+                        .child("users/" + UID);
+            }
         }
-
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_book_map, container, false);
+    private void loadAndInjectData()
+    {
+        DB.addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                Owner = dataSnapshot.getValue(UserMail.class);
+                if(dataSnapshot.hasChild("lat") && dataSnapshot.hasChild("lon"))
+                {
+                    Coordinates = new LatLng(dataSnapshot.child("lat").getValue(Double.class), dataSnapshot.child("lon").getValue(Double.class));
+                    injectData();
+                }
 
-        mMapView = (MapView) view.findViewById(R.id.mapView);
-        mMapView.onCreate(savedInstanceState);
+            }
 
-        mMapView.onResume(); // needed to get the map to display immediately
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+                Log.d("VIEWBOOK", "can't load user");
+            }
+        });
+    }
 
+    private void injectData()
+    {
         try
         {
             MapsInitializer.initialize(getActivity().getApplicationContext());
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -108,8 +140,10 @@ public class BookMapFragment extends Fragment {
                     // For showing a move to my location button
                     //googleMap.setMyLocationEnabled(true);
 
+                    Log.d("VIEWBOOK", "Latitude: " + Coordinates.latitude);
+                    Log.d("VIEWBOOK", "Longitude: " + Coordinates.longitude);
                     // For dropping a marker at a point on the Map
-                    LatLng sydney = new LatLng(-34, 151);
+                    LatLng sydney = new LatLng(Coordinates.latitude, Coordinates.longitude);
                     googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker Title").snippet("Marker Description"));
 
                     // For zooming automatically to the location of the marker
@@ -122,9 +156,23 @@ public class BookMapFragment extends Fragment {
         {
             Log.d("VIEWBOOK", "NO permissions");
         }
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        RootView = inflater.inflate(R.layout.fragment_book_map, container, false);
 
-        return view;
+        mMapView = (MapView) RootView.findViewById(R.id.mapView);
+        mMapView.onCreate(savedInstanceState);
+
+        mMapView.onResume(); // needed to get the map to display immediately
+
+        if(Owner == null && Coordinates == null) loadAndInjectData();
+        else injectData();
+
+        return RootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
