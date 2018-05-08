@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -242,7 +243,6 @@ public class ManualInsertActivity extends AppCompatActivity {
         // Always show the chooser (if there are multiple options available)
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -574,6 +574,8 @@ public class ManualInsertActivity extends AppCompatActivity {
         //save favourite genres
         outState.putSerializable("book_genres", checkedItems);
 
+        outState.putString("uri", uri.toString());
+
         return;
     }
 
@@ -583,6 +585,10 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         //get favourite genres
         checkedItems = (boolean[]) savedInstanceState.getSerializable("book_genres");
+
+        uri = Uri.parse((String) savedInstanceState.get("uri"));
+        mImageField.setImageURI(uri);
+
         return;
     }
 

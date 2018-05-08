@@ -48,8 +48,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -86,6 +90,7 @@ public class EditProfileActivity extends AppCompatActivity implements
     private Button btnGenre;
     private String[] genresList;                                    //all genres list
     boolean[] checkedItems;                                         //checked genres
+    private ArrayList<String> books;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -197,6 +202,33 @@ public class EditProfileActivity extends AppCompatActivity implements
         //no new image is set
         uri = null;
 
+        ArrayList<String> posted_books = null;
+        books = new ArrayList<>();
+        if(savedInstanceState != null)
+            posted_books = (ArrayList<String>) savedInstanceState.get("books");
+
+        if(posted_books == null) {
+            // get booksID posted by the user
+            Query query = FirebaseDatabase.getInstance().getReference()
+                    .child("users")
+                    .child(FirebaseAuth.getInstance().getUid())
+                    .child("books")
+                    .orderByKey();
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot book : dataSnapshot.getChildren())
+                        books.add(book.getKey());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }else{
+            books.addAll(posted_books);
+        }
 
         //save changes if "Save" is pressed and load showProfile
         saveText.setOnClickListener(new View.OnClickListener(){
@@ -594,6 +626,8 @@ public class EditProfileActivity extends AppCompatActivity implements
 
         //save favourite genres
         outState.putSerializable("genres", checkedItems);
+
+        outState.putSerializable("books", books);
 
         //save selected city
         outState.putString("selectedCity", selectedCity);

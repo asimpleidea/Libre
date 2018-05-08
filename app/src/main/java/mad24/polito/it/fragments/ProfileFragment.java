@@ -206,7 +206,7 @@ public class ProfileFragment extends Fragment {
                     .child(FirebaseAuth.getInstance().getUid())
                     .child("books")
                     .orderByKey()
-                    .startAt(books.size()-1)
+                    .startAt(nodeId)
                     .limitToFirst(mBooksPerPage);
         }
 
@@ -217,10 +217,10 @@ public class ProfileFragment extends Fragment {
                 boolean flag = false;
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     if(nodeId == null)
-                        books.add(bookSnapshot.getValue(String.class));
+                        books.add(bookSnapshot.getKey());
                     else
                     if(flag)
-                        books.add(bookSnapshot.getValue(String.class));
+                        books.add(bookSnapshot.getKey());
                     flag = true;
                 }
 
