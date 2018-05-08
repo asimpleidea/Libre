@@ -44,13 +44,43 @@
                     />
         </RelativeLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/posted_book_list"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginTop="35dp">
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="15dp"
+            android:layout_gravity="center_horizontal"/>
 
-        </android.support.v7.widget.RecyclerView>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="@string/myBooks"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/no_books_msg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="45dp"
+                android:layout_marginLeft="45dp"
+                android:visibility="visible"
+                android:text="@string/noBooks"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/posted_book_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
+                android:visibility="invisible">
+            </android.support.v7.widget.RecyclerView>
+
+        </RelativeLayout>
     </LinearLayout>
 
 </FrameLayout>
