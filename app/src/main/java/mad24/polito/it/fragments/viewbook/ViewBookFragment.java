@@ -301,7 +301,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 
     private void setUpMap()
     {
+        Bundle b = new Bundle();
+        b.putString("book", JSONBook);
+
         Map = new BookMapFragment();
+        Map.setArguments(b);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

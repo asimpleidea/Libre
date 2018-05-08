@@ -17,8 +17,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 
 import mad24.polito.it.R;
+import mad24.polito.it.models.Book;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -41,6 +43,7 @@ public class BookMapFragment extends Fragment {
     private View view = null;
     private MapView mMapView = null;
     private GoogleMap googleMap = null;
+    private Book TheBook = null;
 
     private OnFragmentInteractionListener mListener;
 
@@ -69,9 +72,9 @@ public class BookMapFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+        if (getArguments() != null)
+        {
+            TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
         }
 
     }
@@ -87,9 +90,11 @@ public class BookMapFragment extends Fragment {
 
         mMapView.onResume(); // needed to get the map to display immediately
 
-        try {
+        try
+        {
             MapsInitializer.initialize(getActivity().getApplicationContext());
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
         }
 
