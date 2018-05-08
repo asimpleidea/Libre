@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -29,6 +30,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -69,6 +71,7 @@ public class BookDetailsFragment extends Fragment
     private GoodreadsBook Goodreads = null;
     private final int GOODREADS_BOOK_FIELDS = 9;
     private final int GOODREADS_AUTHOR_FIELDS = 3;
+    private boolean AlreadyQueried = false;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -110,8 +113,6 @@ public class BookDetailsFragment extends Fragment
         if (getArguments() != null)
         {
             Data = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
-
-            grabDataFromGoodreads();
         }
     }
 
@@ -139,8 +140,9 @@ public class BookDetailsFragment extends Fragment
                     @Override
                     public void onResponse(String response)
                     {
-
+                        AlreadyQueried = true;
                         parseXML(response);
+                        injectData();
                     }
                 },
                 new Response.ErrorListener()
@@ -148,7 +150,9 @@ public class BookDetailsFragment extends Fragment
                     @Override
                     public void onErrorResponse(VolleyError error)
                     {
+                        AlreadyQueried = true;
                         Log.d("VIEWBOOK", "on Error Response");
+                        injectData();
                     }
                 }
         );
@@ -220,12 +224,6 @@ public class BookDetailsFragment extends Fragment
                 {
                     Goodreads.setPublicationYear(Integer.valueOf(node.getTextContent()));
                     ++done;
-
-                    //  Set it if user did not
-                    if(Data.getEditionYear() == null || (Data.getEditionYear() != null && Data.getEditionYear().length() < 1))
-                    {
-                        ((TextView) RootView.findViewById(R.id.bookPublicationYear)).setText(String.valueOf(Goodreads.getPublicationYear()));
-                    }
                 }
 
                 //  Publisher
@@ -233,8 +231,6 @@ public class BookDetailsFragment extends Fragment
                 {
                     Goodreads.setPublisher(node.getTextContent());
                     ++done;
-
-                    if(Data.getPublisher() != null && Data.getPublisher().length() < 1) ((TextView) RootView.findViewById(R.id.bookPublisher)).setText(Goodreads.getPublisher());
                 }
 
                 //  Language code
@@ -242,8 +238,6 @@ public class BookDetailsFragment extends Fragment
                 {
                     Goodreads.setLanguage(node.getTextContent());
                     ++done;
-
-                    ((TextView) RootView.findViewById(R.id.bookLanguage)).setText(Goodreads.getLanguage());
                 }
 
                 //  Description
@@ -251,8 +245,6 @@ public class BookDetailsFragment extends Fragment
                 {
                     Goodreads.setDescription(node.getTextContent());
                     ++done;
-
-                    ((TextView) RootView.findViewById(R.id.bookDescription)).setText(Goodreads.getDescription());
                 }
 
                 //  Average rating
@@ -260,17 +252,13 @@ public class BookDetailsFragment extends Fragment
                 {
                     Goodreads.setAvgRating(node.getTextContent());
                     ++done;
-
-                    ((TextView) RootView.findViewById(R.id.ratingMark)).setText(Goodreads.getAvgRating());
-                    ((MaterialRatingBar) RootView.findViewById(R.id.ratingStars)).setRating(Float.valueOf(Goodreads.getAvgRating()));
                 }
 
                 //  Num pages
-                if (node.getNodeName().equalsIgnoreCase("num_pages")) {
+                if (node.getNodeName().equalsIgnoreCase("num_pages"))
+                {
                     Goodreads.setPagesCount(Integer.valueOf(node.getTextContent()));
                     ++done;
-
-                    ((TextView) RootView.findViewById(R.id.bookPages)).setText(String.format(getResources().getString(R.string.book_pages), Goodreads.getPagesCount()));
                 }
             }
 
@@ -285,8 +273,6 @@ public class BookDetailsFragment extends Fragment
                 if(node.getNodeName().equalsIgnoreCase("ratings_count"))
                 {
                     Goodreads.setRatingsCount(Integer.valueOf(node.getTextContent()));
-
-                    ((TextView) RootView.findViewById(R.id.ratingCount)).setText(String.format(getResources().getString(R.string.book_ratings_count), Goodreads.getRatingsCount()));
                     break;
                 }
             }
@@ -300,12 +286,11 @@ public class BookDetailsFragment extends Fragment
                 Node node = author.item(i);
 
                 //  Author name
-                if(node.getNodeName().equalsIgnoreCase("author_name"))
+                if(node.getNodeName().equalsIgnoreCase("name"))
                 {
                     Goodreads.setAuthorName(node.getTextContent());
+                    Log.d("VIEWBOOK", "AUthore name: " + Goodreads.getAuthorName());
                     ++fields;
-
-                    if(Data.getAuthor() != null && Data.getAuthor().length() < 1) ((TextView) RootView.findViewById(R.id.bookAuthor)).setText(Goodreads.getAuthorName());
                 }
 
                 //  Author image
@@ -313,7 +298,6 @@ public class BookDetailsFragment extends Fragment
                 {
                     Goodreads.setAuthorImageUrl(node.getTextContent());
                     ++fields;
-
                 }
 
                 //  Author small image
@@ -321,10 +305,6 @@ public class BookDetailsFragment extends Fragment
                 {
                     Goodreads.setAuthorSmallImageUrl(node.getTextContent());
                     ++fields;
-
-                    //  VERY WEIRD! Glide doesn't like it if it is not wrapped in a url!
-                    URL u = new URL(Goodreads.getAuthorImageUrl());
-                    Glide.with(getContext()).load(u.toString()).into((CircleImageView) RootView.findViewById(R.id.authorImage));
                 }
             }
 
@@ -343,6 +323,82 @@ public class BookDetailsFragment extends Fragment
         }
     }
 
+    private void injectData()
+    {
+        // Set the title
+        ((TextView) RootView.findViewById(R.id.bookTitle)).setText(Data.getTitle());
+
+        //  Set the author
+        //  NOTE: we prefer the goodreads author version because the user might misspell it
+        String author = Goodreads != null ? Goodreads.getAuthorName() : Data.getAuthor();
+        ((TextView) RootView.findViewById(R.id.bookAuthor)).setText(author);
+
+        //  Set the description
+        if(Goodreads != null)  ((TextView) RootView.findViewById(R.id.bookDescription)).setText(Goodreads.getDescription());
+
+        //  Set the year
+        String year = Goodreads != null ? Integer.toString(Goodreads.getPublicationYear()) : Data.getEditionYear();
+        if(year.length() > 0)
+        {
+            TextView t = RootView.findViewById(R.id.bookPublicationYear);
+            t.setText(year);
+            ((LinearLayout) t.getParent()).setVisibility(View.VISIBLE);
+        }
+
+        //  Set the publisher
+        String publisher = Goodreads != null ? Goodreads.getPublisher() : Data.getPublisher();
+        if(publisher.length() > 0)
+        {
+            TextView t = RootView.findViewById(R.id.bookPublisher);
+            t.setText(publisher);
+            ((LinearLayout) t.getParent()).setVisibility(View.VISIBLE);
+        }
+
+        //------------------------------------------
+        //  From Goodreads only
+        //------------------------------------------
+
+        if(Goodreads != null)
+        {
+            //  Set the language
+            TextView t = RootView.findViewById(R.id.bookLanguage);
+            t.setText(Goodreads.getLanguage());
+            ((LinearLayout) t.getParent()).setVisibility(View.VISIBLE);
+
+            //  Average rating
+            t = RootView.findViewById(R.id.ratingMark);
+            t.setText(Goodreads.getAvgRating());
+            ((MaterialRatingBar) RootView.findViewById(R.id.ratingStars)).setRating(Float.valueOf(Goodreads.getAvgRating()));
+            ((LinearLayout) t.getParent()).setVisibility(View.VISIBLE);
+
+            //  Pages count
+            t = RootView.findViewById(R.id.bookPages);
+            t.setText(String.format(getResources().getString(R.string.book_pages), Goodreads.getPagesCount()));
+            ((LinearLayout) t.getParent()).setVisibility(View.VISIBLE);
+
+            //  Ratings count
+            t = RootView.findViewById(R.id.ratingCount);
+            t.setText(String.format(getResources().getString(R.string.book_ratings_count), Goodreads.getRatingsCount()));
+
+            try
+            {
+                //  VERY WEIRD! Glide doesn't like it if it is not wrapped in a url!
+                URL u = new URL(Goodreads.getAuthorImageUrl());
+                CircleImageView c = RootView.findViewById(R.id.authorImage);
+                Glide.with(getContext()).load(u.toString()).into(c);
+                c.setVisibility(View.VISIBLE);
+            }
+            catch (MalformedURLException e)
+            {
+                //  Just don't do anything....
+                //e.printStackTrace();
+            }
+        }
+
+        //  Data loaded!
+        //  TODO: raise finished event!
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
@@ -350,21 +406,13 @@ public class BookDetailsFragment extends Fragment
         // Inflate the layout for this fragment
         RootView = inflater.inflate(R.layout.fragment_book_details, container, false);
 
-        // Set the title
-        ((TextView) RootView.findViewById(R.id.bookTitle)).setText(Data.getTitle());
+        if(Goodreads == null)
+        {
+            if(!AlreadyQueried) grabDataFromGoodreads();
+            else injectData();
+        }
+        else injectData();
 
-        //  Set the author
-        //  TODO: get it from GoodReads
-        ((TextView) RootView.findViewById(R.id.bookAuthor)).setText(new String(getResources().getString(R.string.book_by) + " " + Data.getAuthor()));
-
-        //  Set the description
-        ((TextView) RootView.findViewById(R.id.bookDescription)).setText("CACCA");
-
-        //  Set the year
-        ((TextView) RootView.findViewById(R.id.bookPublicationYear)).setText(Data.getEditionYear());
-
-        //  Set the publisher
-        ((TextView) RootView.findViewById(R.id.bookPublisher)).setText(Data.getPublisher());
         return RootView;
     }
 

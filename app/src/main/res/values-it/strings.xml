@@ -167,7 +167,7 @@
 
     <!-- View Book -->
     <string name="read_more">Altro…</string>
-    <string name="book_by">Di </string>
+    <string name="book_by">Di %1$s</string>
     <string name="book_language">Lingua</string>
     <string name="book_pages">%1$d Pagine</string>
     <string name="book_ratings_count">%1$d voti su GoodReads</string>
