@@ -91,6 +91,7 @@ public class ManualInsertActivity extends AppCompatActivity {
     private Button btnGenre;
     private String[] genresList;                                    //all genres list
     boolean[] checkedItems;                                         //checked genres
+    private boolean isPhoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -292,6 +293,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            isPhoto = false;
             mImageField.setImageBitmap(mBitmap);
         }
         //if image profile is shot by the camera
@@ -310,6 +312,7 @@ public class ManualInsertActivity extends AppCompatActivity {
             //set new profile image = shot photo
             mImageField.setImageBitmap(mBitmap);
 
+            isPhoto = true;
             uri = Uri.parse(out.getAbsolutePath());
             Log.d("absolutepath", uri.toString());
         }
@@ -574,7 +577,11 @@ public class ManualInsertActivity extends AppCompatActivity {
         //save favourite genres
         outState.putSerializable("book_genres", checkedItems);
 
-        outState.putString("uri", uri.toString());
+        outState.putBoolean("isPhoto", isPhoto);
+
+//        Log.d("checking", (uri==null)?"null obj":uri.toString());
+        if(uri != null)
+            outState.putString("uri", uri.toString());
 
         return;
     }
@@ -586,8 +593,29 @@ public class ManualInsertActivity extends AppCompatActivity {
         //get favourite genres
         checkedItems = (boolean[]) savedInstanceState.getSerializable("book_genres");
 
-        uri = Uri.parse((String) savedInstanceState.get("uri"));
-        mImageField.setImageURI(uri);
+        uri = Uri.parse(savedInstanceState.getString("uri"));
+        if(uri != null) {
+            isPhoto = savedInstanceState.getBoolean("isPhoto");
+
+            try {
+                if (isPhoto) {
+                    Bitmap bmp = BitmapFactory.decodeFile(uri.toString());
+                    mBitmap = bmp;
+                    mImageField.setImageBitmap(bmp);
+                } else {
+                    File f = new File(uri.toString());
+                    if (!f.exists()) {
+                        //if image is saved on gallery (new image)
+                        Bitmap bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                        mBitmap = bmp;
+                        mImageField.setImageBitmap(bmp);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+//            mImageField.setImageURI(uri);
 
         return;
     }
