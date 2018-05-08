@@ -63,6 +63,7 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class ProfileFragment extends Fragment {
 
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
     private static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
 
     View v;
@@ -205,7 +206,7 @@ public class ProfileFragment extends Fragment {
                     .child(FirebaseAuth.getInstance().getUid())
                     .child("books")
                     .orderByKey()
-                    .startAt(nodeId)
+                    .startAt(books.size()-1)
                     .limitToFirst(mBooksPerPage);
         }
 
@@ -216,10 +217,10 @@ public class ProfileFragment extends Fragment {
                 boolean flag = false;
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     if(nodeId == null)
-                        books.add((String) bookSnapshot.getKey());
+                        books.add(bookSnapshot.getValue(String.class));
                     else
                     if(flag)
-                        books.add((String) bookSnapshot.getKey());
+                        books.add(bookSnapshot.getValue(String.class));
                     flag = true;
                 }
 

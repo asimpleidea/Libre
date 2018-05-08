@@ -457,10 +457,10 @@ public class ManualInsertActivity extends AppCompatActivity {
         DatabaseReference mRef = mDatabase.child("books");
         String bookKey = mRef.push().getKey();
         Date date = new Date();
-        //String bookKey = (0 - date.getTime()) +"_"+ mRef.push().getKey();
-
-        uploadImage(bookKey);
-
+//        Log.d("anotherbug", (mBitmap==null)?"no image":"there is something!");
+        if(mBitmap != null)
+            uploadImage(bookKey);
+//        Log.d("anotherbug", "uploading book");
         mRef.child(bookKey).setValue(new Book(
                 mTitleField.getText().toString(),
                 mAuthorField.getText().toString(),
@@ -488,8 +488,13 @@ public class ManualInsertActivity extends AppCompatActivity {
             }
         });
 
+//        Log.d("anotherbug", "book uploaded");
+        mRef = mDatabase.child("users");
 
-        //Log.d("user_id",  FirebaseAuth.getInstance().getUid());
+        mRef.child(FirebaseAuth.getInstance().getUid()).child("books").child(bookKey).setValue(true);
+
+        finish();
+        //Log.d("anotherbug", "user updated");
     }
 
     private void uploadImage(String bookKey) {

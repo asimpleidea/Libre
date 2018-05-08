@@ -120,7 +120,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
                     Book book = dataSnapshot.getValue(Book.class);
+                    /*for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
+                        books.add(bookSnapshot.getValue(Book.class));
+                    }*/
 
+
+
+                    //Log.d("booksfragment", "adding "+books.size()+" books");
                     mData.add(book);
                     notifyItemInserted(mData.size());
                 }
