@@ -325,8 +325,9 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
         if(Goodreads != null)  ((TextView) RootView.findViewById(R.id.bookDescription)).setText(Goodreads.getDescription());
 
         //  Set the year
-        String year = Goodreads != null ? Integer.toString(Goodreads.getPublicationYear()) : Data.getEditionYear();
-        if(year.length() > 0)
+        String year = null;
+        year = Goodreads != null ? Integer.toString(Goodreads.getPublicationYear()) : Data.getEditionYear();
+        if(year != null && year.length() > 0)
         {
             TextView t = RootView.findViewById(R.id.bookPublicationYear);
             t.setText(year);
@@ -334,8 +335,9 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
         }
 
         //  Set the publisher
-        String publisher = Goodreads != null ? Goodreads.getPublisher() : Data.getPublisher();
-        if(publisher.length() > 0)
+        String publisher = null;
+        publisher = Goodreads != null ? Goodreads.getPublisher() : Data.getPublisher();
+        if(publisher != null && publisher.length() > 0)
         {
             TextView t = RootView.findViewById(R.id.bookPublisher);
             t.setText(publisher);
