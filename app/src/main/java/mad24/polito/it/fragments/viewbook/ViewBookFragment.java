@@ -2,6 +2,7 @@ package mad24.polito.it.fragments.viewbook;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -123,7 +124,6 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         {
             Glide.with(getActivity().getApplicationContext()).load(TheBook.getBookImageLink()).into((ImageView) view.findViewById(R.id.bookCover));
         }
-
 
         setUpDetails();
 
@@ -317,7 +317,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private void showFragment()
     {
         ((ProgressBar)view.findViewById(R.id.loadingScreen)).setVisibility(View.GONE);
-        ((AppBarLayout)view.findViewById(R.id.main_appbar)).setVisibility(View.VISIBLE);
+        AppBarLayout appBar = view.findViewById(R.id.appBar);
+
+        //  When on landscape...
+        if(getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
+            appBar.setExpanded(false);
+        }
+
+        appBar.setVisibility(View.VISIBLE);
         ((ViewPager)view.findViewById(R.id.viewPager)).setVisibility(View.VISIBLE);
         AlreadyVisible = true;
     }
