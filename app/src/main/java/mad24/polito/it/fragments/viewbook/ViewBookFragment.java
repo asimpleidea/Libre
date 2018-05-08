@@ -293,6 +293,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     {
         Bundle b = new Bundle();
         b.putString("owner", TheBook.getUser_id());
+        b.putString("book", JSONBook);
 
         Owner = new BookOwnerFragment();
         Owner.setArguments(b);

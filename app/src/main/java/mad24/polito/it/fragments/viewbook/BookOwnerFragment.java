@@ -1,21 +1,36 @@
 package mad24.polito.it.fragments.viewbook;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
+
+import java.security.acl.Owner;
 
 import mad24.polito.it.R;
+import mad24.polito.it.models.Book;
+import mad24.polito.it.models.UserMail;
+import mad24.polito.it.registrationmail.User;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,6 +44,11 @@ public class BookOwnerFragment extends Fragment
 {
     private String UID = null;
     private DatabaseReference DB = null;
+    private View RootView = null;
+    private UserMail User = null;
+    private StorageReference Storage = null;
+    private Book TheBook = null;
+    private String OwnerImage = null;
 
 
     // TODO: Rename parameter arguments, choose names that match
@@ -73,37 +93,73 @@ public class BookOwnerFragment extends Fragment
             UID = getArguments().getString("owner");
             DB = FirebaseDatabase.getInstance().getReference()
                     .child("users/" + UID);
+            TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
+            Storage = FirebaseStorage.getInstance().getReference("profile_pictures").child(UID + ".jpg");
+        }
+    }
 
-            DB.addListenerForSingleValueEvent(new ValueEventListener()
+    private void loadAndInjectUser()
+    {
+        DB.addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                User = dataSnapshot.getValue(UserMail.class);
+                injectUser();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+                Log.d("VIEWBOOK", "can't load user");
+            }
+        });
+    }
+
+    private void injectUser()
+    {
+        //  Put the owner's pic
+        if(OwnerImage == null)
+        {
+            Storage.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
             {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot)
+                public void onSuccess(Uri uri)
                 {
-                    Log.d("VIEWBOOK", "onDataChange: " + dataSnapshot.child("name").getValue());
-
+                    //  TODO: check for caching options.
+                    Glide.with(getContext()).load(uri).into((ImageView) RootView.findViewById(R.id.ownerPic));
+                    OwnerImage = uri.toString();
                 }
-
+            }).addOnFailureListener(new OnFailureListener()
+            {
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
-
+                public void onFailure(@NonNull Exception e)
+                {
+                    //  Failed...
                 }
             });
-
         }
+        else Glide.with(getContext()).load(OwnerImage).into((ImageView) RootView.findViewById(R.id.ownerPic));
+
+
+        //  The name
+        ((TextView) RootView.findViewById(R.id.ownerName)).setText(User.getName());
+
+        //  The Conditions
+        ((TextView) RootView.findViewById(R.id.bookConditions)).setText(String.format(getResources().getString(R.string.book_conditions_user), TheBook.getCondition()));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_book_owner, container, false);
-    }
+        RootView = inflater.inflate(R.layout.fragment_book_owner, container, false);
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        if(User == null) loadAndInjectUser();
+        else injectUser();
+
+        return RootView;
     }
 
     @Override

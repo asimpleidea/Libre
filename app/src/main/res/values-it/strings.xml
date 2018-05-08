@@ -157,20 +157,22 @@
     <string name="login_with_fb">Entra con Facebook</string>
     <string name="signup_with_fb">Registrati con Facebook</string>
     <string name="logout_from_fb">Esci</string>
-    <string name="fb_wait">Un attimo...</string>
-    <string name="fb_wait_message">Stiamo caricando i tuoi dati da Facebook...</string>
-    <string name="fb_error">Ops...</string>
+    <string name="fb_wait">Un attimo…</string>
+    <string name="fb_wait_message">Stiamo caricando i tuoi dati da Facebook…</string>
+    <string name="fb_error">Ops…</string>
 
     <!-- Error Strings -->
     <string name="fb_error_get_me">Opss! Non siamo riusciti a ottenere i tuoi dati da facebook. Riprova più tardi o prova un altro metodo.</string>
     <string name="fb_error_authenticate">Non siamo riusciti ad autenticarti. Riprova più tardi o prova un altro metodo.</string>
 
     <!-- View Book -->
-    <string name="read_more">Altro...</string>
+    <string name="read_more">Altro…</string>
     <string name="book_by">Di </string>
     <string name="book_language">Lingua</string>
     <string name="book_pages">%1$d Pagine</string>
     <string name="book_ratings_count">%1$d voti su GoodReads</string>
+    <string name="owner_picture">Proprietario</string>
+    <string name="book_conditions_user">"%1$s"</string>
     <!-- /View Book -->
 
 </resources>

@@ -21,34 +21,33 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/imageView"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ownerPic"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_weight="1"
-            android:contentDescription='"image"'
+            android:contentDescription='@string/owner_picture'
             android:src="@drawable/com_facebook_profile_picture_blank_square" />
 
         <TextView
-            android:id="@+id/textView11"
+            android:id="@+id/ownerName"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="fill_vertical"
             android:padding="10dp"
-            android:text="Elis Lulja"
             android:textSize="25sp" />
 
     </LinearLayout>
 
-    <TextView
+    <!-- <TextView
         android:id="@+id/memberSince"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="fill_vertical"
         android:text="Member since April 9, 2018"
-        android:textSize="14sp" />
+        android:textSize="14sp" /> -->
 
     <LinearLayout
         android:id="@+id/userReviews"
@@ -101,14 +100,6 @@
         </LinearLayout>
 
     </LinearLayout>
-        <TextView
-            android:id="@+id/postedDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="fill_vertical"
-            android:text="Posted on April 10, 2018"
-            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/bookConditions"
@@ -118,7 +109,6 @@
             android:layout_marginTop="5dp"
             android:layout_weight="1"
             android:gravity="fill_vertical"
-            android:text='"Good Conditions, some minor issues on the cover"'
             android:textSize="20sp" />
 
         <TextView
