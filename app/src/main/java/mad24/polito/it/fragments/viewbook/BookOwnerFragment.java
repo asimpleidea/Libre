@@ -50,19 +50,10 @@ public class BookOwnerFragment extends Fragment
     private Book TheBook = null;
     private String OwnerImage = null;
 
+    //private OnFragmentInteractionListener mListener;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
-    public BookOwnerFragment() {
+    public BookOwnerFragment()
+    {
         // Required empty public constructor
     }
 
@@ -70,22 +61,18 @@ public class BookOwnerFragment extends Fragment
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment BookOwnerFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static BookOwnerFragment newInstance(String param1, String param2) {
+    public static BookOwnerFragment newInstance() {
         BookOwnerFragment fragment = new BookOwnerFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+        //Bundle args = new Bundle();
         return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null)
@@ -144,7 +131,6 @@ public class BookOwnerFragment extends Fragment
         }
         else Glide.with(getContext()).load(OwnerImage).into((ImageView) RootView.findViewById(R.id.ownerPic));
 
-
         //  The name
         ((TextView) RootView.findViewById(R.id.ownerName)).setText(User.getName());
 
@@ -154,7 +140,8 @@ public class BookOwnerFragment extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             Bundle savedInstanceState)
+    {
         // Inflate the layout for this fragment
         RootView = inflater.inflate(R.layout.fragment_book_owner, container, false);
 
@@ -176,9 +163,10 @@ public class BookOwnerFragment extends Fragment
     }
 
     @Override
-    public void onDetach() {
+    public void onDetach()
+    {
         super.onDetach();
-        mListener = null;
+        //mListener = null;
     }
 
     /**
@@ -191,7 +179,8 @@ public class BookOwnerFragment extends Fragment
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
+    public interface OnFragmentInteractionListener
+    {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
