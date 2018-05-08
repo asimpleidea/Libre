@@ -106,7 +106,7 @@ public class BookDetailsFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("VIEWBOOK", "onCreate called");
+
         if (getArguments() != null)
         {
             Data = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
@@ -139,7 +139,7 @@ public class BookDetailsFragment extends Fragment
                     @Override
                     public void onResponse(String response)
                     {
-                       // Log.d("VIEWBOOK", response);
+
                         parseXML(response);
                     }
                 },
@@ -220,7 +220,7 @@ public class BookDetailsFragment extends Fragment
                 {
                     Goodreads.setPublicationYear(Integer.valueOf(node.getTextContent()));
                     ++done;
-                    Log.d("VIEWBOOK", "value: " + String.valueOf(Data.getEditionYear()));
+
                     //  Set it if user did not
                     if(Data.getEditionYear() == null || (Data.getEditionYear() != null && Data.getEditionYear().length() < 1))
                     {
@@ -350,7 +350,6 @@ public class BookDetailsFragment extends Fragment
         // Inflate the layout for this fragment
         RootView = inflater.inflate(R.layout.fragment_book_details, container, false);
 
-        if(Goodreads != null) Log.d("VIEWBOOK", "IS !NULL");
         // Set the title
         ((TextView) RootView.findViewById(R.id.bookTitle)).setText(Data.getTitle());
 
@@ -373,15 +372,12 @@ public class BookDetailsFragment extends Fragment
     public void onSaveInstanceState(@NonNull Bundle outState)
     {
         super.onSaveInstanceState(outState);
-        Log.d("VIEWBOOK", "save instance");
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
-
-        if(Goodreads != null) Log.d("VIEWBOOK", "resumed with goodreads");
     }
 
     @Override
@@ -400,7 +396,6 @@ public class BookDetailsFragment extends Fragment
     {
         super.onDetach();
         mListener = null;
-        Log.d("VIEWBOOK", "detached");
     }
 
     /**
