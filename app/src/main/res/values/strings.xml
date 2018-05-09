@@ -166,16 +166,14 @@
     <string name="facebook_app_id">102712380576500</string>
     <string name="fb_login_protocol_scheme">fb102712380576500</string>
 
-    <string name="fields">name, first_name, last_name, gender, locale, picture.type(large), timezone, verified, email</string>
+    <string name="fields">name, first_name, last_name, locale, picture.type(large), timezone, email</string>
     <string-array name="fieldsArray">
         <item>name</item>
         <item>first_name</item>
         <item>last_name</item>
-        <item>gender</item>
         <item>locale</item>
         <item>picture</item>
         <item>timezone</item>
-        <item>verified</item>
         <item>email</item>
     </string-array>
 
@@ -193,6 +191,26 @@
     <string name="myBooks">My books:</string>
     <string name="noBooks">Nothing to show, add a new book in the home page</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <!-- /Facebook -->
+
+    <!-- View Book -->
+    <string name="read_more">More...</string>
+    <string name="book_by">By %1$s</string>
+    <string name="book_language">Language</string>
+    <string name="book_pages">%1$d Pages</string>
+    <string name="book_ratings_count">%1$d ratings on GoodReads</string>
+    <string name="owner_picture">Owner\'s picture</string>
+    <string name="book_conditions_user">"%1$s"</string>
+    <string name="my_position">My position</string>
+    <string name="english_language">English</string>
+    <string name="italian_language">Italian</string>
+    <string name="published_by">Published by %1$s</string>
+    <string name="published_in">Published in %1$s</string>
+    <string name="title_activity_view_book">ViewBookActivity</string>
+    <string name="action_settings">Settings</string>
+    <!-- /View Book -->
 
 </resources>

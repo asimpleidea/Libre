@@ -18,8 +18,7 @@
         android:required="false" />
 
     <!-- Necessary for HTTP requests, such as querying Facebook for user's data -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
+    <!-- <uses-permission android:name="android.permission.INTERNET" /> -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -61,9 +60,7 @@
         <activity
             android:name=".BooksActivity"
             android:label="@string/title_activity_books"
-            android:windowSoftInputMode="adjustPan">
-
-        </activity>
+            android:windowSoftInputMode="adjustPan"></activity>
         <activity
             android:name=".registrationmail.LoginActivity"
             android:theme="@style/AppTheme">
@@ -77,12 +74,12 @@
             android:name=".registrationmail.SignupMailActivity"
             android:label="SignupMailActivity"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden|adjustResize"></activity>
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".registrationmail.ResetPasswordMailActivity"
             android:label="ResetPasswordMailActivity"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden|adjustResize"></activity>
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ManualInsertActivity"
             android:label="Insert a new Book"
@@ -100,7 +97,6 @@
             </intent-filter>
             -->
         </activity>
-        <activity android:name=".SignUpActivity" />
 
         <!-- Facebook Login/Signup -->
         <meta-data

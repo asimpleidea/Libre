@@ -281,11 +281,11 @@ public class ShowProfileActivity extends AppCompatActivity {
          * So, when user puts app on foreground again, we check if user is still logged in.
          */
         //FirebaseAuth.getInstance().signOut();
-        if(FirebaseAuth.getInstance().getCurrentUser() == null)
+        /*if(FirebaseAuth.getInstance().getCurrentUser() == null)
         {
             Intent signup = new Intent(this, SignUpActivity.class);
             startActivity(signup);
-        }
+        }*/
 
         //  If you're here, it means you're logged in. You may proceed.
 

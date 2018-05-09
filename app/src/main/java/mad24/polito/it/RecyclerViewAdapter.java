@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,12 +29,14 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 import mad24.polito.it.models.Book;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
@@ -40,9 +44,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
     private StorageReference mStorageRef;
     private StorageReference coverRef;
+    private BooksActivity booksActivity = null;
 
     Context mContext;
     List<Book> mData;
+
+    View v;
 
     public RecyclerViewAdapter(Context mContext, List<Book> mData) {
         this.mContext = mContext;
@@ -50,11 +57,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
     }
+    // TODO: remove this method which is not useful anymore
+    public void setBooksActivity(BooksActivity activity)
+    {
+        booksActivity = activity;
+    }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View v;
         v = LayoutInflater.from(mContext).inflate(R.layout.adapter_books_layout, parent, false);
 
         MyViewHolder vHolder = new MyViewHolder(v);
@@ -86,6 +97,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         @Override
                         public void onSuccess(Uri uri) {
                             String imageURL = uri.toString();
+
+                            //  Set the url of cover *INSIDE* the object (so we won't have to query it again later).
+                            //mData.get(holder.getAdapterPosition()).setBookImageLink(uri.toString());
                             Glide.with(mContext).load(imageURL).into(holder.book_img);
                         }
                     })
@@ -98,6 +112,44 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }else{
             holder.book_img.setImageDrawable(mContext.getResources().getDrawable(R.drawable.default_book_cover));
         }
+
+        //--------------------------------------
+        //  Set item touch listener
+        //--------------------------------------
+
+        holder.itemView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                //----------------------------------
+                //  Init
+                //----------------------------------
+
+                //  TODO: check if passing object as JSON makes sense: what if the object is too large?
+                //  Pass the book's data here, so we won't have to download everything again
+                //  Doing as JSON, so I won't have to write too many .putString etc :D
+                Bundle args = new Bundle();
+                args.putString("book", new Gson().toJson(mData.get(holder.getAdapterPosition())));
+
+                //----------------------------------
+                //  Start the fragment
+                //----------------------------------
+
+                final ViewBookFragment b = new ViewBookFragment();
+                b.setArguments(args);
+
+                //----------------------------------
+                //  Show me the book
+                //----------------------------------
+
+                BooksActivity myActivity =  (BooksActivity) v.getContext();
+                myActivity.setViewBookFragment(b);
+                myActivity.setFragment(b, "ViewBook");
+                /*booksActivity.setViewBookFragment(b);
+                booksActivity.setFragment(b, "ViewBook");*/
+            }
+        });
     }
 
     @Override

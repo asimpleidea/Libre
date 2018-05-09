@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -45,10 +46,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;
+import mad24.polito.it.locator.Locator;
+import mad24.polito.it.locator.LocatorEventsListener;
+import mad24.polito.it.models.UserMail;
 
 
 /**
@@ -119,6 +124,7 @@ public class FacebookAuthenticator
      */
     FacebookAuthenticator(Context context, Activity currentActivity)
     {
+        Log.d("FBLOGIN", "in constructor");
         this.context = context;
         Manager = CallbackManager.Factory.create();
         CurrentActivity = currentActivity;
@@ -133,7 +139,9 @@ public class FacebookAuthenticator
      */
     public void setButton(LoginButton button)
     {
+        Log.d("FBLOGIN", "on setButton");
         Button = button;
+        Button.setReadPermissions("email", "public_profile");
 
         //  Set the callback
         Button.registerCallback(Manager, new FacebookCallback<LoginResult>() {
@@ -330,11 +338,11 @@ public class FacebookAuthenticator
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot)
                                 {
-                                    Log.d("FBB", "ONDATACHANGE");
+                                    Log.d("FBLOGIN", "ONDATACHANGE");
                                     //  No need to do anything else then
                                     if (dataSnapshot.hasChild(logged.getUid()))
                                     {
-                                        Log.d("FBB", "hasChild");
+                                        Log.d("FBLOGIN", "hasChild");
                                         //Toast.makeText(context, "User already exists, just logging", Toast.LENGTH_SHORT).show();
                                         context.startActivity(new Intent(context, BooksActivity.class));
                                         CurrentActivity.finish();
@@ -362,9 +370,10 @@ public class FacebookAuthenticator
                                     catch(JSONException j)
                                     {
                                         //  Nothing, just don't save the picture
+                                        Log.d("FBLOGIN", "JSONException");
                                     }
-                                    catch(InterruptedException i){}
-                                    catch(ExecutionException e){}
+                                    catch(InterruptedException i){Log.d("FBLOGIN", "InterruptionException");}
+                                    catch(ExecutionException e){Log.d("FBLOGIN", "ExecutionException");}
 
 
                                     UploadTask task = Storage.child("profile_pictures").child(logged.getUid()+".jpg").putStream(stream);
@@ -384,7 +393,10 @@ public class FacebookAuthenticator
                                         @Override
                                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
                                         {
-                                            createUser(logged, o, taskSnapshot.getDownloadUrl().toString());
+                                            Log.d("FBLOGIN", "Success");
+
+                                            String picUrl = taskSnapshot.getDownloadUrl() != null ? taskSnapshot.getDownloadUrl().toString() : null;
+                                            createUser(logged, o, picUrl);
                                         }
                                     });
                                 }
@@ -392,10 +404,11 @@ public class FacebookAuthenticator
                                 @Override
                                 public void onCancelled(DatabaseError databaseError)
                                 {
-
+                                    FirebaseAuth.getInstance().signOut();
                                 }
                             });
                         }
+                        else FirebaseAuth.getInstance().signOut();
                     }
                 }
         );
@@ -404,54 +417,87 @@ public class FacebookAuthenticator
 
     private void createUser(final FirebaseUser logged, final JSONObject o, String picture)
     {
-        User u = new User();
-
+        final UserMail u = new UserMail();
+        Log.d("FBLOGIN", "onCreateUser");
         try
         {
-            //Log.d("FBB", o.toString());
             //  Todo: check for email value, as Facebook not always returns it (check fb developer page)
             u.setEmail(o.getString("email"));
-            u.setGender(o.getString("gender"));
-            u.setLocale(o.getString("locale"));
-            u.setName(o.getString("name"));
-            u.setTimezone(o.getInt("timezone"));
             u.setBio("");
-            u.setPhone("");
             u.setCity("");
-            //u.addFavoriteGenre("horror");
-            u.setPicture(picture);
+            u.setGenres(new ArrayList<Integer>());
+            u.setIdCity("");
+            u.setName(o.getString("name"));
+            u.setPhone("");
 
-            //  Finally, store user to DB!
-            DB.child("users")
-                    .child(logged.getUid())
-                    .setValue(u, new DatabaseReference.CompletionListener()
-                    {
-                        @Override
-                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
-                        {
-                            if(databaseError != null) onFailure(logged);
-                            else
-                            {
-                                WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                    @Override
-                                    public void onDismiss(DialogInterface dialogInterface)
-                                    {
-                                        context.startActivity(new Intent(context, BooksActivity.class));
-                                        CurrentActivity.finish();
-                                    }
-                                });
-                                WaitingDialog.dismiss();
-                                //Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
+            //  Get user's current location
+            Locator l = new Locator(CurrentActivity, context);
+            l.addListener(new LocatorEventsListener() {
 
-                            }
-                        }
-                    });
+                @Override
+                public void onSuccess(double latitude, double longitude)
+                {
+                    u.setLat(latitude);
+                    u.setLon(longitude);
+                    pushUser(u, logged);
+                }
+
+                @Override
+                public void onFailure()
+                {
+                    //  Set latitude and longitude of politecnico di torino
+                    u.setLat(45.06249);
+                    u.setLon(7.66220);
+                    pushUser(u, logged);
+                }
+
+                @Override
+                public void onPermissionDenied()
+                {
+                    //  Set latitude and longitude of politecnico di torino
+                    u.setLat(45.06249);
+                    u.setLon(7.66220);
+                    pushUser(u, logged);
+                }
+            }).once();
         }
         catch(JSONException j)
         {
+            Log.d("FBLOGIN", "JSONEXCEPTION in onCreateUser");
             onFailure(logged);
         }
 
+    }
+
+    private void pushUser(final UserMail u, final FirebaseUser logged)
+    {
+        //  Finally, store user to DB!
+        DB.child("users")
+                .child(logged.getUid())
+                .setValue(u, new DatabaseReference.CompletionListener()
+                {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
+                    {
+                        Log.d("FBLOGIN", "onComplete in onCreateUser");
+                        if(databaseError != null) onFailure(logged);
+                        else
+                        {
+                            Log.d("FBLOGIN", "onComplete and success in onCreateUser");
+                            WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialogInterface)
+                                {
+                                        context.startActivity(new Intent(context, BooksActivity.class));
+                                        CurrentActivity.finish();
+                                }
+                            });
+                            WaitingDialog.dismiss();
+                            //Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+                });
     }
 
     private void onFailure(final FirebaseUser logged)
