@@ -120,6 +120,7 @@ public class FacebookAuthenticator
      */
     FacebookAuthenticator(Context context, Activity currentActivity)
     {
+        Log.d("FBLOGIN", "in constructor");
         this.context = context;
         Manager = CallbackManager.Factory.create();
         CurrentActivity = currentActivity;
@@ -134,6 +135,7 @@ public class FacebookAuthenticator
      */
     public void setButton(LoginButton button)
     {
+        Log.d("FBLOGIN", "on setButton");
         Button = button;
 
         //  Set the callback
