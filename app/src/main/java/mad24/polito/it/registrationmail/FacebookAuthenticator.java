@@ -137,6 +137,7 @@ public class FacebookAuthenticator
     {
         Log.d("FBLOGIN", "on setButton");
         Button = button;
+        Button.setReadPermissions("email", "public_profile");
 
         //  Set the callback
         Button.registerCallback(Manager, new FacebookCallback<LoginResult>() {
