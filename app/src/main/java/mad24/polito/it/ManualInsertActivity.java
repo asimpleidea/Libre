@@ -559,9 +559,9 @@ public class ManualInsertActivity extends AppCompatActivity {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
                 Toast.makeText(ManualInsertActivity.this, getResources().getText(R.string.manualInsert_uploadSuccessful),Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
+                //progressDialog.dismiss();
                 //showing the uploaded image in ImageView using the download url
-                Glide.with(ManualInsertActivity.this).load(downloadUrl).into(mImageField);
+                //Glide.with(ManualInsertActivity.this).load(downloadUrl).into(mImageField);
 
                 finish();
 
@@ -593,7 +593,11 @@ public class ManualInsertActivity extends AppCompatActivity {
         //get favourite genres
         checkedItems = (boolean[]) savedInstanceState.getSerializable("book_genres");
 
-        uri = Uri.parse(savedInstanceState.getString("uri"));
+        if(savedInstanceState.getString("uri") != null)
+            uri = Uri.parse(savedInstanceState.getString("uri"));
+        else
+            uri = null;
+
         if(uri != null) {
             isPhoto = savedInstanceState.getBoolean("isPhoto");
 

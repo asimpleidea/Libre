@@ -176,4 +176,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         notifyItemRangeInserted(initialSize, 1);
     }
 
+    public boolean contains(Book book) {
+        return mData.contains(book);
+    }
+
 }

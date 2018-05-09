@@ -151,7 +151,7 @@
 
     <!-- search strings -->
     <string name="search_search">Search...</string>
-    <string name="search_noResults">No results</string>
+    <string name="search_noResults">No results in your area</string>
 
     <!--upload strings -->
     <string name="manualInsert_uploadSuccessful">Upload successful</string>

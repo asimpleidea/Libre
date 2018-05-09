@@ -35,7 +35,11 @@ import mad24.polito.it.models.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -62,6 +66,7 @@ public class BooksFragment extends Fragment {
     private int mBooksPerPage = 6;
 
     private ArrayList<String> keyBooks = new ArrayList<String>();
+    private Long timestampKey = (long)0;
 
     public BooksFragment() {
         // Required empty public constructor
@@ -184,6 +189,8 @@ public class BooksFragment extends Fragment {
                 .orderByKey()
                 .equalTo(nodeId);
 
+        final long timestamp = timestampKey;
+
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -192,7 +199,15 @@ public class BooksFragment extends Fragment {
 
                     //Log.d("debug", "TITLE: "+book.getTitle());
 
+                    synchronized (timestampKey) {
+                        if(timestamp < timestampKey)
+                            return;
+                    }
+
                     synchronized (actualItemCount) {
+                        if(recyclerViewAdapter.contains(book))
+                            return;
+
                         recyclerViewAdapter.add(book);
                         actualItemCount++;
                     }
@@ -325,6 +340,10 @@ public class BooksFragment extends Fragment {
     }
 
     public void getKeys(double lat, double lon) {
+        synchronized (timestampKey) {
+            timestampKey = new Date().getTime();
+        }
+
         keyBooks = new ArrayList<>();
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("locationBooks");
@@ -335,7 +354,8 @@ public class BooksFragment extends Fragment {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
                 //Log.d("debug", "onKeyEntered - New key added");
-                keyBooks.add(key);
+                if(!keyBooks.contains(key))
+                    keyBooks.add(key);
             }
 
             @Override
@@ -351,6 +371,13 @@ public class BooksFragment extends Fragment {
             @Override
             public void onGeoQueryReady() {
                 //Log.d("debug", "OnGeoQueryReady - all keys are loaded");
+
+                //set Adapter
+                recyclerViewAdapter = new RecyclerViewAdapter(getContext(), new ArrayList<Book>());
+                rv.setAdapter(recyclerViewAdapter);
+
+                askeditemCount = 0;
+                actualItemCount = 0;
 
                 //reverse array to have on top the nearest and most recent
                 Collections.reverse(keyBooks);

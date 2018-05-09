@@ -284,6 +284,9 @@ public class SearchFragment extends Fragment {
                     Book book = bookSnapshot.getValue(Book.class);
                     String keywordLowerCase = keyword.toLowerCase();
 
+                    if(recyclerViewAdapter.contains(book))
+                        return;
+
                     //search for a matching
                     if (book.getTitle().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getTitle().toLowerCase()) ) {
                         recyclerViewAdapter.add(book);
@@ -325,6 +328,8 @@ public class SearchFragment extends Fragment {
     }
 
     public void getKeys(double lat, double lon) {
+        semaphoreKeyPrepared = false;
+
         keyBooks = new ArrayList<>();
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("locationBooks");
@@ -335,7 +340,8 @@ public class SearchFragment extends Fragment {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
                 //Log.d("debug", "onKeyEntered - New key added");
-                keyBooks.add(key);
+                if(!keyBooks.contains(key))
+                    keyBooks.add(key);
             }
 
             @Override

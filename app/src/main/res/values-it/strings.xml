@@ -147,7 +147,7 @@
 
     <!-- search strings -->
     <string name="search_search">Cerca...</string>
-    <string name="search_noResults">Nessun risultato</string>
+    <string name="search_noResults">Nessun risultato nella tua zona</string>
 
     <!--upload strings -->
     <string name="manualInsert_uploadSuccessful">Caricato con successo</string>

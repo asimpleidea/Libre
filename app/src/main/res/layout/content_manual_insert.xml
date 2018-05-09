@@ -54,7 +54,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_isbn"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -70,7 +71,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_title"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -87,7 +89,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_author"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:imeOptions="flagNoExtractUi" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -103,7 +106,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_publisher"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:imeOptions="flagNoExtractUi" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -120,7 +124,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/edition_year"
-                        android:inputType="date" />
+                        android:inputType="date"
+                        android:imeOptions="flagNoExtractUi" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -137,7 +142,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_conditions"
-                        android:inputType="text|textMultiLine"/>
+                        android:inputType="text|textMultiLine"
+                        android:imeOptions="flagNoExtractUi" />
 
                 </android.support.design.widget.TextInputLayout>
 
