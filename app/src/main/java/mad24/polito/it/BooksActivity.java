@@ -88,6 +88,9 @@ public class BooksActivity  extends AppCompatActivity
         BottomNavigationViewHelper.disableShiftMode(navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+
+        //  TODO: REMOVE THIS WHEN DONE
+        FirebaseAuth.getInstance().signOut();
         FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
 
         //check if logged, if not, go to login activity

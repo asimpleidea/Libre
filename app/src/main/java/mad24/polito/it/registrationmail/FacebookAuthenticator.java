@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -330,11 +331,11 @@ public class FacebookAuthenticator
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot)
                                 {
-                                    Log.d("FBB", "ONDATACHANGE");
+                                    Log.d("FBLOGIN", "ONDATACHANGE");
                                     //  No need to do anything else then
                                     if (dataSnapshot.hasChild(logged.getUid()))
                                     {
-                                        Log.d("FBB", "hasChild");
+                                        Log.d("FBLOGIN", "hasChild");
                                         //Toast.makeText(context, "User already exists, just logging", Toast.LENGTH_SHORT).show();
                                         context.startActivity(new Intent(context, BooksActivity.class));
                                         CurrentActivity.finish();
@@ -362,9 +363,10 @@ public class FacebookAuthenticator
                                     catch(JSONException j)
                                     {
                                         //  Nothing, just don't save the picture
+                                        Log.d("FBLOGIN", "JSONException");
                                     }
-                                    catch(InterruptedException i){}
-                                    catch(ExecutionException e){}
+                                    catch(InterruptedException i){Log.d("FBLOGIN", "InterruptionException");}
+                                    catch(ExecutionException e){Log.d("FBLOGIN", "ExecutionException");}
 
 
                                     UploadTask task = Storage.child("profile_pictures").child(logged.getUid()+".jpg").putStream(stream);
@@ -384,7 +386,10 @@ public class FacebookAuthenticator
                                         @Override
                                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
                                         {
-                                            createUser(logged, o, taskSnapshot.getDownloadUrl().toString());
+                                            Log.d("FBLOGIN", "Success");
+
+                                            String picUrl = taskSnapshot.getDownloadUrl() != null ? taskSnapshot.getDownloadUrl().toString() : null;
+                                            createUser(logged, o, picUrl);
                                         }
                                     });
                                 }
@@ -392,10 +397,11 @@ public class FacebookAuthenticator
                                 @Override
                                 public void onCancelled(DatabaseError databaseError)
                                 {
-
+                                    FirebaseAuth.getInstance().signOut();
                                 }
                             });
                         }
+                        else FirebaseAuth.getInstance().signOut();
                     }
                 }
         );
@@ -405,21 +411,21 @@ public class FacebookAuthenticator
     private void createUser(final FirebaseUser logged, final JSONObject o, String picture)
     {
         User u = new User();
-
+        Log.d("FBLOGIN", "onCreateUser");
         try
         {
             //Log.d("FBB", o.toString());
             //  Todo: check for email value, as Facebook not always returns it (check fb developer page)
             u.setEmail(o.getString("email"));
-            u.setGender(o.getString("gender"));
-            u.setLocale(o.getString("locale"));
+            //u.setGender(o.getString("gender"));
+            //u.setLocale(o.getString("locale"));
             u.setName(o.getString("name"));
-            u.setTimezone(o.getInt("timezone"));
+            //u.setTimezone(o.getInt("timezone"));
             u.setBio("");
             u.setPhone("");
-            u.setCity("");
+            //u.setCity("");
             //u.addFavoriteGenre("horror");
-            u.setPicture(picture);
+            //u.setPicture(picture);
 
             //  Finally, store user to DB!
             DB.child("users")
@@ -429,15 +435,17 @@ public class FacebookAuthenticator
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
                         {
+                            Log.d("FBLOGIN", "onComplete in onCreateUser");
                             if(databaseError != null) onFailure(logged);
                             else
                             {
+                                Log.d("FBLOGIN", "onComplete and success in onCreateUser");
                                 WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                                     @Override
                                     public void onDismiss(DialogInterface dialogInterface)
                                     {
-                                        context.startActivity(new Intent(context, BooksActivity.class));
-                                        CurrentActivity.finish();
+                                        /*context.startActivity(new Intent(context, BooksActivity.class));
+                                        CurrentActivity.finish();*/
                                     }
                                 });
                                 WaitingDialog.dismiss();
@@ -449,6 +457,7 @@ public class FacebookAuthenticator
         }
         catch(JSONException j)
         {
+            Log.d("FBLOGIN", "JSONEXCEPTION in onCreateUser");
             onFailure(logged);
         }
 
