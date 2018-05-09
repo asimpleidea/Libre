@@ -13,6 +13,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompatSideChannelService;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -63,7 +64,6 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class ProfileFragment extends Fragment {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
     private static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
 
     View v;
@@ -71,6 +71,7 @@ public class ProfileFragment extends Fragment {
     // Android Layout
     private RecyclerView rv;
     private RecyclerViewAdapter recyclerViewAdapter;
+    private TextView tv;
 
     // Array lists
     private List<Book> books;
@@ -78,13 +79,14 @@ public class ProfileFragment extends Fragment {
     FirebaseUser userAuth;
 
     de.hdodenhof.circleimageview.CircleImageView profile_img;
+    android.support.design.widget.FloatingActionButton profile_button;
     private Bitmap profileImageBitmap;
 
     // Recycler view management
     private int mTotalItemCount = 0;
     private int mLastVisibleItemPosition;
     private boolean mIsLoading = false;
-    private int mBooksPerPage = 6;
+    private int mBooksPerPage = 6; // TODO: Set to 50
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -96,6 +98,8 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         v = inflater.inflate(mad24.polito.it.R.layout.fragment_profile, container, false);
 
+        tv = (TextView) v.findViewById(R.id.no_books_msg);
+
         rv = (RecyclerView) v.findViewById(R.id.posted_book_list);
 
         final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
@@ -105,6 +109,7 @@ public class ProfileFragment extends Fragment {
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
         rv.setAdapter(recyclerViewAdapter);
 
+        getUserName();
         getBooks(null);
 
         rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -130,11 +135,16 @@ public class ProfileFragment extends Fragment {
         return v;
     }
 
+    private void getUserName() {
+        // TODO: get user name and set proper TextView
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         profile_img = (de.hdodenhof.circleimageview.CircleImageView) v.findViewById(R.id.frag_profile_image);
+        profile_button = (android.support.design.widget.FloatingActionButton) v.findViewById(R.id.frag_profile_photoButton);
 
         //get user
         userAuth = FirebaseAuth.getInstance().getCurrentUser();
@@ -174,6 +184,15 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        profile_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), ShowProfileActivity.class);
+
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void getBooks(final String nodeId) {
@@ -195,7 +214,7 @@ public class ProfileFragment extends Fragment {
                     .child(FirebaseAuth.getInstance().getUid())
                     .child("books")
                     .orderByKey()
-                    .startAt(books.size()-1)
+                    .startAt(nodeId)
                     .limitToFirst(mBooksPerPage);
         }
 
@@ -206,14 +225,21 @@ public class ProfileFragment extends Fragment {
                 boolean flag = false;
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     if(nodeId == null)
-                        books.add(bookSnapshot.getValue(String.class));
+                        books.add(bookSnapshot.getKey());
                     else
                     if(flag)
-                        books.add(bookSnapshot.getValue(String.class));
+                        books.add(bookSnapshot.getKey());
                     flag = true;
                 }
 
                 Log.d("books", "adding "+books.size()+" books");
+                if(books.size() == 0){
+                    tv.setVisibility(View.VISIBLE);
+                    rv.setVisibility(View.INVISIBLE);
+                }else{
+                    tv.setVisibility(View.INVISIBLE);
+                    rv.setVisibility(View.VISIBLE);
+                }
                 recyclerViewAdapter.retreiveBooks(books);
             }
 

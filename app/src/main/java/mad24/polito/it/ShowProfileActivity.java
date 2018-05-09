@@ -85,7 +85,7 @@ public class ShowProfileActivity extends AppCompatActivity {
         userAuth = FirebaseAuth.getInstance().getCurrentUser();
 
         //check if logged, if not go to login activity
-        if (userAuth == null) {
+        /*if (userAuth == null) {
             Intent i = new Intent(ShowProfileActivity.this, LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(i);
@@ -94,7 +94,7 @@ public class ShowProfileActivity extends AppCompatActivity {
             for(int j = 0; j < fm.getBackStackEntryCount(); ++j)
                 fm.popBackStack();
 
-        }
+        }*/
 
         //get shared preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
@@ -152,8 +152,7 @@ public class ShowProfileActivity extends AppCompatActivity {
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                showDialog(getString(R.string.invalidName),
-                        getString(R.string.editprofile_insertValidName));
+                return;
             }
         });
 

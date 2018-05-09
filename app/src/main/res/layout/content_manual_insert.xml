@@ -31,7 +31,8 @@
                 android:layout_gravity="center"
                 android:orientation="vertical"
                 android:paddingLeft="20dp"
-                android:paddingRight="20dp">
+                android:paddingRight="20dp"
+                android:paddingBottom="20dp">
 
                 <!-- TODO: modify this -->
                 <android.support.v7.widget.AppCompatImageView
@@ -53,7 +54,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_isbn"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -69,7 +71,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_title"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -86,7 +89,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_author"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:imeOptions="flagNoExtractUi" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -102,7 +106,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_publisher"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:imeOptions="flagNoExtractUi" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -119,7 +124,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/edition_year"
-                        android:inputType="date" />
+                        android:inputType="date"
+                        android:imeOptions="flagNoExtractUi" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -136,9 +142,25 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:hint="@string/book_conditions"
-                        android:inputType="text|textMultiLine"/>
+                        android:inputType="text|textMultiLine"
+                        android:imeOptions="flagNoExtractUi" />
 
                 </android.support.design.widget.TextInputLayout>
+
+                <Button
+                    android:id="@+id/manual_ins_buttonGenre"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="@dimen/profile_description"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorToolbar"
+                    android:text="@string/buttonGenreProfile"
+                    android:textAllCaps="false"
+                    android:paddingBottom="12dp"
+                    />
 
 
                 <Button

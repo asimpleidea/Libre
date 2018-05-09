@@ -3,11 +3,13 @@ package mad24.polito.it;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -22,7 +24,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.signin.internal.Storage;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,20 +43,18 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import mad24.polito.it.models.Book;
+import mad24.polito.it.models.UserMail;
+import mad24.polito.it.registrationmail.LoginActivity;
+import mad24.polito.it.registrationmail.SignupMailActivity;
 
 public class ManualInsertActivity extends AppCompatActivity {
 
@@ -83,6 +84,14 @@ public class ManualInsertActivity extends AppCompatActivity {
     private String userChoosenTask;
     private Uri uri;
     private String bookCoverUri;
+
+    private Double lat = null;
+    private Double lon = null;
+
+    private Button btnGenre;
+    private String[] genresList;                                    //all genres list
+    boolean[] checkedItems;                                         //checked genres
+    private boolean isPhoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +134,14 @@ public class ManualInsertActivity extends AppCompatActivity {
             }
         });
 
+        //get elements to manage favourite genres
+        btnGenre = (Button) findViewById(R.id.manual_ins_buttonGenre);
+        genresList = getResources().getStringArray(R.array.genres);
+        checkedItems = new boolean[genresList.length];
+
+        //set event to manage favourite genres
+        manageButtonGenre();
+
         Bundle b = getIntent().getExtras();
         int value = -1; // or other values
         if(b != null)
@@ -140,6 +157,30 @@ public class ManualInsertActivity extends AppCompatActivity {
                     .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
                     .initiateScan();
         }
+
+        FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
+
+        //get data from Firebase Database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("users");
+
+        //get coordinates
+        usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                //get User object
+                UserMail user = snapshot.getValue(UserMail.class);
+
+                //get coordinates
+                lat = user.getLat();
+                lon = user.getLon();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                return;
+            }
+        });
 
     }
 
@@ -204,7 +245,6 @@ public class ManualInsertActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         Log.i("state", "onRequestPermissionResult");
@@ -253,6 +293,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            isPhoto = false;
             mImageField.setImageBitmap(mBitmap);
         }
         //if image profile is shot by the camera
@@ -271,6 +312,7 @@ public class ManualInsertActivity extends AppCompatActivity {
             //set new profile image = shot photo
             mImageField.setImageBitmap(mBitmap);
 
+            isPhoto = true;
             uri = Uri.parse(out.getAbsolutePath());
             Log.d("absolutepath", uri.toString());
         }
@@ -392,13 +434,36 @@ public class ManualInsertActivity extends AppCompatActivity {
             return;
         }
 
+        //if coordinates are not set
+        if(lat == null || lon == null) {
+            new AlertDialog.Builder(ManualInsertActivity.this)
+                    .setTitle(getResources().getString(R.string.coordinates_error))
+                    .setMessage(getResources().getString(R.string.coordinates_errorGettingInfo))
+                    .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+            return;
+        }
+
+        //get genre strings
+        ArrayList<Integer> selectedGenres = new ArrayList<Integer>();
+
+        for (int i = 0; i < genresList.length; i++) {
+            if (checkedItems[i] == true)
+                selectedGenres.add(i);
+        }
+
         DatabaseReference mRef = mDatabase.child("books");
         String bookKey = mRef.push().getKey();
         Date date = new Date();
-        //String bookKey = (0 - date.getTime()) +"_"+ mRef.push().getKey();
-
-        uploadImage(bookKey);
-
+//        Log.d("anotherbug", (mBitmap==null)?"no image":"there is something!");
+        if(mBitmap != null)
+            uploadImage(bookKey);
+//        Log.d("anotherbug", "uploading book");
         mRef.child(bookKey).setValue(new Book(
                 mTitleField.getText().toString(),
                 mAuthorField.getText().toString(),
@@ -409,18 +474,50 @@ public class ManualInsertActivity extends AppCompatActivity {
                 bookCoverUri,
                 bookKey,
                 FirebaseAuth.getInstance().getUid(),
-                date));
+                date,
+                selectedGenres));
 
-        //set priority?
-        //mRef.child(bookKey).setPriority(0 - (new Date().getTime())); //(new Date().getTime()/1000));
+        GeoFire geoFire = new GeoFire(mDatabase.child("locationBooks"));
 
-        //Log.d("user_id",  FirebaseAuth.getInstance().getUid());
+        SharedPreferences prefs = getSharedPreferences("location", MODE_PRIVATE);
+        geoFire.setLocation(bookKey, new GeoLocation(lat, lon), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+                    System.out.println("Location saved on server successfully!");
+                }
+            }
+        });
+
+//        Log.d("anotherbug", "book uploaded");
+        mRef = mDatabase.child("users");
+
+        mRef.child(FirebaseAuth.getInstance().getUid()).child("books").child(bookKey).setValue(true);
+
+        finish();
+        //Log.d("anotherbug", "user updated");
     }
 
     private void uploadImage(String bookKey) {
 
         //create reference to images folder and assing a name to the file that will be uploaded
         StorageReference bookCoverRef = mStorageRef.child("bookCovers").child(bookKey+".jpg");
+
+        //the shortest side must be 180px
+        Bitmap b = mBitmap; //BitmapFactory.decodeFile(uri.toString());
+        float scale;
+        if(b.getWidth() > b.getHeight()) {
+            scale = (float)b.getHeight() / 180;
+        } else {
+            scale = (float)b.getWidth() / 180;
+        }
+
+        if(scale < 1)
+            scale = 1;
+
+        mBitmap = Bitmap.createScaledBitmap(b, (int)((float)b.getWidth()/scale), (int)((float)b.getHeight()/scale), true);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -462,15 +559,69 @@ public class ManualInsertActivity extends AppCompatActivity {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
                 Toast.makeText(ManualInsertActivity.this, getResources().getText(R.string.manualInsert_uploadSuccessful),Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
+                //progressDialog.dismiss();
                 //showing the uploaded image in ImageView using the download url
-                Glide.with(ManualInsertActivity.this).load(downloadUrl).into(mImageField);
+                //Glide.with(ManualInsertActivity.this).load(downloadUrl).into(mImageField);
 
                 finish();
 
             }
         });
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //save favourite genres
+        outState.putSerializable("book_genres", checkedItems);
+
+        outState.putBoolean("isPhoto", isPhoto);
+
+//        Log.d("checking", (uri==null)?"null obj":uri.toString());
+        if(uri != null)
+            outState.putString("uri", uri.toString());
+
+        return;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        //get favourite genres
+        checkedItems = (boolean[]) savedInstanceState.getSerializable("book_genres");
+
+        if(savedInstanceState.getString("uri") != null)
+            uri = Uri.parse(savedInstanceState.getString("uri"));
+        else
+            uri = null;
+
+        if(uri != null) {
+            isPhoto = savedInstanceState.getBoolean("isPhoto");
+
+            try {
+                if (isPhoto) {
+                    Bitmap bmp = BitmapFactory.decodeFile(uri.toString());
+                    mBitmap = bmp;
+                    mImageField.setImageBitmap(bmp);
+                } else {
+                    File f = new File(uri.toString());
+                    if (!f.exists()) {
+                        //if image is saved on gallery (new image)
+                        Bitmap bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                        mBitmap = bmp;
+                        mImageField.setImageBitmap(bmp);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+//            mImageField.setImageURI(uri);
+
+        return;
     }
 
     private void showDialog(String title, String message) {
@@ -484,5 +635,55 @@ public class ManualInsertActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    //event clicking the button to choose favourite genres
+    private void manageButtonGenre() {
+        btnGenre.setOnClickListener(new View.OnClickListener() {
+            boolean[] oldSelectedGenres = new boolean[genresList.length];
+
+            @Override
+            public void onClick(View view) {
+                oldSelectedGenres = new boolean[genresList.length];
+
+                for(int i=0; i < genresList.length; i++) {
+                    if(checkedItems[i] == true)
+                        oldSelectedGenres[i] = true;
+                }
+
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(ManualInsertActivity.this);
+                mBuilder.setTitle(R.string.title_genre_alertdialog);
+                mBuilder.setMultiChoiceItems(genresList, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    //called every time you click a checkbox
+                    public void onClick(DialogInterface dialogInterface, int position, boolean isChecked) {
+                    }
+                });
+
+                mBuilder.setCancelable(false);
+
+                //called when you click "ok" button
+                mBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                    }
+                });
+
+                mBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        for(int i=0; i < genresList.length; i++) {
+                            checkedItems[i] = oldSelectedGenres[i];
+                        }
+
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                final AlertDialog mDialog = mBuilder.create();
+
+                mDialog.show();
+            }
+        });
     }
 }

@@ -2,35 +2,42 @@ package mad24.polito.it.fragments;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import mad24.polito.it.R;
 import mad24.polito.it.RecyclerViewAdapter;
 import mad24.polito.it.models.Book;
+import mad24.polito.it.models.UserMail;
 
 
 /**
@@ -48,20 +55,20 @@ public class SearchFragment extends Fragment {
     private RecyclerView rv;
     private RecyclerViewAdapter recyclerViewAdapter;
 
-    // Array lists
-    private List<Book> books;
-
     // Recycler view management
     private Boolean mIsLoading = false;
     private int mPostsPerPage = 6;      //TODO set to 50
-    private String lastItemId = null;
-    private boolean continueSearch = true;
+    private Integer itemCount = 0;
 
     private String currentQuery = new String("");
 
     LinearLayoutManager mLayoutManager;
 
     Context context;
+
+    Boolean semaphoreKeyPrepared = false;
+
+    private ArrayList<String> keyBooks = new ArrayList<String>();
 
 
     public SearchFragment() {
@@ -79,6 +86,49 @@ public class SearchFragment extends Fragment {
         ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
 
         searchView = (SearchView) v.findViewById(R.id.search_searchView);
+
+        //get user auth
+        FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
+
+        //get data from Firebase Database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("users");
+
+        usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                //get User object
+                UserMail user = snapshot.getValue(UserMail.class);
+
+                //get coordinates
+                Double lat = user.getLat();
+                Double lon = user.getLon();
+
+                //get coordinates and nearby books
+                getKeys(lat, lon);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                if(getContext() == null)
+                    return;
+
+                new AlertDialog.Builder(getContext())
+                        .setTitle(getResources().getString(R.string.coordinates_error))
+                        .setMessage(getResources().getString(R.string.coordinates_errorGettingInfo))
+                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        //zero books for now
+        itemCount = 0;
+
         return v;
     }
 
@@ -104,26 +154,27 @@ public class SearchFragment extends Fragment {
 
             @Override
             public boolean onQueryTextSubmit(final String query) {
+                synchronized (semaphoreKeyPrepared) {
+                    if(!semaphoreKeyPrepared)
+                        return false;
+                }
+
                 synchronized (currentQuery) {
+                    itemCount = 0;
+
                     //if you click search button more than one time
                     if(oldQuery.equals(query))
                         return false;
 
-                    //update current and old query
-                    currentQuery = query;
-                    oldQuery = query;
-
                     //hide keyboard and suggestions
                     searchView.clearFocus();
 
-                    books = new ArrayList<Book>();
-                    recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
+                    recyclerViewAdapter = new RecyclerViewAdapter(getContext(), new ArrayList<Book>());
                     rv.setAdapter(recyclerViewAdapter);
 
-                    lastItemId = null;
-                    continueSearch = true;
-
-                    getBooks(lastItemId, query, mPostsPerPage);
+                    synchronized(itemCount) {
+                        getBooks(query, mPostsPerPage);
+                    }
 
                     rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -132,18 +183,16 @@ public class SearchFragment extends Fragment {
                             super.onScrolled(recyclerView, dx, dy);
 
                             if (dy > 0) {
+                                synchronized (itemCount) {
+                                    if(itemCount.intValue() >= keyBooks.size())
+                                        return;
 
-                                if (!mIsLoading && continueSearch) {
-
-                                    Log.d("debug", "GET MORE BOOKS");
-                                    getBooks(lastItemId, query, mPostsPerPage);
-                                    mIsLoading = true;
+                                    getBooks(query, mPostsPerPage);
                                 }
 
                             }
                         }
                     });
-
 
                     return true;
                 }
@@ -155,39 +204,37 @@ public class SearchFragment extends Fragment {
                 if(query.length() < 3)
                     return false;
 
+                synchronized (semaphoreKeyPrepared) {
+                    if(!semaphoreKeyPrepared)
+                        return false;
+                }
+
                 synchronized (currentQuery) {
+                    itemCount = 0;
+
                     currentQuery = query;
 
-                    books = new ArrayList<Book>();
-                    recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
+                    recyclerViewAdapter = new RecyclerViewAdapter(getContext(), new ArrayList<Book>());
                     rv.setAdapter(recyclerViewAdapter);
 
-                    lastItemId = null;
-                    continueSearch = true;
-
-
-                    getBooks(lastItemId, query, mPostsPerPage);
-
+                    getBooks(query, mPostsPerPage);
 
                     rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
                         @Override
                         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                             super.onScrolled(recyclerView, dx, dy);
 
                             if (dy > 0) {
+                                synchronized (itemCount) {
+                                    if(itemCount.intValue() >= keyBooks.size())
+                                        return;
 
-                                if (!mIsLoading && continueSearch) {
-
-                                    //Log.d("debug", "GET MORE BOOKS");
-                                    getBooks(lastItemId, query, mPostsPerPage);
-                                    mIsLoading = true;
+                                    getBooks(query, mPostsPerPage);
                                 }
 
                             }
                         }
                     });
-
 
                     return true;
                 }
@@ -200,106 +247,125 @@ public class SearchFragment extends Fragment {
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
 
         super.onCreateOptionsMenu(menu, inflater);
-
-        super.onCreateOptionsMenu(menu, inflater);
     }
 
 
-    private void getBooks(final String nodeId, final String keyword, final int remainedQuantity) {
+    private void getBooks(final String keyword, final int remainedQuantity) {
         final Query query;
 
         if (remainedQuantity < 1)
             return;
 
-        //Log.d("debug", "GETBOOKS");
+        final int number;
+        synchronized (itemCount) {
+            if(itemCount.intValue() >= keyBooks.size()) {
+                return;
+            }
+
+            number = itemCount++;
+        }
 
         v.findViewById(R.id.search_emptyView).setVisibility(View.GONE);
 
-        if (nodeId == null)
-            query = FirebaseDatabase.getInstance().getReference()
-                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
-                    .orderByKey()
-                    .limitToLast(mPostsPerPage);
-        else
-            query = FirebaseDatabase.getInstance().getReference()
-                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
-                    .orderByKey()
-                    .endAt(nodeId)
-                    .limitToLast(mPostsPerPage);
+        query = FirebaseDatabase.getInstance().getReference()
+                .child(FIREBASE_DATABASE_LOCATION_BOOKS)
+                .orderByKey()
+                .equalTo(keyBooks.get(number));
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<Book> books = new ArrayList<>();
+                if(!keyword.equals(currentQuery))
+                    return;
+
                 int remained = remainedQuantity;
-                boolean justLast = true;
-                boolean first = true;
 
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     Book book = bookSnapshot.getValue(Book.class);
-                    //Log.d("debug", "BOOK TITLE: "+book.getTitle());
+                    String keywordLowerCase = keyword.toLowerCase();
 
-                    if (nodeId != null && nodeId.equals(book.getBook_id()))
-                        continue;
+                    if(recyclerViewAdapter.contains(book))
+                        return;
 
                     //search for a matching
-                    if (book.getTitle().toLowerCase().contains(keyword)) {
-                        books.add(book);
+                    if (book.getTitle().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getTitle().toLowerCase()) ) {
+                        recyclerViewAdapter.add(book);
                         remained--;
-                    } else if (book.getAuthor().toLowerCase().contains(keyword)) {
-                        books.add(book);
+                    } else if (book.getAuthor().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getAuthor().toLowerCase()) ) {
+                        recyclerViewAdapter.add(book);
                         remained--;
-                    } else if(book.getPublisher() != null && book.getPublisher().toLowerCase().contains(keyword)) {
-                        books.add(book);
+                    } else if(book.getIsbn().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getIsbn().toLowerCase()) ) {
+                        recyclerViewAdapter.add(book);
                         remained--;
+                    } else if(book.getPublisher() != null && !book.getPublisher().isEmpty()) {
+                        if(book.getPublisher().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getPublisher().toLowerCase()) ) {
+                            recyclerViewAdapter.add(book);
+                            remained--;
+                        }
                     }
 
                     //check match on genre
 
-                    if(first) {
-                        lastItemId = book.getBook_id();
-                        first = false;
-                    }
-
-                    justLast = false;
-                }
-
-                if (!dataSnapshot.hasChildren()) {
-                    remained = 0;
-                    continueSearch = false;
-                }
-
-                if (justLast) {
-                    remained = 0;
-                    continueSearch = false;
-                }
-
-                //if query is changed --> abort operation
-                synchronized (currentQuery) {
-                    if(!currentQuery.equals(keyword)) {
-                        continueSearch = false;
-                        mIsLoading = false;
-                        return;
-                    } else {
-                        //more recent books go first
-                        Collections.reverse(books);
-                        recyclerViewAdapter.addAll(books);
-                    }
+                    break;
                 }
 
                 //if not much books are found
-                getBooks(lastItemId, keyword, remained);
-                mIsLoading = false;
-
+                getBooks(keyword, remained);
                 if(mLayoutManager.getItemCount() < 1) {
                     v.findViewById(R.id.search_emptyView).setVisibility(View.VISIBLE);
+                } else {
+                    v.findViewById(R.id.search_emptyView).setVisibility(View.GONE);
                 }
+
+                mIsLoading = false;
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                continueSearch = false;
                 mIsLoading = false;
+            }
+        });
+    }
+
+    public void getKeys(double lat, double lon) {
+        semaphoreKeyPrepared = false;
+
+        keyBooks = new ArrayList<>();
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("locationBooks");
+        GeoFire geoFire = new GeoFire(ref);
+
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lon), 100);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                //Log.d("debug", "onKeyEntered - New key added");
+                if(!keyBooks.contains(key))
+                    keyBooks.add(key);
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                //System.out.println(String.format("Key %s is no longer in the search area", key));
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                //System.out.println(String.format("Key %s moved within the search area to [%f,%f]", key, location.latitude, location.longitude));
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                //Log.d("debug", "OnGeoQueryReady - all keys are loaded");
+
+                //reverse array to have on top the nearest and most recent
+                Collections.reverse(keyBooks);
+                semaphoreKeyPrepared = true;
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                //System.err.println("There was an error with this query: " + error);
             }
         });
     }

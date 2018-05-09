@@ -12,12 +12,14 @@ public class UserMail {
     String phone;
     String bio;
     ArrayList<Integer> genres;
+    double lat;
+    double lon;
 
     public UserMail() {
 
     }
 
-    public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres) {
+    public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres, double lat, double lon) {
         this.email = email;
         this.name = name;
         this.city = city;
@@ -26,6 +28,8 @@ public class UserMail {
         this.phone = phone;
         this.bio = bio;
         this.genres = genres;
+        this.lat = lat;
+        this.lon = lon;
     }
 
     public String getEmail() {
@@ -82,6 +86,22 @@ public class UserMail {
 
     public void setGenres(ArrayList<Integer> genres) {
         this.genres = genres;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
     }
 
 }

@@ -48,8 +48,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -86,6 +90,7 @@ public class EditProfileActivity extends AppCompatActivity implements
     private Button btnGenre;
     private String[] genresList;                                    //all genres list
     boolean[] checkedItems;                                         //checked genres
+    private ArrayList<String> books;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -197,6 +202,33 @@ public class EditProfileActivity extends AppCompatActivity implements
         //no new image is set
         uri = null;
 
+        ArrayList<String> posted_books = null;
+        books = new ArrayList<>();
+        if(savedInstanceState != null)
+            posted_books = (ArrayList<String>) savedInstanceState.get("books");
+
+        if(posted_books == null) {
+            // get booksID posted by the user
+            Query query = FirebaseDatabase.getInstance().getReference()
+                    .child("users")
+                    .child(FirebaseAuth.getInstance().getUid())
+                    .child("books")
+                    .orderByKey();
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot book : dataSnapshot.getChildren())
+                        books.add(book.getKey());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }else{
+            books.addAll(posted_books);
+        }
 
         //save changes if "Save" is pressed and load showProfile
         saveText.setOnClickListener(new View.OnClickListener(){
@@ -418,53 +450,75 @@ public class EditProfileActivity extends AppCompatActivity implements
                 //if all checks are positive
                 if(isModified) {
                     try {
-                        DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
+                        //get coordinates
+                        Places.GeoDataApi.getPlaceById(mGoogleApiClient, idSelectedCity)
+                                .setResultCallback(new ResultCallback<PlaceBuffer>() {
+                                    @Override
+                                    public void onResult(PlaceBuffer places) {
+                                        if (places.getStatus().isSuccess()) {
+                                            final Place myPlace = places.get(0);
+                                            LatLng queriedLocation = myPlace.getLatLng();
+                                            Double lat = queriedLocation.latitude;
+                                            Double lon = queriedLocation.longitude;
 
-                        Task initTask = myDatabase.child("users").child(userAuth.getUid())
-                                .setValue(new UserMail(userAuth.getEmail(), newName, newCity, idSelectedCity, newPhone,
-                                        newBio, newSelectedGenres) );
+                                            DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
 
-                        initTask.addOnSuccessListener(new OnSuccessListener() {
-                            @Override
-                            public void onSuccess(Object o) {
-                                //check if upload on database and/or storage have finished
-                                synchronized (semaphore) {
-                                    semaphore--;
+                                            Task initTask = myDatabase.child("users").child(userAuth.getUid())
+                                                    .setValue(new UserMail(userAuth.getEmail(), newName, newCity, idSelectedCity, newPhone,
+                                                            newBio, newSelectedGenres, lat, lon) );
 
-                                    if (semaphore <= 0) {
-                                        progressBar.setVisibility(View.GONE);
+                                            initTask.addOnSuccessListener(new OnSuccessListener() {
+                                                @Override
+                                                public void onSuccess(Object o) {
+                                                    //check if upload on database and/or storage have finished
+                                                    synchronized (semaphore) {
+                                                        semaphore--;
 
-                                        String encoded = "";
-                                        if(profileImageBitmap != null) {
-                                            //store bitmap in sharedPreferences
-                                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                            profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                                            byte[] b = baos.toByteArray();
-                                            encoded = Base64.encodeToString(b, Base64.DEFAULT);
-                                        }
+                                                        if (semaphore <= 0) {
+                                                            progressBar.setVisibility(View.GONE);
 
-                                        Intent resultIntent = new Intent();
-                                        resultIntent.putExtra("modified", true);
-                                        resultIntent.putExtra("imageModified", (uri != null));
-                                        if(!encoded.equals(""))
-                                            resultIntent.putExtra("profileImage", encoded);
+                                                            String encoded = "";
+                                                            if(profileImageBitmap != null) {
+                                                                //store bitmap in sharedPreferences
+                                                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                                                profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                                                byte[] b = baos.toByteArray();
+                                                                encoded = Base64.encodeToString(b, Base64.DEFAULT);
+                                                            }
 
-                                        setResult(Activity.RESULT_OK, resultIntent);
-                                        finish();
-                                    }
+                                                            Intent resultIntent = new Intent();
+                                                            resultIntent.putExtra("modified", true);
+                                                            resultIntent.putExtra("imageModified", (uri != null));
+                                                            if(!encoded.equals(""))
+                                                                resultIntent.putExtra("profileImage", encoded);
+
+                                                            setResult(Activity.RESULT_OK, resultIntent);
+                                                            finish();
+                                                        }
+                                                    }
+
+                                                }
+                                            });
+
+                                            initTask.addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    progressBar.setVisibility(View.GONE);
+
+                                                    //if image profile saving fails
+                                                    showDialog(getResources().getString(R.string.signup_error),
+                                                            getResources().getString(R.string.signup_retry));
+                                                }
+                                            });
+                                } else {
+                                    progressBar.setVisibility(View.GONE);
+
+                                    //if image profile saving fails
+                                    showDialog(getResources().getString(R.string.signup_error),
+                                            getResources().getString(R.string.signup_retry));
                                 }
 
-                            }
-                        });
-
-                        initTask.addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                progressBar.setVisibility(View.GONE);
-
-                                //if image profile saving fails
-                                showDialog(getResources().getString(R.string.signup_error),
-                                        getResources().getString(R.string.signup_retry));
+                                places.release();
                             }
                         });
                     } catch (Exception e) {
@@ -572,6 +626,8 @@ public class EditProfileActivity extends AppCompatActivity implements
 
         //save favourite genres
         outState.putSerializable("genres", checkedItems);
+
+        outState.putSerializable("books", books);
 
         //save selected city
         outState.putString("selectedCity", selectedCity);
@@ -801,11 +857,9 @@ public class EditProfileActivity extends AppCompatActivity implements
             }
             // Selecting the first object buffer.
             final Place place = places.get(0);
-            CharSequence attributions = places.getAttributions();
-
-            if (attributions != null) {
-
-            }
+            LatLng latlng = place.getLatLng();
+            Log.v("Latitude is", "" + latlng.latitude);
+            Log.v("Longitude is", "" + latlng.longitude);
         }
     };*/
 

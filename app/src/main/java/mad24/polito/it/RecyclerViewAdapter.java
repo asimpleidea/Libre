@@ -217,4 +217,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         notifyItemRangeInserted(initialSize, newBooks.size());
     }
 
+    public void add(Book book) {
+        int initialSize = mData.size();
+        mData.add(book);
+        notifyItemRangeInserted(initialSize, 1);
+    }
+
+    public boolean contains(Book book) {
+        return mData.contains(book);
+    }
+
 }

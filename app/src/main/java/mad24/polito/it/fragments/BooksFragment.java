@@ -2,6 +2,7 @@ package mad24.polito.it.fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,8 +18,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -29,7 +37,11 @@ import mad24.polito.it.models.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -58,10 +70,12 @@ public class BooksFragment extends Fragment {
     private String userChoosenTask;
 
     // Recycler view management
-    private int mTotalItemCount = 0;
-    private int mLastVisibleItemPosition;
-    private boolean mIsLoading = false;
+    private Integer askeditemCount = 0;
+    private Integer actualItemCount = 0;
     private int mBooksPerPage = 6;
+
+    private ArrayList<String> keyBooks = new ArrayList<String>();
+    private Long timestampKey = (long)0;
 
     /**
      * Finger position on X axys
@@ -112,6 +126,48 @@ public class BooksFragment extends Fragment {
                 mLayoutManager.getOrientation());
         rv.addItemDecoration(dividerItemDecoration);
 */
+        //get user auth
+        FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
+
+        //get data from Firebase Database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("users");
+
+        usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                //get User object
+                UserMail user = snapshot.getValue(UserMail.class);
+
+                //get coordinates
+                Double lat = user.getLat();
+                Double lon = user.getLon();
+
+                //get coordinates and nearby books
+                getKeys(lat, lon);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                if(getContext() == null)
+                    return;
+
+                new AlertDialog.Builder(getContext())
+                        .setTitle(getResources().getString(R.string.coordinates_error))
+                        .setMessage(getResources().getString(R.string.coordinates_errorGettingInfo))
+                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        //zero books for now
+        actualItemCount = 0;
+        askeditemCount = 0;
 
         books = new ArrayList<Book>();
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
@@ -202,34 +258,38 @@ public class BooksFragment extends Fragment {
         new_book_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 //Log.d("booksfragment", "Button pressed");
                 selectBookInsertMethod();
             }
         });
 
-        getBooks(null);
-
         rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
+                synchronized (askeditemCount) {
+                    if(askeditemCount.intValue() < 1)
+                        return;
+                }
+
                 if (dy > 0) {
-                    mTotalItemCount = mLayoutManager.getItemCount();
-                    mLastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
+                    int totalNow;
+                    synchronized (askeditemCount) {
+                        if(askeditemCount.intValue() >= keyBooks.size())
+                            return;
 
-                    Log.d("debg", "totalItem: "+mTotalItemCount+"; lastvisiblePosition: "+mLastVisibleItemPosition);
-                    if (!mIsLoading && mTotalItemCount <= (mLastVisibleItemPosition+ mBooksPerPage)) {
+                        totalNow = askeditemCount;
 
-                        getBooks(recyclerViewAdapter.getLastItemId());
-                        mIsLoading = true;
+                        for (int i = totalNow; i < mBooksPerPage + totalNow && i < keyBooks.size(); i++) {
+                            askeditemCount++;
+                            getBooks(keyBooks.get(i));
+                        }
                     }
+
                 }
             }
         });
-
 
         return v;
     }
@@ -241,60 +301,44 @@ public class BooksFragment extends Fragment {
     }
 
     private void getBooks(final String nodeId) {
+        Query query = FirebaseDatabase.getInstance().getReference()
+                .child(FIREBASE_DATABASE_LOCATION_BOOKS)
+                .orderByKey()
+                .equalTo(nodeId);
 
-        //Log.d("booksfragment", "getting books starting from: "+nodeId);
-
-        Query query;
-
-        if (nodeId == null)
-            query = FirebaseDatabase.getInstance().getReference()
-                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
-                    .orderByKey()
-                    .limitToLast(mBooksPerPage);
-        else
-            query = FirebaseDatabase.getInstance().getReference()
-                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
-                    .orderByKey()
-                    .endAt(nodeId)
-                    .limitToLast(mBooksPerPage);
+        final long timestamp = timestampKey;
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<Book> books = new ArrayList<>();
-                boolean flag = false;
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     Book book = bookSnapshot.getValue(Book.class);
-                    //Log.d("debug", "BOOK TITLE: "+book.getTitle() );
 
-                    //not add "nodeId" book because it's already inserted
-                    if (nodeId != null && nodeId.equals(book.getBook_id()))
-                        continue;
+                    //Log.d("debug", "TITLE: "+book.getTitle());
 
-                    books.add(book);
+                    synchronized (timestampKey) {
+                        if(timestamp < timestampKey)
+                            return;
+                    }
 
-                    /*if(nodeId == null)
-                        books.add(book);
-                    else if(flag)
-                        books.add(book);
+                    synchronized (actualItemCount) {
+                        if(recyclerViewAdapter.contains(book))
+                            return;
 
-                    flag = true;*/
+                        recyclerViewAdapter.add(book);
+                        actualItemCount++;
+                    }
+
+                //response should be just one book
+break;
                 }
-
-                //more recent books go first
-                Collections.reverse(books);
-
-                //Log.d("booksfragment", "adding "+books.size()+" books");
-                recyclerViewAdapter.addAll(books);
-
-                mIsLoading = false;
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                mIsLoading = false;
             }
         });
+
     }
 
     @Override
@@ -410,5 +454,63 @@ public class BooksFragment extends Fragment {
                 }
                 break;
         }
+    }
+
+    public void getKeys(double lat, double lon) {
+        synchronized (timestampKey) {
+            timestampKey = new Date().getTime();
+        }
+
+        keyBooks = new ArrayList<>();
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("locationBooks");
+        GeoFire geoFire = new GeoFire(ref);
+
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lon), 100);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                //Log.d("debug", "onKeyEntered - New key added");
+                if(!keyBooks.contains(key))
+                    keyBooks.add(key);
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                //System.out.println(String.format("Key %s is no longer in the search area", key));
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                //System.out.println(String.format("Key %s moved within the search area to [%f,%f]", key, location.latitude, location.longitude));
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                //Log.d("debug", "OnGeoQueryReady - all keys are loaded");
+
+                //set Adapter
+                recyclerViewAdapter = new RecyclerViewAdapter(getContext(), new ArrayList<Book>());
+                rv.setAdapter(recyclerViewAdapter);
+
+                askeditemCount = 0;
+                actualItemCount = 0;
+
+                //reverse array to have on top the nearest and most recent
+                Collections.reverse(keyBooks);
+
+                synchronized(askeditemCount) {
+                    for (int i = 0; i < mBooksPerPage && i < keyBooks.size(); i++) {
+                        askeditemCount++;
+                        getBooks(keyBooks.get(i));
+                    }
+                }
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                //System.err.println("There was an error with this query: " + error);
+            }
+        });
     }
 }

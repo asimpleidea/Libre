@@ -1,5 +1,6 @@
 package mad24.polito.it.models;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Book {
@@ -19,11 +20,13 @@ public class Book {
 
     private Date date;
 
+    private ArrayList<Integer> genres;
+
     public Book() {
     }
 
-    public Book(String title, String author, String isbn, String publisher,
-                String editionYear, String condition, String bookImageLink, String book_id, String uid, Date date) {
+    public Book(String title, String author, String isbn, String publisher, String editionYear,
+                String condition, String bookImageLink, String book_id, String uid, Date date, ArrayList<Integer> genres) {
         this.title = title;
         this.author = author;
         this.isbn = isbn;
@@ -35,6 +38,7 @@ public class Book {
         this.book_id = book_id;
         this.user_id = uid;
         this.date = date;
+        this.genres = genres;
     }
 
     public String getIsbn() {
@@ -123,5 +127,13 @@ public class Book {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public ArrayList<Integer> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(ArrayList<Integer> genres) {
+        this.genres = genres;
     }
 }

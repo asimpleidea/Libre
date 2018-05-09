@@ -147,12 +147,16 @@
 
     <!-- search strings -->
     <string name="search_search">Cerca...</string>
-    <string name="search_noResults">Nessun risultato</string>
+    <string name="search_noResults">Nessun risultato nella tua zona</string>
 
     <!--upload strings -->
     <string name="manualInsert_uploadSuccessful">Caricato con successo</string>
     <string name="manualInsert_uploadError">Errore durante il carimento!</string>
     <string name="manualInsert_uploading">Caricamento...</string>
+
+    <!--error getting coordinates-->
+    <string name="coordinates_error">Errore</string>
+    <string name="coordinates_errorGettingInfo">Errore acquisendo le informazioni dell\'utente</string>
 
     <string name="login_with_fb">Entra con Facebook</string>
     <string name="signup_with_fb">Registrati con Facebook</string>
@@ -164,7 +168,8 @@
     <!-- Error Strings -->
     <string name="fb_error_get_me">Opss! Non siamo riusciti a ottenere i tuoi dati da facebook. Riprova più tardi o prova un altro metodo.</string>
     <string name="fb_error_authenticate">Non siamo riusciti ad autenticarti. Riprova più tardi o prova un altro metodo.</string>
-
+    <string name="myBooks">I miei libri:</string>
+    <string name="noBooks">Non hai ancora postato nessun libro, aggiungine uno nella home page!</string>
     <!-- View Book -->
     <string name="read_more">Altro…</string>
     <string name="book_by">Di %1$s</string>
