@@ -193,35 +193,50 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
                 //  Title?
                 if (node.getNodeName().equalsIgnoreCase("title"))
                 {
-                    Goodreads.setTitle(node.getTextContent());
+                    String title = "";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) title = node.getTextContent();
+
+                    Goodreads.setTitle(title);
                     ++done;
                 }
 
                 //  Image Url
                 if (node.getNodeName().equalsIgnoreCase("image_url"))
                 {
-                    Goodreads.setImageUrl(node.getTextContent());
+                    String url = "";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) url = node.getTextContent();
+
+                    Goodreads.setImageUrl(url);
                     ++done;
                 }
 
                 //  Small Image url
                 if (node.getNodeName().equalsIgnoreCase("small_image_url"))
                 {
-                    Goodreads.setSmallImageUrl(node.getTextContent());
+                    String url = "";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) url = node.getTextContent();
+
+                    Goodreads.setSmallImageUrl(url);
                     ++done;
                 }
 
                 //  Publishing year
                 if (node.getNodeName().equalsIgnoreCase("publication_year"))
                 {
-                    Goodreads.setPublicationYear(Integer.valueOf(node.getTextContent()));
+                    int year = 2018;
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) year = Integer.parseInt(node.getTextContent());
+
+                    Goodreads.setPublicationYear(year);
                     ++done;
                 }
 
                 //  Publisher
                 if (node.getNodeName().equalsIgnoreCase("publisher"))
                 {
-                    Goodreads.setPublisher(node.getTextContent());
+                    String publisher = "";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) publisher = node.getTextContent();
+
+                    Goodreads.setPublisher(publisher);
                     ++done;
                 }
 
@@ -239,21 +254,30 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
                 //  Description
                 if (node.getNodeName().equalsIgnoreCase("description"))
                 {
-                    Goodreads.setDescription(node.getTextContent());
+                    String desc = "";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) desc = node.getTextContent();
+
+                    Goodreads.setDescription(desc);
                     ++done;
                 }
 
                 //  Average rating
                 if (node.getNodeName().equalsIgnoreCase("average_rating"))
                 {
-                    Goodreads.setAvgRating(node.getTextContent());
+                    String avg = "3.2";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) avg = node.getTextContent();
+
+                    Goodreads.setAvgRating(avg);
                     ++done;
                 }
 
                 //  Num pages
                 if (node.getNodeName().equalsIgnoreCase("num_pages"))
                 {
-                    Goodreads.setPagesCount(Integer.valueOf(node.getTextContent()));
+                    int pages = 863;
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) pages = Integer.parseInt(node.getTextContent());
+
+                    Goodreads.setPagesCount(pages);
                     ++done;
                 }
             }
@@ -268,7 +292,10 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
                 //  ratings count
                 if(node.getNodeName().equalsIgnoreCase("ratings_count"))
                 {
-                    Goodreads.setRatingsCount(Integer.valueOf(node.getTextContent()));
+                    int ratings = 213;
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) ratings = Integer.parseInt(node.getTextContent());
+
+                    Goodreads.setRatingsCount(ratings);
                     break;
                 }
             }
@@ -284,14 +311,19 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
                 //  Author name
                 if(node.getNodeName().equalsIgnoreCase("name"))
                 {
-                    Goodreads.setAuthorName(node.getTextContent());
-                    Log.d("VIEWBOOK", "AUthore name: " + Goodreads.getAuthorName());
+                    String authorName = "";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) authorName = node.getTextContent();
+
+                    Goodreads.setAuthorName(authorName);
                     ++fields;
                 }
 
                 //  Author image
                 if(node.getNodeName().equalsIgnoreCase("image_url"))
                 {
+                    String avg = "";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) avg = node.getTextContent();
+
                     Goodreads.setAuthorImageUrl(node.getTextContent());
                     ++fields;
                 }
@@ -299,6 +331,9 @@ public class BookDetailsFragment extends Fragment implements FragmentWithLoading
                 //  Author small image
                 if(node.getNodeName().equalsIgnoreCase("small_image_url"))
                 {
+                    String avg = "";
+                    if(node.getTextContent() != null && !node.getTextContent().isEmpty()) avg = node.getTextContent();
+
                     Goodreads.setAuthorSmallImageUrl(node.getTextContent());
                     ++fields;
                 }
