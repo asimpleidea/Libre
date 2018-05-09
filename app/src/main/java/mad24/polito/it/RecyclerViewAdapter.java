@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,13 +49,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     Context mContext;
     List<Book> mData;
 
+    View v;
+
     public RecyclerViewAdapter(Context mContext, List<Book> mData) {
         this.mContext = mContext;
         this.mData = mData;
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
     }
-
+    // TODO: remove this method which is not useful anymore
     public void setBooksActivity(BooksActivity activity)
     {
         booksActivity = activity;
@@ -63,7 +66,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View v;
         v = LayoutInflater.from(mContext).inflate(R.layout.adapter_books_layout, parent, false);
 
         MyViewHolder vHolder = new MyViewHolder(v);
@@ -97,7 +99,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                             String imageURL = uri.toString();
 
                             //  Set the url of cover *INSIDE* the object (so we won't have to query it again later).
-                            mData.get(holder.getAdapterPosition()).setBookImageLink(uri.toString());
+                            // TODO: this instruction introduces problems
+//                            mData.get(holder.getAdapterPosition()).setBookImageLink(uri.toString());
                             Glide.with(mContext).load(imageURL).into(holder.book_img);
                         }
                     })
@@ -141,8 +144,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //  Show me the book
                 //----------------------------------
 
-                booksActivity.setViewBookFragment(b);
-                booksActivity.setFragment(b, "ViewBook");
+                BooksActivity myActivity =  (BooksActivity) v.getContext();
+                myActivity.setViewBookFragment(b);
+                myActivity.setFragment(b, "ViewBook");
+                /*booksActivity.setViewBookFragment(b);
+                booksActivity.setFragment(b, "ViewBook");*/
             }
         });
     }
