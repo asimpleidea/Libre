@@ -1,5 +1,6 @@
 package mad24.polito.it;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -72,7 +74,6 @@ public class ShowProfileActivity extends AppCompatActivity {
     Bitmap profileImageBitmap = null;
 
     Boolean semaphoreData = false;
-    Boolean semaphoreImage = false;
 
 
     @Override
@@ -83,18 +84,6 @@ public class ShowProfileActivity extends AppCompatActivity {
 
         //get user
         userAuth = FirebaseAuth.getInstance().getCurrentUser();
-
-        //check if logged, if not go to login activity
-        /*if (userAuth == null) {
-            Intent i = new Intent(ShowProfileActivity.this, LoginActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-
-            FragmentManager fm = getSupportFragmentManager();
-            for(int j = 0; j < fm.getBackStackEntryCount(); ++j)
-                fm.popBackStack();
-
-        }*/
 
         //get shared preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
@@ -156,40 +145,14 @@ public class ShowProfileActivity extends AppCompatActivity {
             }
         });
 
-        if(profileImageBitmap == null) {
-            StorageReference ref = FirebaseStorage.getInstance().getReference().child("profile_pictures/" + userAuth.getUid() + ".jpg");
-            try {
-                final File localFile = File.createTempFile("Images", "bmp");
-                ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        profileImageBitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                        imageProfile.setImageBitmap(profileImageBitmap);
-
-                        synchronized (semaphoreImage) {
-                            semaphoreImage = true;
-                        }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        imageProfile.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user));
-                        synchronized (semaphoreImage) {
-                            semaphoreImage = true;
-                        }
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-                synchronized (semaphoreImage) {
-                    semaphoreImage = true;
-                }
-            }
-        } else {
+        //get profile image
+        String encoded = prefs.getString("profileImage", null);
+        if(encoded != null && !encoded.equals("unknown")) {
+            byte[] imageAsBytes = Base64.decode(encoded.getBytes(), Base64.DEFAULT);
+            profileImageBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
             imageProfile.setImageBitmap(profileImageBitmap);
-            synchronized (semaphoreImage) {
-                semaphoreImage = true;
-            }
+        } else {
+            imageProfile.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user) );
         }
 
         //listener onClick for editing
@@ -199,15 +162,6 @@ public class ShowProfileActivity extends AppCompatActivity {
                 //check if data are loaded
                 synchronized (semaphoreData) {
                     if(!semaphoreData) {
-                        showDialog(getString(R.string.showprofile_dataNotLoaded),
-                                getString(R.string.showprofile_waitData));
-                        return;
-                    }
-                }
-
-                //check if profile image is loaded
-                synchronized (semaphoreImage) {
-                    if(!semaphoreImage) {
                         showDialog(getString(R.string.showprofile_dataNotLoaded),
                                 getString(R.string.showprofile_waitData));
                         return;
@@ -266,7 +220,7 @@ public class ShowProfileActivity extends AppCompatActivity {
         super.onStart();
     }
 
-    @Override
+    /* @Override
     protected void onResume() {
         super.onResume();
 
@@ -289,7 +243,7 @@ public class ShowProfileActivity extends AppCompatActivity {
 
         //  If you're here, it means you're logged in. You may proceed.
 
-        Log.i("state", "OnResume - show");
+        /*Log.i("state", "OnResume - show");
         //get preferences
         prefs = getSharedPreferences("profile", MODE_PRIVATE);
 
@@ -340,7 +294,7 @@ public class ShowProfileActivity extends AppCompatActivity {
             }
         }
 
-    }
+    }*/
 
     private TextView BuildGenreLayout(final String name) {
         TextView genre = new TextView(this);
@@ -368,6 +322,12 @@ public class ShowProfileActivity extends AppCompatActivity {
                     byte[] imageAsBytes = Base64.decode(encoded.getBytes(), Base64.DEFAULT);
                     profileImageBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
                     imageProfile.setImageBitmap(profileImageBitmap);
+
+                    //set response to ProfileFragment
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("profileImage", encoded);
+
+                    setResult(Activity.RESULT_OK, resultIntent);
                 }
             }
         }

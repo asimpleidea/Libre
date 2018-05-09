@@ -65,6 +65,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class ProfileFragment extends Fragment {
 
     private static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
+    private int SHOW_PROFILE = 1;
 
     View v;
 
@@ -87,6 +88,8 @@ public class ProfileFragment extends Fragment {
     private int mLastVisibleItemPosition;
     private boolean mIsLoading = false;
     private int mBooksPerPage = 6; // TODO: Set to 50
+
+    Boolean semaphoreImage = false;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -149,6 +152,7 @@ public class ProfileFragment extends Fragment {
         //get user
         userAuth = FirebaseAuth.getInstance().getCurrentUser();
 
+        //first time "profileImageBitmap" will be always null --> download to Firebase
         if(profileImageBitmap == null) {
             StorageReference ref = FirebaseStorage.getInstance().getReference().child("profile_pictures/" + userAuth.getUid() + ".jpg");
             try {
@@ -159,6 +163,10 @@ public class ProfileFragment extends Fragment {
                         profileImageBitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
                         profile_img.setImageBitmap(profileImageBitmap);
 
+                        synchronized (semaphoreImage) {
+                            semaphoreImage = true;
+                        }
+
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -166,32 +174,30 @@ public class ProfileFragment extends Fragment {
                         Activity activity = getActivity();
                         if(activity != null && isAdded())
                             profile_img.setImageDrawable(getResources().getDrawable(R.drawable.unknown_user));
+
+                        synchronized (semaphoreImage) {
+                            semaphoreImage = true;
+                        }
                     }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
+
+                synchronized (semaphoreImage) {
+                    semaphoreImage = true;
+                }
             }
         } else {
             profile_img.setImageBitmap(profileImageBitmap);
+
+            synchronized (semaphoreImage) {
+                semaphoreImage = true;
+            }
         }
 
-        profile_img.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), ShowProfileActivity.class);
-
-                startActivity(intent);
-            }
-        });
-
-        profile_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), ShowProfileActivity.class);
-
-                startActivity(intent);
-            }
-        });
+        //set event clicking profile image or pencil button
+        profile_img.setOnClickListener(new eventImageClick());
+        profile_button.setOnClickListener(new eventImageClick());
 
     }
 
@@ -250,6 +256,75 @@ public class ProfileFragment extends Fragment {
         });
 
 
+    }
+
+    class eventImageClick implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            //check if profile image is loaded
+            synchronized (semaphoreImage) {
+                if(!semaphoreImage) {
+                    showDialog(getString(R.string.showprofile_dataNotLoaded),
+                            getString(R.string.showprofile_waitData));
+                    return;
+                }
+            }
+
+            //get preferences
+            if(getContext() == null)
+                return;
+
+            SharedPreferences prefs = getContext().getSharedPreferences("profile", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+
+            //save profile image if not the standard one
+            if(profileImageBitmap != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                profileImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] b = baos.toByteArray();
+                String encoded = Base64.encodeToString(b, Base64.DEFAULT);
+                editor.putString("profileImage", encoded);
+            } else {
+                editor.putString("profileImage", "unknown");
+            }
+
+            editor.commit();
+
+            Intent intent = new Intent(getActivity(), ShowProfileActivity.class);
+            startActivityForResult(intent, SHOW_PROFILE);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i("state", "onActivityResult");
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SHOW_PROFILE && resultCode == Activity.RESULT_OK) {
+            //get profile image
+            String encoded = data.getStringExtra("profileImage");
+            if(encoded != null) {
+                byte[] imageAsBytes = Base64.decode(encoded.getBytes(), Base64.DEFAULT);
+                profileImageBitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+                profile_img.setImageBitmap(profileImageBitmap);
+            }
+        }
+    }
+
+    private void showDialog(String title, String message) {
+        if(getContext() == null)
+            return;
+
+        new AlertDialog.Builder(getContext() )
+                .setTitle(title)
+                .setMessage(message)
+                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
 }
