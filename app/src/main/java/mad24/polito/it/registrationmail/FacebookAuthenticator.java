@@ -46,10 +46,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;
+import mad24.polito.it.locator.Locator;
+import mad24.polito.it.locator.LocatorEventsListener;
+import mad24.polito.it.models.UserMail;
 
 
 /**
@@ -413,50 +417,49 @@ public class FacebookAuthenticator
 
     private void createUser(final FirebaseUser logged, final JSONObject o, String picture)
     {
-        User u = new User();
+        final UserMail u = new UserMail();
         Log.d("FBLOGIN", "onCreateUser");
         try
         {
-            //Log.d("FBB", o.toString());
             //  Todo: check for email value, as Facebook not always returns it (check fb developer page)
             u.setEmail(o.getString("email"));
-            //u.setGender(o.getString("gender"));
-            //u.setLocale(o.getString("locale"));
-            u.setName(o.getString("name"));
-            //u.setTimezone(o.getInt("timezone"));
             u.setBio("");
+            u.setCity("");
+            u.setGenres(new ArrayList<Integer>());
+            u.setIdCity("");
+            u.setName(o.getString("name"));
             u.setPhone("");
-            //u.setCity("");
-            //u.addFavoriteGenre("horror");
-            //u.setPicture(picture);
 
-            //  Finally, store user to DB!
-            DB.child("users")
-                    .child(logged.getUid())
-                    .setValue(u, new DatabaseReference.CompletionListener()
-                    {
-                        @Override
-                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
-                        {
-                            Log.d("FBLOGIN", "onComplete in onCreateUser");
-                            if(databaseError != null) onFailure(logged);
-                            else
-                            {
-                                Log.d("FBLOGIN", "onComplete and success in onCreateUser");
-                                WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                    @Override
-                                    public void onDismiss(DialogInterface dialogInterface)
-                                    {
-                                        /*context.startActivity(new Intent(context, BooksActivity.class));
-                                        CurrentActivity.finish();*/
-                                    }
-                                });
-                                WaitingDialog.dismiss();
-                                //Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
+            //  Get user's current location
+            Locator l = new Locator(CurrentActivity, context);
+            l.addListener(new LocatorEventsListener() {
 
-                            }
-                        }
-                    });
+                @Override
+                public void onSuccess(double latitude, double longitude)
+                {
+                    u.setLat(latitude);
+                    u.setLon(longitude);
+                    pushUser(u, logged);
+                }
+
+                @Override
+                public void onFailure()
+                {
+                    //  Set latitude and longitude of politecnico di torino
+                    u.setLat(45.06249);
+                    u.setLon(7.66220);
+                    pushUser(u, logged);
+                }
+
+                @Override
+                public void onPermissionDenied()
+                {
+                    //  Set latitude and longitude of politecnico di torino
+                    u.setLat(45.06249);
+                    u.setLon(7.66220);
+                    pushUser(u, logged);
+                }
+            }).once();
         }
         catch(JSONException j)
         {
@@ -464,6 +467,37 @@ public class FacebookAuthenticator
             onFailure(logged);
         }
 
+    }
+
+    private void pushUser(final UserMail u, final FirebaseUser logged)
+    {
+        //  Finally, store user to DB!
+        DB.child("users")
+                .child(logged.getUid())
+                .setValue(u, new DatabaseReference.CompletionListener()
+                {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
+                    {
+                        Log.d("FBLOGIN", "onComplete in onCreateUser");
+                        if(databaseError != null) onFailure(logged);
+                        else
+                        {
+                            Log.d("FBLOGIN", "onComplete and success in onCreateUser");
+                            WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialogInterface)
+                                {
+                                        /*context.startActivity(new Intent(context, BooksActivity.class));
+                                        CurrentActivity.finish();*/
+                                }
+                            });
+                            WaitingDialog.dismiss();
+                            //Toast.makeText(context, "Thanks for joining in! Happy to have you on board!", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+                });
     }
 
     private void onFailure(final FirebaseUser logged)
