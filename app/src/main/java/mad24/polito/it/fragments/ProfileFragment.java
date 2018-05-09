@@ -72,6 +72,7 @@ public class ProfileFragment extends Fragment {
     private RecyclerView rv;
     private RecyclerViewAdapter recyclerViewAdapter;
     private TextView tv;
+    private TextView uv;
 
     // Array lists
     private List<Book> books;
@@ -99,6 +100,7 @@ public class ProfileFragment extends Fragment {
         v = inflater.inflate(mad24.polito.it.R.layout.fragment_profile, container, false);
 
         tv = (TextView) v.findViewById(R.id.no_books_msg);
+        uv = (TextView) v.findViewById(R.id.user_name);
 
         rv = (RecyclerView) v.findViewById(R.id.posted_book_list);
 
@@ -137,6 +139,24 @@ public class ProfileFragment extends Fragment {
 
     private void getUserName() {
         // TODO: get user name and set proper TextView
+        Query query;
+
+        query = FirebaseDatabase.getInstance().getReference()
+                .child(FIREBASE_DATABASE_LOCATION_USERS)
+                .child(FirebaseAuth.getInstance().getUid())
+                .child("name");
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                uv.setText(dataSnapshot.getValue(String.class));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
