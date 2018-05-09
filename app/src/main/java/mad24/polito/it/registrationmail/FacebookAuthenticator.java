@@ -488,8 +488,8 @@ public class FacebookAuthenticator
                                 @Override
                                 public void onDismiss(DialogInterface dialogInterface)
                                 {
-                                        /*context.startActivity(new Intent(context, BooksActivity.class));
-                                        CurrentActivity.finish();*/
+                                        context.startActivity(new Intent(context, BooksActivity.class));
+                                        CurrentActivity.finish();
                                 }
                             });
                             WaitingDialog.dismiss();
