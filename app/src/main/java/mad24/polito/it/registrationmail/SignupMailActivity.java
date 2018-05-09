@@ -18,6 +18,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.ContextThemeWrapper;
@@ -123,6 +124,7 @@ public class SignupMailActivity extends AppCompatActivity implements
         //  Set up facebook sign up
         //-----------------------------------
 
+        Log.d("FBLOGIN", "Setting up the authenticator");
         FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
         FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
         FBAuth.setActionType(FacebookAuthenticator.ActionTypes.SIGNUP);
