@@ -126,7 +126,7 @@ public class Locator implements LocationNotifier, ActivityCompat.OnRequestPermis
                 {
                     if(Listener != null)
                     {
-                        if(location != null ) Listener.onSuccess(location.getLatitude(), location.getLatitude());
+                        if(location != null ) Listener.onSuccess(location.getLatitude(), location.getLongitude());
                         else Listener.onFailure();
                     }
                 }
