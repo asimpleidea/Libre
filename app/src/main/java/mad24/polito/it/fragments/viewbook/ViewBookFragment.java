@@ -21,6 +21,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 
 import mad24.polito.it.BooksActivity;
@@ -56,6 +58,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private final String BOOK_OWNER_TITLE = "Owner";
     private final String BOOK_MAP_TITLE = "Map";
     private final String BUNDLE_KEY = "book";
+    StorageReference Storage = null;
 
     private FragmentLoadingListener LoadingListener = null;
 
@@ -109,6 +112,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         {
             JSONBook = getArguments().getString(BUNDLE_KEY);
             TheBook = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
+            //Storage = FirebaseStorage.getInstance().getReference().child("bookCovers");
         }
     }
 
@@ -299,6 +303,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                     }
                     else
                     {
+
                         cover.setImageDrawable(getResources().getDrawable(R.drawable.default_book_cover));
                         showFragment();
                     }

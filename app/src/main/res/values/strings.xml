@@ -166,16 +166,14 @@
     <string name="facebook_app_id">102712380576500</string>
     <string name="fb_login_protocol_scheme">fb102712380576500</string>
 
-    <string name="fields">name, first_name, last_name, gender, locale, picture.type(large), timezone, verified, email</string>
+    <string name="fields">name, first_name, last_name, locale, picture.type(large), timezone, email</string>
     <string-array name="fieldsArray">
         <item>name</item>
         <item>first_name</item>
         <item>last_name</item>
-        <item>gender</item>
         <item>locale</item>
         <item>picture</item>
         <item>timezone</item>
-        <item>verified</item>
         <item>email</item>
     </string-array>
 

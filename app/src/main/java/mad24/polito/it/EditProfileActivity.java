@@ -192,7 +192,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
         //get profile image
         String encoded = prefs.getString("profileImage", null);
-        if(!encoded.equals("unknown")) {
+        if(encoded != null && !encoded.equals("unknown")) {
             byte[] imageAsBytes = Base64.decode(encoded.getBytes(), Base64.DEFAULT);
             imageProfile.setImageBitmap(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
         } else {
