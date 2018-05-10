@@ -158,7 +158,7 @@
     <string name="coordinates_error">Errore</string>
     <string name="coordinates_errorGettingInfo">Errore acquisendo le informazioni dell\'utente</string>
 
-    <string name="login_with_fb">Entra con Facebook</string>
+    <string name="login_with_fb">Accedi con Facebook</string>
     <string name="signup_with_fb">Registrati con Facebook</string>
     <string name="logout_from_fb">Esci</string>
     <string name="fb_wait">Un attimo…</string>

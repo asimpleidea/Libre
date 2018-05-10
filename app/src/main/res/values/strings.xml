@@ -177,7 +177,7 @@
         <item>email</item>
     </string-array>
 
-    <string name="login_with_fb">Login with Facebook</string>
+    <string name="login_with_fb">Access with Facebook</string>
     <string name="signup_with_fb">Sign up with Facebook</string>
     <string name="logout_from_fb">Log out</string>
     <string name="fb_wait">Loading data...</string>
