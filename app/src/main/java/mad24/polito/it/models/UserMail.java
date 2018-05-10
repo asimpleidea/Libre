@@ -17,6 +17,7 @@ public class UserMail {
     HashMap<String, Boolean> books;
     double lat;
     double lon;
+    boolean fb = false;
 
     public UserMail() {
 
@@ -38,6 +39,10 @@ public class UserMail {
         for(String b : books)
             this.books.put(b, true);
     }
+
+    public boolean isFb() { return fb; }
+
+    public void setFb(boolean fb) { this.fb = fb; }
 
     public String getEmail() {
         return email;
