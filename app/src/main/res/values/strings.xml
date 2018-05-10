@@ -148,6 +148,7 @@
     <string name="ISBN_explain">ISBN is a code of 13 digits!</string>
     <string name="edition_year">Edition Year</string>
     <string name="book_conditions">Book conditions</string>
+    <string name="book_submitted">Book successfully submitted!</string>
 
     <!-- search strings -->
     <string name="search_search">Search...</string>

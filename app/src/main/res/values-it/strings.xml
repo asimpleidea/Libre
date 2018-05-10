@@ -89,7 +89,6 @@
     <string name="nav_chat">Chat</string>
     <string name="nav_profile">Profilo</string>
 
-    <!-- TODO: Change this text -->
     <string name="dialog_scan">Scansione ISBN</string>
     <string name="dialog_manualIns">Inserimento manuale</string>
     <string name="manual_insert_error">Errore acquisendo le informazioni sul libro</string>
@@ -138,6 +137,7 @@
     <string name="book_isbn">ISBN</string>
     <string name="book_publisher">Editore</string>
     <string name="bookSend">Invia</string>
+    <string name="book_submitted">Libro inserito correttamente!</string>
 
     <!-- book insert errors -->
     <string name="required">Necessario!</string>

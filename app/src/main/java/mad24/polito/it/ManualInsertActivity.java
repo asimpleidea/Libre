@@ -496,6 +496,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         mRef.child(FirebaseAuth.getInstance().getUid()).child("books").child(bookKey).setValue(true);
 
+        Toast.makeText(this, getString(R.string.book_submitted),Toast.LENGTH_LONG).show();
         finish();
         //Log.d("anotherbug", "user updated");
     }
