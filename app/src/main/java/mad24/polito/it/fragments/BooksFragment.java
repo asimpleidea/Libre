@@ -57,6 +57,8 @@ public class BooksFragment extends Fragment {
      * TODO: Get a good threshold value here. From previous tests 20 seems too low; 100 seems to suit it better
      */
     private final float SCROLL_THRESHOLD = 100;
+    private final int RADIUS = 100;
+    private final int RADIUS_LARGER = 1000;
 
     View v;
 
@@ -76,6 +78,7 @@ public class BooksFragment extends Fragment {
 
     private ArrayList<String> keyBooks = new ArrayList<String>();
     private Long timestampKey = (long)0;
+    private Boolean semaphoreGetKeys = true;
 
     /**
      * Finger position on X axys
@@ -144,7 +147,9 @@ public class BooksFragment extends Fragment {
                 Double lon = user.getLon();
 
                 //get coordinates and nearby books
-                getKeys(lat, lon);
+                synchronized (this) {
+                    getKeys(lat, lon, RADIUS);
+                }
             }
 
             @Override
@@ -301,7 +306,7 @@ public class BooksFragment extends Fragment {
     }
 
     private void getBooks(final String nodeId) {
-        Query query = FirebaseDatabase.getInstance().getReference()
+        final Query query = FirebaseDatabase.getInstance().getReference()
                 .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                 .orderByKey()
                 .equalTo(nodeId);
@@ -314,7 +319,7 @@ public class BooksFragment extends Fragment {
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     Book book = bookSnapshot.getValue(Book.class);
 
-                    //Log.d("debug", "TITLE: "+book.getTitle());
+                    Log.d("debug", "TITLE: "+book.getTitle());
 
                     synchronized (timestampKey) {
                         if(timestamp < timestampKey)
@@ -330,8 +335,10 @@ public class BooksFragment extends Fragment {
                     }
 
                 //response should be just one book
-break;
+                break;
                 }
+
+                query.removeEventListener(this);
             }
 
             @Override
@@ -456,21 +463,29 @@ break;
         }
     }
 
-    public void getKeys(double lat, double lon) {
+    public void getKeys(final double lat, final double lon, long radius) {
+        synchronized (semaphoreGetKeys) {
+            if(semaphoreGetKeys.booleanValue() == false)
+                return;
+
+            semaphoreGetKeys = false;
+        }
+
         synchronized (timestampKey) {
             timestampKey = new Date().getTime();
         }
 
         keyBooks = new ArrayList<>();
+        final long time = timestampKey;
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("locationBooks");
         GeoFire geoFire = new GeoFire(ref);
 
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lon), 100);
+        final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lon), radius);
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                //Log.d("debug", "onKeyEntered - New key added");
+                Log.d("debug", "onKeyEntered - New key added "+time);
                 if(!keyBooks.contains(key))
                     keyBooks.add(key);
             }
@@ -487,7 +502,17 @@ break;
 
             @Override
             public void onGeoQueryReady() {
-                //Log.d("debug", "OnGeoQueryReady - all keys are loaded");
+                Log.d("debug", "OnGeoQueryReady - all keys are loaded");
+
+                if(keyBooks.size() < 1) {
+                    synchronized (semaphoreGetKeys) {
+                        semaphoreGetKeys = true;
+                    }
+
+                    getKeys(lat, lon, RADIUS_LARGER);
+                    geoQuery.removeGeoQueryEventListener(this);
+                    return;
+                }
 
                 //set Adapter
                 recyclerViewAdapter = new RecyclerViewAdapter(getContext(), new ArrayList<Book>());
@@ -505,6 +530,12 @@ break;
                         getBooks(keyBooks.get(i));
                     }
                 }
+
+                synchronized (semaphoreGetKeys) {
+                    semaphoreGetKeys = true;
+                }
+
+                geoQuery.removeGeoQueryEventListener(this);
             }
 
             @Override
