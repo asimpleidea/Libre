@@ -124,7 +124,6 @@ public class FacebookAuthenticator
      */
     FacebookAuthenticator(Context context, Activity currentActivity)
     {
-        Log.d("FBLOGIN", "in constructor");
         this.context = context;
         Manager = CallbackManager.Factory.create();
         CurrentActivity = currentActivity;
@@ -139,7 +138,6 @@ public class FacebookAuthenticator
      */
     public void setButton(LoginButton button)
     {
-        Log.d("FBLOGIN", "on setButton");
         Button = button;
         Button.setReadPermissions("email", "public_profile");
 
@@ -148,7 +146,6 @@ public class FacebookAuthenticator
                     @Override
                     public void onSuccess(LoginResult loginResult)
                     {
-                        Log.d("FBLOGIN", "Successful!");
                         onFinish(loginResult.getAccessToken());
                     }
 
@@ -203,8 +200,6 @@ public class FacebookAuthenticator
      */
     protected void onFinish(AccessToken token)
     {
-        Log.d("FBLOGIN", "onFinish called! and action is" + Type.toString());
-
         if(Type == ActionTypes.UNKNOWN) return;
 
         //---------------------------------
@@ -276,7 +271,6 @@ public class FacebookAuthenticator
             @Override
             public void onCompleted(JSONObject object, GraphResponse response)
             {
-                Log.d("FBLOGIN", "newMeRequest is finished with status: " + response.getRawResponse());
 
                 //  200 OK?
                 if(response.getError() != null)
@@ -315,7 +309,7 @@ public class FacebookAuthenticator
     {
         //  Get the credential
         final AuthCredential  credential = FacebookAuthProvider.getCredential(token.getToken());
-        Log.d("FBLOGIN", "in sign in");
+
         //  ... and log the user in
         FireAuth.signInWithCredential(credential).addOnCompleteListener(CurrentActivity,
                 new OnCompleteListener<AuthResult>()
@@ -323,10 +317,9 @@ public class FacebookAuthenticator
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task)
                     {
-                        Log.d("FBLOGIN", "in onComplete");
+
                         if (task.isSuccessful())
                         {
-                            Log.d("FBLOGIN", "task is successful");
                             //  Get the user logged
                             final FirebaseUser logged = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -338,11 +331,9 @@ public class FacebookAuthenticator
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot)
                                 {
-                                    Log.d("FBLOGIN", "ONDATACHANGE");
                                     //  No need to do anything else then
                                     if (dataSnapshot.hasChild(logged.getUid()))
                                     {
-                                        Log.d("FBLOGIN", "hasChild");
                                         //Toast.makeText(context, "User already exists, just logging", Toast.LENGTH_SHORT).show();
                                         context.startActivity(new Intent(context, BooksActivity.class));
                                         CurrentActivity.finish();
@@ -363,7 +354,6 @@ public class FacebookAuthenticator
                                         //----------------------------------
 
                                         final String pic = o.getJSONObject("picture").getJSONObject("data").getString("url");
-                                        Log.d("FBLOGIN", pic);
 
                                         stream = new PullFBPictureStream(logged.getUid()).execute(pic).get();
                                     }
@@ -383,7 +373,7 @@ public class FacebookAuthenticator
                                         public void onFailure(@NonNull Exception e)
                                         {
                                             //  Create User
-                                            Log.d("FBLOGIN", "failure");
+                                            //Log.d("FBLOGIN", "failure");
                                             createUser(logged, o, null);
                                         }
                                     });
@@ -393,7 +383,7 @@ public class FacebookAuthenticator
                                         @Override
                                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
                                         {
-                                            Log.d("FBLOGIN", "Success");
+                                            //Log.d("FBLOGIN", "Success");
 
                                             String picUrl = taskSnapshot.getDownloadUrl() != null ? taskSnapshot.getDownloadUrl().toString() : null;
                                             createUser(logged, o, picUrl);
@@ -412,13 +402,12 @@ public class FacebookAuthenticator
                     }
                 }
         );
-        Log.d("FBLOGIN", "after signin with credential");
     }
 
     private void createUser(final FirebaseUser logged, final JSONObject o, String picture)
     {
         final UserMail u = new UserMail();
-        Log.d("FBLOGIN", "onCreateUser");
+
         try
         {
             //  Todo: check for email value, as Facebook not always returns it (check fb developer page)
@@ -429,6 +418,7 @@ public class FacebookAuthenticator
             u.setIdCity("");
             u.setName(o.getString("name"));
             u.setPhone("");
+            u.setFb(true);
 
             //  Get user's current location
             Locator l = new Locator(CurrentActivity, context);
@@ -463,7 +453,6 @@ public class FacebookAuthenticator
         }
         catch(JSONException j)
         {
-            Log.d("FBLOGIN", "JSONEXCEPTION in onCreateUser");
             onFailure(logged);
         }
 
@@ -479,11 +468,9 @@ public class FacebookAuthenticator
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference)
                     {
-                        Log.d("FBLOGIN", "onComplete in onCreateUser");
                         if(databaseError != null) onFailure(logged);
                         else
                         {
-                            Log.d("FBLOGIN", "onComplete and success in onCreateUser");
                             WaitingDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                                 @Override
                                 public void onDismiss(DialogInterface dialogInterface)

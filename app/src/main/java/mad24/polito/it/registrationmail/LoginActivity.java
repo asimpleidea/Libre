@@ -67,7 +67,8 @@ public class LoginActivity extends AppCompatActivity {
 
         FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
         FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
-        FBAuth.setActionType(FacebookAuthenticator.ActionTypes.LOGIN);
+        //FBAuth.setActionType(FacebookAuthenticator.ActionTypes.LOGIN);
+        FBAuth.setActionType(FacebookAuthenticator.ActionTypes.SIGNUP);
         FBAuth.setDialogBuilder(new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_AppCompat_DayNight_NoActionBar)));
 
         //-----------------------------------

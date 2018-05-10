@@ -124,12 +124,12 @@ public class SignupMailActivity extends AppCompatActivity implements
         //  Set up facebook sign up
         //-----------------------------------
 
-        Log.d("FBLOGIN", "Setting up the authenticator");
-        FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
-        FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
-        FBAuth.setActionType(FacebookAuthenticator.ActionTypes.SIGNUP);
-        FBAuth.setDialogBuilder(new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_AppCompat_DayNight_NoActionBar)));
-
+        /*
+            FBAuth = new FacebookAuthenticator(getApplicationContext(), this);
+            FBAuth.setButton((LoginButton) findViewById(R.id.login_button));
+            FBAuth.setActionType(FacebookAuthenticator.ActionTypes.SIGNUP);
+            FBAuth.setDialogBuilder(new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.Theme_AppCompat_DayNight_NoActionBar)));
+        */
         //-----------------------------------
         //  Regular sign up
         //-----------------------------------
