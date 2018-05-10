@@ -465,7 +465,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
                                             Task initTask = myDatabase.child("users").child(userAuth.getUid())
                                                     .setValue(new UserMail(userAuth.getEmail(), newName, newCity, idSelectedCity, newPhone,
-                                                            newBio, newSelectedGenres, lat, lon) );
+                                                            newBio, newSelectedGenres, books, lat, lon) );
 
                                             initTask.addOnSuccessListener(new OnSuccessListener() {
                                                 @Override

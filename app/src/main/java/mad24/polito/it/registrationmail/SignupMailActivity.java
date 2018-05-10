@@ -863,7 +863,7 @@ public class SignupMailActivity extends AppCompatActivity implements
                             DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
                             myDatabase.child("users").child(user.getUid())
                                     .setValue(new UserMail(mailString, nameString, cityString, idSelectedCity,
-                                            phoneString, bioString, selectedGenres, lat, lon) );
+                                            phoneString, bioString, selectedGenres, new ArrayList<String>(), lat, lon) );
 
                             progressBar.setVisibility(View.GONE);
 

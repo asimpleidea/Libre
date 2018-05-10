@@ -3,8 +3,10 @@ package mad24.polito.it.models;
 import android.net.Uri;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class UserMail {
+
     String email;
     String name;
     String city;
@@ -12,6 +14,7 @@ public class UserMail {
     String phone;
     String bio;
     ArrayList<Integer> genres;
+    HashMap<String, Boolean> books;
     double lat;
     double lon;
 
@@ -19,7 +22,7 @@ public class UserMail {
 
     }
 
-    public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres, double lat, double lon) {
+    public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres, ArrayList<String> books, double lat, double lon) {
         this.email = email;
         this.name = name;
         this.city = city;
@@ -30,6 +33,10 @@ public class UserMail {
         this.genres = genres;
         this.lat = lat;
         this.lon = lon;
+
+        this.books = new HashMap<String, Boolean>();
+        for(String b : books)
+            this.books.put(b, true);
     }
 
     public String getEmail() {
