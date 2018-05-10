@@ -10,11 +10,14 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
+
 import mad24.polito.it.fragments.BooksFragment;
 import mad24.polito.it.fragments.ChatFragment;
 import mad24.polito.it.fragments.ProfileFragment;
@@ -141,9 +144,15 @@ public class BooksActivity  extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Log.d("VIEWBOOK", "Saving: "+ currentFragment.getClass().toString());
         //  TODO: this needs to be modified in case we were on a ViewBookFragment
         outState.putInt("fragment", currentFragment.ordinal());
+
+        //  Were we on a view book?
+        if(ViewBook != null)
+        {
+            outState.putString("viewbook", ViewBook.getArguments().getString("book"));
+        }
+
     }
 
     @Override
@@ -169,8 +178,17 @@ public class BooksActivity  extends AppCompatActivity
                 break;
             case 4:
             {
-                if(ViewBook == null) Log.d("VIEWBOOK", "Viewbook is null");
-                Log.d("VIEWBOOK", "here");
+                if(savedInstanceState.containsKey("viewbook"))
+                {
+                    Bundle args = new Bundle();
+                    args.putString("book", savedInstanceState.getString("viewbook"));
+
+                    final ViewBookFragment b = new ViewBookFragment();
+                    b.setArguments(args);
+
+                    setViewBookFragment(b);
+                    setFragment(b, "ViewBook");
+                }
             }
                 break;
         }

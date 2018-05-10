@@ -124,10 +124,10 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         view = inflater.inflate(R.layout.fragment_view_book, container, false);
 
         //  Load the book cover
-        if(TheBook.getBookImageLink() != null && !TheBook.getBookImageLink().isEmpty())
+        /*if(TheBook.getBookImageLink() != null && !TheBook.getBookImageLink().isEmpty())
         {
             Glide.with(getActivity().getApplicationContext()).load(TheBook.getBookImageLink()).into((ImageView) view.findViewById(R.id.bookCover));
-        }
+        }*/
 
         setUpDetails();
 
