@@ -57,7 +57,7 @@ public class SearchFragment extends Fragment {
 
     // Recycler view management
     private Boolean mIsLoading = false;
-    private int mPostsPerPage = 6;      //TODO set to 50
+    private int mPostsPerPage = 20;
     private Integer itemCount = 0;
 
     private String currentQuery = new String("");

@@ -88,7 +88,7 @@ public class ProfileFragment extends Fragment {
     private int mTotalItemCount = 0;
     private int mLastVisibleItemPosition;
     private boolean mIsLoading = false;
-    private int mBooksPerPage = 6; // TODO: Set to 50
+    private int mBooksPerPage = 20;
 
     Boolean semaphoreImage = false;
 

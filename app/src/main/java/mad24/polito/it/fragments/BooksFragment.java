@@ -74,7 +74,7 @@ public class BooksFragment extends Fragment {
     // Recycler view management
     private Integer askeditemCount = 0;
     private Integer actualItemCount = 0;
-    private int mBooksPerPage = 6;
+    private int mBooksPerPage = 20;
 
     private ArrayList<String> keyBooks = new ArrayList<String>();
     private Long timestampKey = (long)0;
