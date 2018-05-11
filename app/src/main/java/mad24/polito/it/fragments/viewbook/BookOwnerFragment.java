@@ -1,6 +1,7 @@
 package mad24.polito.it.fragments.viewbook;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,12 +11,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,6 +32,7 @@ import com.google.gson.Gson;
 import java.security.acl.Owner;
 
 import mad24.polito.it.R;
+import mad24.polito.it.chats.ChatActivity;
 import mad24.polito.it.models.Book;
 import mad24.polito.it.models.UserMail;
 import mad24.polito.it.registrationmail.User;
@@ -148,6 +153,45 @@ public class BookOwnerFragment extends Fragment
         if(User == null) loadAndInjectUser();
         else injectUser();
 
+        ((Button) RootView.findViewById(R.id.startChat)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d("CHAT", "I AM CLICKED");
+                /*DatabaseReference chats =*/ FirebaseDatabase.getInstance()
+                        .getReference()
+                        .child("chats")
+                        .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                        .child(TheBook.getUser_id())
+                        .addListenerForSingleValueEvent(new ValueEventListener()
+                        {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot)
+                            {
+                                //  The chat id
+                                String chat = null;
+
+                                //  Was a chat already there?
+                                //  NOTE: the second case is actually an error: the chat is found but the id does not exit.
+                                if(dataSnapshot != null && dataSnapshot.hasChild("chat")) chat = dataSnapshot.child("chat").getValue(String.class);
+
+                                //  Start the activity
+                                Intent intent = new Intent(getActivity(), ChatActivity.class);
+                                intent.putExtra("chat", chat);
+                                intent.putExtra("start", dataSnapshot.child("id").getValue(String.class));
+                                startActivity(intent);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError)
+                            {
+                                //  TODO: display an error message?
+                                Log.d("CHAT", "on error");
+                            }
+                        });
+            }
+        });
         return RootView;
     }
 
