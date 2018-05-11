@@ -60,7 +60,7 @@
         <activity
             android:name=".BooksActivity"
             android:label="@string/title_activity_books"
-            android:windowSoftInputMode="adjustPan"></activity>
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".registrationmail.LoginActivity"
             android:theme="@style/AppTheme">
@@ -121,6 +121,9 @@
         </activity>
         <!-- /Facebook Login/Signup -->
 
+        <activity
+            android:name=".ChatActivity"
+            android:label="@string/title_activity_chat"></activity>
     </application>
 
 </manifest>

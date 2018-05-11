@@ -60,6 +60,10 @@ dependencies {
     implementation 'com.borjabravo:readmoretextview:2.1.0'
     //  HTTP Requests
     implementation 'com.android.volley:volley:1.1.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 
 apply plugin: 'com.google.gms.google-services'
+
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
