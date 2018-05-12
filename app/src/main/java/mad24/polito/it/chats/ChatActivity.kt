@@ -35,7 +35,7 @@ class ChatActivity : AppCompatActivity()
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
     var Them : String? = null
     var MostRecentMessage : String = ""
-    var OldestMessage : String? = null
+    var OldestMessage : String = ""
     var Initialized : Boolean = false
     var User : UserMail? = null
 
@@ -87,6 +87,9 @@ class ChatActivity : AppCompatActivity()
         {
             ChatID = intent.getStringExtra("chat")
             MostRecentMessage = intent.getStringExtra("start")
+
+            //  At first they are the same of course
+            OldestMessage = MostRecentMessage
         }
 
         //  Set up stuff
@@ -110,8 +113,6 @@ class ChatActivity : AppCompatActivity()
 
     private fun setUpMessagesListener()
     {
-        Log.d("CHAT", "on setUpMessagesListener")
-
         //  Set it up
         MessagesReference = MainReference.child(ChatID).child("messages")
 
@@ -127,10 +128,10 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Set the event
-        var query = MessagesReference.orderByChild("sent")
+        var query = MessagesReference.orderByKey()
 
         //  TODO: check the limitToLast
-        .startAt(MostRecentMessage).limitToLast(Take)
+        .limitToLast(Take).endAt(OldestMessage)
 
         query.addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -144,16 +145,63 @@ class ChatActivity : AppCompatActivity()
                 synchronized(t.Initialized)
                 {
                     Initialized = true
-                    Take = 1
                 }
 
                 if(p0 == null) return
+
                 for(p : DataSnapshot in p0.children)
                 {
                     Log.d("CHAT", "message: ${p.child("content").getValue(String::class.java)}")
                 }
 
-                listenForNewMessages()
+                //  Little trick to know if this is the first time we are doing this
+                if(OldestMessage.compareTo(MostRecentMessage) == 0) listenForNewMessages()
+
+                //  No need to synchronize it now
+                OldestMessage = p0.children.first().key
+
+                //  TODO: scroll on top to get previous messages
+                //  General idea behind this:
+                //  NOTE: this idea must be implemented because I don't know if it works or not
+                if(p0.children.count() == Take)
+                {
+                    /*- if we got exactly Take message (example 20)
+                        - then here we attach the scroll event to the view:
+                            when user scrolls on top, this function (getFirstMessages) gets called again,
+                            but this time, OldestMessage is a different value (we changed it two lines above)
+                            Since this is a addListerForSINGLEevent this want be triggered more if user keeps scrolling.
+                            So we will be called here again: if 20 messages redo attach scroll event.
+                            So this is going to be a recursive scroll attacher until less than 20 messages are loaded.
+                            In that case, this block won't be called again, thus making scroll just a pure scroll, not an infinite one
+                            NOTE: firebase will get every Take messages until the message provided as endAt,
+                            BUT: the one that you pass to endAt will be included!
+                            So, if you want to get 20 messages, you have to load 21: you show only the last 20;
+                            the first one, you have to *NOT* use but keep it as parameter for the next query when user scrolls.
+                            I know that this general algorithm seems a bit complicated...
+                            If you can find a better algorithm go for it, otherwise contact me on slack for better explanation.
+
+                            I wrote a simulator down below, simulating a user scrolling up every 5 seconds.
+                            Uncomment it to have an example of what I have written above.
+                            You might want to set Take to a smaller value (like 3) to get an idea of what I was talking about.
+                    */
+                    /*
+                    //  OldestMessage is now that element which Firebase will stop at (endAt())
+                    //  It will take 20 messages in which this will be the 20th.
+                    //  So, as I said above, better take 21 and keep that first one just as a reference for the next query,
+                    //  and instead show the other 20 (so from 1 to 20, discard message on position 0)
+                    Log.d("CHAT", "new oldest: $OldestMessage")
+                    object : CountDownTimer(5*1000, 5*1000)
+                        {
+                            override fun onFinish()
+                            {
+                                Log.d("CHAT", "Going to reload again")
+                                getFirstMessages()
+                            }
+
+                            override fun onTick(p0: Long) {}
+
+                        }.start()*/
+                }
             }
         })
     }
@@ -180,13 +228,10 @@ class ChatActivity : AppCompatActivity()
                 if(p0 == null) return
 
                 //  TODO: probably a check to see if we loaded them all
-                if(p0.children.count() < Take) return
+                if(p0.children.count() < 1) return
 
                 //  Get the actual message (we are taking just one, so we're getting the first)
                 val newMessage = p0.children.first()
-
-                Log.d("CHAT", "new message key: ${newMessage.key}")
-                Log.d("CHAT", "most recent message: $MostRecentMessage")
 
                 //  If you're here, it means that the new message was caught
                 //  NOTE: a new message can arrive when we are still parsing the previous new one.
@@ -197,14 +242,11 @@ class ChatActivity : AppCompatActivity()
                     //  NOTE: kotlin suggests doing compareTo() instead of equals(), so I did it like that
                     if(newMessage.key.compareTo(MostRecentMessage) == 0)
                     {
-                        Log.d("CHAT", "message discarded because it was already loaded")
                         return
                     }
 
                     MostRecentMessage = newMessage.key
                 }
-
-                //Log.d("CHAT", "new message: ${newMessage.getValue(String::class.java)}")
             }
         })
     }
@@ -225,12 +267,11 @@ class ChatActivity : AppCompatActivity()
             override fun onDataChange(p0: DataSnapshot?)
             {
                 if(!::TypingNotifier.isInitialized) return
-                Log.d("CHAT", "onDataChange of typing")
+
                 if(p0 != null)
                 {
-                    Log.d("CHAT", "onDataChange of typing: not null")
                     if(p0.hasChild("is_typing"))
-                    {Log.d("CHAT", "onDataChange hastyping")
+                    {
                         //  TODO: add fade in & fade out animations here
                         if(p0.child("is_typing")?.value == true) TypingNotifier?.visibility = View.VISIBLE
                         else TypingNotifier?.visibility = View.GONE
@@ -444,7 +485,6 @@ class ChatActivity : AppCompatActivity()
             SubmitButton.setOnClickListener(null)
 
             //  TODO: Remove events as well? I think that is not necessary
-            Log.d("CHAT", "reset done")
         }
     }
 }
