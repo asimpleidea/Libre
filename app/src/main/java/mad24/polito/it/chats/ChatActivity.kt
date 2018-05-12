@@ -34,7 +34,7 @@ class ChatActivity : AppCompatActivity()
     var Take : Int = 20
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
     var Them : String? = null
-    var MostRecentMessaged : String? = null
+    var MostRecentMessage : String = ""
     var OldestMessage : String? = null
     var Initialized : Boolean = false
     var User : UserMail? = null
@@ -76,28 +76,21 @@ class ChatActivity : AppCompatActivity()
         TypingNotifier = findViewById(R.id.userIsTyping)
         TypingNotifier.setText("${User?.name} is typing... (THREE DOTS ANIMATION HERE?")
 
-        //  The typer
+        //  The typer (edit text)
         Typer = findViewById(R.id.typeText)
 
         //  The submitter
         SubmitButton = findViewById(R.id.submitButton)
 
-        //  Set up the typing observer
-        setUpTypingObserver()
-
-        ChatID = "-LCJ2HXE0ECtlt_5oFF0"
-        MostRecentMessaged = "-LCJ2VQqpxPE7P4cbd_8"
-        //  Set up other stuff
-        setUps()
         //  Do we already have a chat stored?
         if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
         {
-            //ChatID = intent.getStringExtra("chat")
-            //MostRecentMessaged = intent.getStringExtra("start")
-
-            //  Set up other stuff
-            //setUps()
+            ChatID = intent.getStringExtra("chat")
+            MostRecentMessage = intent.getStringExtra("start")
         }
+
+        //  Set up stuff
+        setUps()
     }
 
     private fun setUps()
@@ -105,11 +98,14 @@ class ChatActivity : AppCompatActivity()
         //  Typing observer
         setUpTypingObserver()
 
-        //  Set up messages listener
-        setUpMessagesListener()
+        if(ChatID != null)
+        {
+            //  Set up messages listener
+            setUpMessagesListener()
 
-        //  Set up typing listener
-        setUpTypingListener()
+            //  Set up typing listener
+            setUpTypingListener()
+        }
     }
 
     private fun setUpMessagesListener()
@@ -134,7 +130,7 @@ class ChatActivity : AppCompatActivity()
         var query = MessagesReference.orderByChild("sent")
 
         //  TODO: check the limitToLast
-        .startAt(MostRecentMessaged).limitToLast(Take)
+        .startAt(MostRecentMessage).limitToLast(Take)
 
         query.addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -164,10 +160,13 @@ class ChatActivity : AppCompatActivity()
 
     private fun listenForNewMessages()
     {
+        //  Reference to this class
+        val t = this
+
         //  Set the event
         var query = MessagesReference.orderByChild("sent")
 
-        .startAt(MostRecentMessaged).limitToLast(1)
+        .startAt(MostRecentMessage).limitToLast(1)
 
         query.addValueEventListener(object : ValueEventListener
         {
@@ -183,16 +182,29 @@ class ChatActivity : AppCompatActivity()
                 //  TODO: probably a check to see if we loaded them all
                 if(p0.children.count() < Take) return
 
+                //  Get the actual message (we are taking just one, so we're getting the first)
+                val newMessage = p0.children.first()
 
-                //  TODO: Discard the first message because it is already there
+                Log.d("CHAT", "new message key: ${newMessage.key}")
+                Log.d("CHAT", "most recent message: $MostRecentMessage")
 
-                if(p0.key == MostRecentMessaged) return
+                //  If you're here, it means that the new message was caught
+                //  NOTE: a new message can arrive when we are still parsing the previous new one.
+                //  In that case, we have to wait for the previous onDataChange to finish this part
+                synchronized(t.MostRecentMessage)
+                {
+                    //  Discard the message if it is already the same as the last one (like: the one that we just posted)
+                    //  NOTE: kotlin suggests doing compareTo() instead of equals(), so I did it like that
+                    if(newMessage.key.compareTo(MostRecentMessage) == 0)
+                    {
+                        Log.d("CHAT", "message discarded because it was already loaded")
+                        return
+                    }
 
-                //  TODO: check if this is correct
-                MostRecentMessaged = p0.children.first().key
+                    MostRecentMessage = newMessage.key
+                }
 
-                Log.d("CHAT", "new message: ${p0.child("content").getValue(String::class.java)}")
-
+                //Log.d("CHAT", "new message: ${newMessage.getValue(String::class.java)}")
             }
         })
     }
@@ -270,7 +282,6 @@ class ChatActivity : AppCompatActivity()
                 {
                     if(!CountDownRunning)
                     {
-                        // TODO: check if events are needed here
                         IAmTyping.child("is_typing").setValue(true) { p0, p1 ->
                             if(p0 != null)
                             {
@@ -351,12 +362,12 @@ class ChatActivity : AppCompatActivity()
         MainReference.child(ChatID).setValue(p){ error, ref ->
             if(error != null)
             {
-                Log.d("CHAT", "Delete conversation")
+                //  TODO: Dialog: "Sorry we could not send your message, please try again later"
                 return@setValue
             }
 
             //  Set up stuff
-            //  NOTE: no need to synchronize this, because at this point I am the only one who modifies it
+            //  NOTE: no need to synchronize this block, because at this point I am the only one who modifies it
             Initialized = true
             setUps()
 
@@ -366,21 +377,36 @@ class ChatActivity : AppCompatActivity()
 
     private fun postMessage()
     {
+        val t = this
+
         //  Again, the !! is pretty useless because we're sure that the user is authenticated at this point
         val c = ChatMessage(Typer.text.toString(), Me!!, getCurrentISODate())
 
         //  First, push the id
         val p = MessagesReference.push().key
+        var previousRecentMessage = ""
+
+        //  This must happen in a synchronized way
+        synchronized(this.MostRecentMessage)
+        {
+            previousRecentMessage = MostRecentMessage
+            MostRecentMessage = p
+        }
 
         //  Now push the actual message
         MessagesReference.child(p).setValue(c) { error, ref ->
-            if(error != null)
+            synchronized(t.MostRecentMessage)
             {
-                Log.d("CHAT", "error on post message")
-            }
-            else
-            {
-                MostRecentMessaged = p
+                if(error != null)
+                {
+                    // restore it
+                    MostRecentMessage = previousRecentMessage
+                    //  TODO: Dialog: "Sorry we could not send your message, please try again later"
+                }
+                else
+                {
+
+                }
             }
 
             //  Error or not, user must be able to write again
