@@ -34,7 +34,8 @@ class ChatActivity : AppCompatActivity()
     var Take : Int = 20
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
     var Them : String? = null
-    var LastMessagePulled : String? = null
+    var MostRecentMessaged : String? = null
+    var OldestMessage : String? = null
     var Initialized : Boolean = false
     var User : UserMail? = null
 
@@ -85,14 +86,14 @@ class ChatActivity : AppCompatActivity()
         setUpTypingObserver()
 
         ChatID = "-LCJ2HXE0ECtlt_5oFF0"
-        LastMessagePulled = "-LCJ2VQqpxPE7P4cbd_8"
+        MostRecentMessaged = "-LCJ2VQqpxPE7P4cbd_8"
         //  Set up other stuff
         setUps()
         //  Do we already have a chat stored?
         if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
         {
             //ChatID = intent.getStringExtra("chat")
-            //LastMessagePulled = intent.getStringExtra("start")
+            //MostRecentMessaged = intent.getStringExtra("start")
 
             //  Set up other stuff
             //setUps()
@@ -133,7 +134,7 @@ class ChatActivity : AppCompatActivity()
         var query = MessagesReference.orderByChild("sent")
 
         //  TODO: check the limitToLast
-        .startAt(LastMessagePulled).limitToLast(Take)
+        .startAt(MostRecentMessaged).limitToLast(Take)
 
         query.addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -166,7 +167,7 @@ class ChatActivity : AppCompatActivity()
         //  Set the event
         var query = MessagesReference.orderByChild("sent")
 
-        .startAt(LastMessagePulled).limitToLast(1)
+        .startAt(MostRecentMessaged).limitToLast(1)
 
         query.addValueEventListener(object : ValueEventListener
         {
@@ -185,10 +186,10 @@ class ChatActivity : AppCompatActivity()
 
                 //  TODO: Discard the first message because it is already there
 
-                if(p0.key == LastMessagePulled) return
+                if(p0.key == MostRecentMessaged) return
 
                 //  TODO: check if this is correct
-                LastMessagePulled = p0.children.first().key
+                MostRecentMessaged = p0.children.first().key
 
                 Log.d("CHAT", "new message: ${p0.child("content").getValue(String::class.java)}")
 
@@ -379,7 +380,7 @@ class ChatActivity : AppCompatActivity()
             }
             else
             {
-                LastMessagePulled = p
+                MostRecentMessaged = p
             }
 
             //  Error or not, user must be able to write again
