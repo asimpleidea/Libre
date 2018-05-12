@@ -27,7 +27,7 @@ class ChatActivity : AppCompatActivity()
 {
     lateinit var MainReference : DatabaseReference
     lateinit var MessagesReference : DatabaseReference
-    lateinit var MyFriendIsTyping : DatabaseReference
+    lateinit var TheyAreTyping : DatabaseReference
     lateinit var IAmTyping : DatabaseReference
 
     var ChatID : String? = null
@@ -84,10 +84,10 @@ class ChatActivity : AppCompatActivity()
         //  Set up the typing observer
         setUpTypingObserver()
 
-        /*ChatID = "-LCJ2HXE0ECtlt_5oFF0"
+        ChatID = "-LCJ2HXE0ECtlt_5oFF0"
         LastMessagePulled = "-LCJ2VQqpxPE7P4cbd_8"
         //  Set up other stuff
-        setUps()*/
+        setUps()
         //  Do we already have a chat stored?
         if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
         {
@@ -199,10 +199,10 @@ class ChatActivity : AppCompatActivity()
     private fun setUpTypingListener()
     {
         //  Get the reference
-        MyFriendIsTyping = MainReference.child(ChatID).child("partecipants").child(Them)
+        TheyAreTyping = MainReference.child(ChatID).child("partecipants").child(Them)
 
         //  Set up listener
-        MyFriendIsTyping.addValueEventListener(object : ValueEventListener
+        TheyAreTyping.addValueEventListener(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?)
             {
@@ -330,7 +330,9 @@ class ChatActivity : AppCompatActivity()
 
         //  The dateformat
         val dateFormat : DateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", locale)
-        dateFormat.timeZone = TimeZone.getDefault()
+
+        //  UPDATE: all dates will be formatted according to UTC. Later, at display, it will be adjusted with user's timezone
+        //dateFormat.timeZone = TimeZone.getDefault()
 
         return dateFormat.format(Calendar.getInstance(tz, locale).time)
     }
@@ -385,7 +387,37 @@ class ChatActivity : AppCompatActivity()
         }
     }
 
-    override fun onDestroy() {
+    override fun onDestroy()
+    {
         super.onDestroy()
+
+        if(ChatID == null) return
+
+        val t = this
+
+        //  Reset: Update my last time here and set that I am not writing
+
+        TheyAreTyping.parent.child(Me!!).setValue(ChatMessageContainer.Partecipants.User(getCurrentISODate()))
+        { err, ref ->
+            if(err != null)
+            {
+                Log.d("CHAT", "could not reset")
+                //return@setValue
+            }
+
+            //  Stop the counting
+            synchronized(t.CountDownRunning)
+            {
+                if(CountDownRunning) StopTyping.cancel()
+            }
+
+            //  Detach everything
+            //  NOTE: I don't actually know if this is necessary or android handles this on its own but... whatever
+            Typer.setOnClickListener(null)
+            SubmitButton.setOnClickListener(null)
+
+            //  TODO: Remove events as well? I think that is not necessary
+            Log.d("CHAT", "reset done")
+        }
     }
 }
