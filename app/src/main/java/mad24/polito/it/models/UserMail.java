@@ -19,8 +19,10 @@ public class UserMail {
     double lon;
     boolean fb = false;
 
-    public UserMail() {
+    UserStatus status = null;
 
+    public UserMail()
+    {
     }
 
     public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres, ArrayList<String> books, double lat, double lon) {
@@ -38,6 +40,8 @@ public class UserMail {
         this.books = new HashMap<String, Boolean>();
         for(String b : books)
             this.books.put(b, true);
+
+        status = new UserStatus(false, "", "");
     }
 
     public boolean isFb() { return fb; }
@@ -116,4 +120,7 @@ public class UserMail {
         this.lon = lon;
     }
 
+    public UserStatus getStatus() { return status; }
+
+    public void setStatus(UserStatus status) { this.status = status; }
 }

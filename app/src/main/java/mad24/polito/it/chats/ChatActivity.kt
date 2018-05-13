@@ -15,11 +15,11 @@ import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.gson.Gson
-import kotlinx.android.synthetic.main.activity_chat.*
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
 import mad24.polito.it.models.ChatMessageContainer
 import mad24.polito.it.models.UserMail
+import mad24.polito.it.models.UserStatus
 import mad24.polito.it.registrationmail.LoginActivity
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -31,9 +31,11 @@ class ChatActivity : AppCompatActivity()
     lateinit var MessagesReference : DatabaseReference
     lateinit var TheyAreTyping : DatabaseReference
     lateinit var IAmTyping : DatabaseReference
+    lateinit var ReceiverReference : DatabaseReference
 
-    var ChatID : String? = null
-    var Take : Int = 20
+    //var ChatID : String? = null
+    lateinit var ChatID : String
+    val Take : Int = 20
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
     var Them : String? = null
     var MostRecentMessage : String = ""
@@ -113,12 +115,27 @@ class ChatActivity : AppCompatActivity()
         setUps()
     }
 
+    private fun updateMyStatus(status: Boolean = true, last : String = "", inChat : String = "home")
+    {
+        //  FINALLY WE CAN SET DEFAULT PARAMETER VALUES IN KOTLIN!!!
+
+        //  Set my status as online and here
+        val u = UserStatus(status, last, inChat)
+        MainReference.parent.child("users").child(Me).child("status").setValue(u){ err, _ ->
+            if(err != null)
+            {
+                Log.d("CHAT", "error while trying to set me online")
+                return@setValue
+            }
+        }
+    }
+
     private fun setUps()
     {
         //  Typing observer
         setUpTypingObserver()
 
-        if(ChatID != null)
+        if(::ChatID.isInitialized)
         {
             //  Set up messages listener
             setUpMessagesListener()
@@ -126,6 +143,46 @@ class ChatActivity : AppCompatActivity()
             //  Set up typing listener
             setUpTypingListener()
         }
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+
+        //  Update my status: set me online here.
+        //  when(stuff) ecc is very good to do... but a ternary operator would be better...
+        val onChat = ( fun() : String
+        {
+            when(::ChatID.isInitialized)
+            {
+                true -> return ChatID
+                false ->  return ""
+            }
+        }())
+
+        updateMyStatus(true, "", onChat)
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+
+        //  Update my status: I am no longer in this chat
+        //  NOTE: we don't actually know where the user is right now, se we have to set offline status.
+        //  If the user is getting back to the chats fragment, then the onResume there will take care of putting it online
+        updateMyStatus(false, getCurrentISODate(), "0")
+    }
+
+    override fun onBackPressed()
+    {
+        super.onBackPressed()
+
+        //  TODO: General Idea:
+        /*
+            If back button is pressed: check if the previous activity is a chat related activity (check the intent).
+            If yes -> keep my status as online.
+            If no -> set my status as offline
+         */
     }
 
     private fun setUpMessagesListener()
@@ -306,7 +363,7 @@ class ChatActivity : AppCompatActivity()
         //  Set the button
         setUpButtonEvent()
 
-        if(ChatID == null) return
+        if(!::ChatID.isInitialized) return
 
         //  Set the typing reference
         IAmTyping = MainReference.child(ChatID).child("partecipants").child(Me)
@@ -383,7 +440,7 @@ class ChatActivity : AppCompatActivity()
             SubmitButton.setOnClickListener(null)
 
             //  Is there a conversation already?
-            if(ChatID == null) createConversation()
+            if(::ChatID.isInitialized) createConversation()
             else postMessage()
         })
     }
@@ -413,7 +470,7 @@ class ChatActivity : AppCompatActivity()
         //  UPDATE: all dates will be formatted according to UTC. Later, at display, it will be adjusted with user's timezone
         //dateFormat.timeZone = TimeZone.getDefault()
 
-        return dateFormat.format(Calendar.getInstance(tz, locale).time)
+        return dateFormat.format(Calendar.getInstance(locale).time)
     }
 
     private fun createConversation()
@@ -436,6 +493,10 @@ class ChatActivity : AppCompatActivity()
             //  Set up stuff
             //  NOTE: no need to synchronize this block, because at this point I am the only one who modifies it
             Initialized = true
+
+            //  The chat has been created! Let's update this status
+            updateMyStatus(true, "", ChatID)
+
             setUps()
 
             postMessage()
@@ -481,12 +542,11 @@ class ChatActivity : AppCompatActivity()
     {
         super.onDestroy()
 
-        if(ChatID == null) return
+        if(::ChatID.isInitialized) return
 
         val t = this
 
         //  Reset: Update my last time here and set that I am not writing
-
         TheyAreTyping.parent.child(Me!!).setValue(ChatMessageContainer.Partecipants.User(getCurrentISODate()))
         { err, _ ->
             if(err != null)

@@ -1,6 +1,7 @@
 package mad24.polito.it;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -14,19 +15,31 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 import mad24.polito.it.fragments.BooksFragment;
 import mad24.polito.it.fragments.ChatFragment;
 import mad24.polito.it.fragments.ProfileFragment;
 import mad24.polito.it.fragments.SearchFragment;
 import mad24.polito.it.fragments.viewbook.ViewBookFragment;
+import mad24.polito.it.models.UserStatus;
 import mad24.polito.it.registrationmail.LoginActivity;
 
 public class BooksActivity  extends AppCompatActivity
 {
+    private DatabaseReference MeReference = null;
+
     private BottomNavigationView mMainNav;
     private FrameLayout mMainFrame;
 
@@ -50,21 +63,25 @@ public class BooksActivity  extends AppCompatActivity
                 case mad24.polito.it.R.id.nav_home:
                     //Log.d("frag", "nav_home pressed");
 //                    mTextMessage.setText(R.string.nav_home);
+                    setMeOffline();
                     setFragment(booksFragment);
                     return true;
                 case mad24.polito.it.R.id.nav_search:
                     //Log.d("frag", "nav_search pressed");
 //                    mTextMessage.setText(R.string.nav_search);
+                    setMeOffline();
                     setFragment(searchFragment);
                     return true;
                 case R.id.nav_chat:
                     //Log.d("frag", "nav_profile_pressed");
 //                    mTextMessage.setText(R.string.nav_profile);
+                    setMeOnline();
                     setFragment(chatFragment);
                     return true;
                 case mad24.polito.it.R.id.nav_profile:
                     //Log.d("frag", "nav_profile pressed");
 //                    mTextMessage.setText(R.string.nav_profile);
+                    setMeOffline();
                     setFragment(profileFragment);
                     return true;
             }
@@ -101,6 +118,8 @@ public class BooksActivity  extends AppCompatActivity
 
             finish();
         }
+
+        MeReference = FirebaseDatabase.getInstance().getReference().child("users").child(userAuth.getUid());
 
        setFragment(booksFragment);
     }
@@ -192,6 +211,68 @@ public class BooksActivity  extends AppCompatActivity
             }
                 break;
         }
+    }
+
+    private String getCurrentISODate()
+    {
+        Locale locale = null;
+
+        //  Read the same thing I wrote for this on ChatActivity.kt
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) locale = getApplicationContext().getResources().getConfiguration().getLocales().get(0);
+        else locale = getApplicationContext().getResources().getConfiguration().locale;
+
+        //  The dateformat
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", locale);
+
+        return dateFormat.format(Calendar.getInstance(locale).getTime());
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        Log.d("CHAT", "resumed in chat fregment");
+
+        if(currentFragment == CurrentFragment.ChatFragment) setMeOnline();
+        else setMeOffline();
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+
+        setMeOffline();
+    }
+
+    private void setMeOnline()
+    {
+        updateMyStatus(true, "", "home");
+    }
+
+    private void setMeOffline()
+    {
+        updateMyStatus(false, getCurrentISODate(), "0");
+    }
+
+    private void updateMyStatus(boolean online, String last, String inChat)
+    {
+        //  Set my status as online and here
+        UserStatus u = new UserStatus(online, last, inChat);
+
+        MeReference.child("status").setValue(u).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid)
+            {
+                Log.d("CHAT", "updated status");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e)
+            {
+                Log.d("CHAT", "failed updating status");
+            }
+        });
     }
 
 }
