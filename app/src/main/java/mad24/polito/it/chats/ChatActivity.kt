@@ -12,9 +12,13 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.google.gson.Gson
+import de.hdodenhof.circleimageview.CircleImageView
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
 import mad24.polito.it.models.ChatMessageContainer
@@ -85,6 +89,16 @@ class ChatActivity : AppCompatActivity()
 
             //  The online status
             TheirStatus = findViewById(R.id.theirStatus)
+
+            //  Put user's image
+            FirebaseStorage.getInstance().getReference("profile_pictures")
+                    .child("$Them.jpg")
+                    .downloadUrl
+                    .addOnSuccessListener {url ->
+                        Glide.with(applicationContext).load(url).into(findViewById(R.id.theirImage))
+                    }.addOnFailureListener {
+                        Glide.with(applicationContext).load(R.drawable.unknown_user).into(findViewById(R.id.theirImage))
+                    }
         }
 
         //  Set typing text
@@ -197,7 +211,7 @@ class ChatActivity : AppCompatActivity()
     private fun setUpStatusListener()
     {
         if(!::ReceiverReference.isInitialized) return
-        Log.d("CHAT", "in status listener")
+
         ReceiverReference.child("status").addValueEventListener(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?)
@@ -207,7 +221,6 @@ class ChatActivity : AppCompatActivity()
 
             override fun onDataChange(p0: DataSnapshot?)
             {
-                Log.d("CHAT", "onDatachange of status Listener")
                 if(p0 == null) return
 
                 val u = p0.getValue(UserStatus::class.java)
