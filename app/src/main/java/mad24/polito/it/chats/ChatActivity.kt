@@ -48,6 +48,8 @@ class ChatActivity : AppCompatActivity()
     lateinit var Typer : EditText
     lateinit var SubmitButton : Button
     lateinit var ChatToolbar : Toolbar
+    lateinit var TheirStatus : TextView
+
     lateinit var StopTyping : CountDownTimer
     var CountDownRunning : Boolean = false
     val Seconds : Long = 3 *1000
@@ -75,16 +77,20 @@ class ChatActivity : AppCompatActivity()
             User = Gson().fromJson(intent.getStringExtra("user"), UserMail::class.java)
             Them = intent.getStringExtra("with")
 
+            //  Put the receiver Reference
+            ReceiverReference = MainReference.parent.child("users").child(Them)
+
+            //  The name
             findViewById<TextView>(R.id.theirName).text = User?.name
 
-            //  TODO: set the user's status here
-            findViewById<TextView>(R.id.theirStatus).text = "Online"
+            //  The online status
+            TheirStatus = findViewById(R.id.theirStatus)
         }
 
         //  Set typing text
         //  TODO: use String.format(id, User?.name) instead of this hardcoded string
         TypingNotifier = findViewById(R.id.userIsTyping)
-        TypingNotifier.setText("${User?.name} is typing... (THREE DOTS ANIMATION HERE?")
+        TypingNotifier.text = ("${User?.name} is typing... (THREE DOTS ANIMATION HERE?")
 
         //  The typer (edit text)
         Typer = findViewById(R.id.typeText)
@@ -135,6 +141,9 @@ class ChatActivity : AppCompatActivity()
         //  Typing observer
         setUpTypingObserver()
 
+        //  Status listener
+        setUpStatusListener()
+
         if(::ChatID.isInitialized)
         {
             //  Set up messages listener
@@ -183,6 +192,30 @@ class ChatActivity : AppCompatActivity()
             If yes -> keep my status as online.
             If no -> set my status as offline
          */
+    }
+
+    private fun setUpStatusListener()
+    {
+        if(!::ReceiverReference.isInitialized) return
+        Log.d("CHAT", "in status listener")
+        ReceiverReference.child("status").addValueEventListener(object : ValueEventListener
+        {
+            override fun onCancelled(p0: DatabaseError?)
+            {
+                Log.d("CHAT", "status listener cancelled")
+            }
+
+            override fun onDataChange(p0: DataSnapshot?)
+            {
+                Log.d("CHAT", "onDatachange of status Listener")
+                if(p0 == null) return
+
+                val u = p0.getValue(UserStatus::class.java)
+                if(u!!.isOnline) TheirStatus.text = "Online"
+                else TheirStatus.text = "Last online: ${u.last_online}"
+            }
+
+        })
     }
 
     private fun setUpMessagesListener()
