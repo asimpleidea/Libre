@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/ToolbarTheme.NoActionBar"
-        app:contentInsetStart="0dp"
+
         >
 
         <LinearLayout
@@ -25,8 +25,8 @@
                 android:id="@+id/theirImage"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginEnd="10dp"/>
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -34,43 +34,45 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/theirName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="18sp"
-                    android:id="@+id/theirName"/>
+                    android:textSize="18sp" />
+
                 <TextView
+                    android:id="@+id/theirStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/theirStatus"
-                    android:textSize="12sp"
-                    />
+                    android:textSize="12sp" />
             </LinearLayout>
 
         </LinearLayout>
 
     </android.support.v7.widget.Toolbar>
 
-        <android.support.v7.widget.RecyclerView
+    <TextView
+        android:id="@+id/userIsTyping"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/messagesContainer"
+        android:animateLayoutChanges="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/chatToolbar" />
 
-            android:id="@+id/messagesContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="parent"
-            tools:layout_editor_absoluteX="8dp"
-            android:scrollbars="vertical"
-            >
+    <android.support.v7.widget.RecyclerView
 
-        </android.support.v7.widget.RecyclerView>
+        android:id="@+id/messagesContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chatToolbar"
+        android:stackFromBottom="true">
 
-        <TextView
-            android:id="@+id/userIsTyping"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/messagesContainer"
-            android:animateLayoutChanges="true"
-            android:visibility="visible"
-            />
+    </android.support.v7.widget.RecyclerView>
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"

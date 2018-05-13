@@ -1,6 +1,6 @@
 package mad24.polito.it.models
 
-class ChatMessage constructor(_content: String, _by : String, _sent: String)
+class ChatMessage constructor(_content: String = "", _by : String = "", _sent: String = "")
 {
     var content = _content
     var by = _by
@@ -8,4 +8,5 @@ class ChatMessage constructor(_content: String, _by : String, _sent: String)
 
     //  Because it is not received yet
     var received = "0"
+
 }

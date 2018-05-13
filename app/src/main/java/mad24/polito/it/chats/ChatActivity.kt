@@ -5,6 +5,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.KeyEvent
@@ -36,6 +38,10 @@ class ChatActivity : AppCompatActivity()
     lateinit var TheyAreTyping : DatabaseReference
     lateinit var IAmTyping : DatabaseReference
     lateinit var ReceiverReference : DatabaseReference
+
+    private lateinit var RV: RecyclerView
+    private lateinit var Adapter: MessagesRecyclerAdapter
+    private lateinit var ViewManager: RecyclerView.LayoutManager
 
     //var ChatID : String? = null
     lateinit var ChatID : String
@@ -121,6 +127,17 @@ class ChatActivity : AppCompatActivity()
             finish()
         })
 
+        ViewManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+
+        //  This is just temporary, it will be updated later, in statusListener
+        Adapter = MessagesRecyclerAdapter("0")
+
+        RV = findViewById<RecyclerView>(R.id.messagesContainer).apply {
+            //setHasFixedSize(true)
+            layoutManager = ViewManager
+            adapter = Adapter
+        }
+
         //  Do we already have a chat stored?
         if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
         {
@@ -160,11 +177,11 @@ class ChatActivity : AppCompatActivity()
 
         if(::ChatID.isInitialized)
         {
-            //  Set up messages listener
-            setUpMessagesListener()
-
             //  Set up typing listener
             setUpTypingListener()
+
+            //  Set up messages listener
+            setUpMessagesListener()
         }
     }
 
@@ -174,11 +191,12 @@ class ChatActivity : AppCompatActivity()
 
         //  Update my status: set me online here.
         //  when(stuff) ecc is very good to do... but a ternary operator would be better...
+
         val onChat = ( fun() : String
         {
             when(::ChatID.isInitialized)
             {
-                true -> return ChatID
+                true -> {Log.d("CHAT", "ChatActivity $ChatID"); return ChatID}
                 false ->  return ""
             }
         }())
@@ -212,6 +230,8 @@ class ChatActivity : AppCompatActivity()
     {
         if(!::ReceiverReference.isInitialized) return
 
+        val t = this
+
         ReceiverReference.child("status").addValueEventListener(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?)
@@ -224,8 +244,27 @@ class ChatActivity : AppCompatActivity()
                 if(p0 == null) return
 
                 val u = p0.getValue(UserStatus::class.java)
-                if(u!!.isOnline) TheirStatus.text = "Online"
-                else TheirStatus.text = "Last online: ${u.last_online}"
+
+                synchronized(t.Adapter)
+                {
+                    if(u!!.isOnline)
+                    {
+                        TheirStatus.text = "Online"
+
+                        Log.d("CHAT", "in_chat: ${u.in_chat.compareTo(ChatID)} and id: $ChatID")
+                        //  Is the user here?
+                        /*when(u.in_chat.compareTo(ChatID) == 0)
+                        {
+                            true -> Adapter.Here()
+                            false -> Adapter.NotHere()
+                        }*/
+                    }
+                    else
+                    {
+                        TheirStatus.text = "Last online: ${u.last_online}"
+                        //Adapter.NotHere()
+                    }
+                }
             }
 
         })
@@ -269,9 +308,9 @@ class ChatActivity : AppCompatActivity()
 
                 if(p0 == null) return
 
-                for(p : DataSnapshot in p0.children)
+                synchronized(t.Adapter)
                 {
-                    Log.d("CHAT", "message: ${p.child("content").getValue(String::class.java)}")
+                    Adapter.pushMessages(p0)
                 }
 
                 //  Little trick to know if this is the first time we are doing this
@@ -373,6 +412,8 @@ class ChatActivity : AppCompatActivity()
 
     private fun setUpTypingListener()
     {
+        val t = this
+
         //  Get the reference
         TheyAreTyping = MainReference.child(ChatID).child("partecipants").child(Them)
 
@@ -388,15 +429,23 @@ class ChatActivity : AppCompatActivity()
             {
                 if(!::TypingNotifier.isInitialized) return
 
-                if(p0 != null)
+                if(p0 == null) return
+
+                if(p0.hasChild("is_typing"))
                 {
-                    if(p0.hasChild("is_typing"))
+                    //  TODO: add fade in & fade out animations here
+                    if(p0.child("is_typing")?.value == true) TypingNotifier.visibility = View.VISIBLE
+                    else TypingNotifier.visibility = View.GONE
+                }
+
+                if(p0.hasChild("last_here"))
+                {
+                    synchronized(t.Adapter)
                     {
-                        //  TODO: add fade in & fade out animations here
-                        if(p0.child("is_typing")?.value == true) TypingNotifier.visibility = View.VISIBLE
-                        else TypingNotifier.visibility = View.GONE
+                        //Adapter.setLastHere(p0.child("last_here").key)
                     }
                 }
+
             }
 
         })
