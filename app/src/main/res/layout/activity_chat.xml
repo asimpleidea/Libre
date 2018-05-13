@@ -7,35 +7,76 @@
     android:layout_height="match_parent"
     tools:context=".chats.ChatActivity">
 
-    <TextView
-        android:id="@+id/message"
-        android:layout_width="wrap_content"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/chatToolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="@string/title_home"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ToolbarTheme.NoActionBar"
+        app:contentInsetStart="0dp"
+        >
 
-    <TextView
-        android:id="@+id/userIsTyping"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:animateLayoutChanges="true"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/book4"
+                android:layout_marginRight="25dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:id="@+id/theirName"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/theirStatus"
+                    android:textSize="12sp"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.Toolbar>
+
+        <android.support.v7.widget.RecyclerView
+
+            android:id="@+id/messagesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="parent"
+            tools:layout_editor_absoluteX="8dp">
+
+        </android.support.v7.widget.RecyclerView>
+
+        <TextView
+            android:id="@+id/userIsTyping"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/messagesContainer"
+            android:animateLayoutChanges="true"
+            android:visibility="visible"
+            />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="0dp"
-        android:layout_marginStart="0dp"
         android:background="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        >
+        app:layout_constraintRight_toRightOf="parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -48,24 +89,22 @@
                 android:id="@+id/typeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="textMultiLine"
                 android:layout_marginEnd="15dp"
                 android:layout_marginRight="15dp"
-                android:maxLines="3"
-                />
+                android:ems="10"
+                android:inputType="textMultiLine"
+                android:maxLines="3" />
 
             <!-- Maybe a round button with a -> icon or a paper airplane (à la telegram) here? -->
             <Button
                 android:id="@+id/submitButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Button"
-                android:layout_toEndOf="@id/typeText"
                 android:layout_alignParentEnd="true"
-                android:layout_toRightOf="@id/typeText"
                 android:layout_alignParentRight="true"
-                />
+                android:layout_toEndOf="@id/typeText"
+                android:layout_toRightOf="@id/typeText"
+                android:text="Button" />
         </RelativeLayout>
 
     </android.support.design.widget.BottomNavigationView>

@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -14,6 +15,7 @@ import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.gson.Gson
+import kotlinx.android.synthetic.main.activity_chat.*
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
 import mad24.polito.it.models.ChatMessageContainer
@@ -43,6 +45,7 @@ class ChatActivity : AppCompatActivity()
     lateinit var TypingNotifier : TextView
     lateinit var Typer : EditText
     lateinit var SubmitButton : Button
+    lateinit var ChatToolbar : Toolbar
     lateinit var StopTyping : CountDownTimer
     var CountDownRunning : Boolean = false
     val Seconds : Long = 3 *1000
@@ -69,6 +72,11 @@ class ChatActivity : AppCompatActivity()
         {
             User = Gson().fromJson(intent.getStringExtra("user"), UserMail::class.java)
             Them = intent.getStringExtra("with")
+
+            findViewById<TextView>(R.id.theirName).text = User?.name
+
+            //  TODO: set the user's status here
+            findViewById<TextView>(R.id.theirStatus).text = "Online"
         }
 
         //  Set typing text
@@ -81,6 +89,15 @@ class ChatActivity : AppCompatActivity()
 
         //  The submitter
         SubmitButton = findViewById(R.id.submitButton)
+
+        //  Put a back button
+        ChatToolbar = findViewById(R.id.chatToolbar)
+        ChatToolbar.title = getString(R.string.app_name)
+        ChatToolbar.setNavigationIcon(R.drawable.ic_white_back_arrow)
+        ChatToolbar.setNavigationOnClickListener(View.OnClickListener
+        {
+            finish()
+        })
 
         //  Do we already have a chat stored?
         if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
@@ -273,8 +290,8 @@ class ChatActivity : AppCompatActivity()
                     if(p0.hasChild("is_typing"))
                     {
                         //  TODO: add fade in & fade out animations here
-                        if(p0.child("is_typing")?.value == true) TypingNotifier?.visibility = View.VISIBLE
-                        else TypingNotifier?.visibility = View.GONE
+                        if(p0.child("is_typing")?.value == true) TypingNotifier.visibility = View.VISIBLE
+                        else TypingNotifier.visibility = View.GONE
                     }
                 }
             }
@@ -301,7 +318,7 @@ class ChatActivity : AppCompatActivity()
             {
                 synchronized(t.CountDownRunning)
                 {
-                    IAmTyping.child("is_typing").setValue(false) { error, success ->
+                    IAmTyping.child("is_typing").setValue(false) { error, _ ->
                         if(error != null)
                         {
                             Log.d("CHAT", "error: could not reset iamtyping")
@@ -316,14 +333,14 @@ class ChatActivity : AppCompatActivity()
             override fun onTick(p0: Long) {}
         }
 
-        Typer.setOnKeyListener(View.OnKeyListener { view, i, keyEvent ->
+        Typer.setOnKeyListener(View.OnKeyListener { _, _, keyEvent ->
             if(keyEvent.action == KeyEvent.ACTION_DOWN)
             {
                 synchronized(t.CountDownRunning)
                 {
                     if(!CountDownRunning)
                     {
-                        IAmTyping.child("is_typing").setValue(true) { p0, p1 ->
+                        IAmTyping.child("is_typing").setValue(true) { p0, _ ->
                             if(p0 != null)
                             {
                                 Log.d("CHAT", "error")
@@ -353,6 +370,9 @@ class ChatActivity : AppCompatActivity()
         //  Already has the event?
         if(SubmitButton.hasOnClickListeners()) return
 
+        //  Reset the editext
+        Typer.text = null
+
         //  Set the event
         SubmitButton.setOnClickListener(View.OnClickListener
         {
@@ -374,8 +394,14 @@ class ChatActivity : AppCompatActivity()
         val locale = ( fun() : Locale
         {
             //  It doesn't matter if it says that it is deprecated. We are supporting from API 15, so we have to do it like this
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) return applicationContext.resources.configuration.locales[0]
-            else return applicationContext.resources.configuration.locale
+            //  Testing it with a when expression
+            when(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            {
+                true -> return applicationContext.resources.configuration.locales[0]
+                false -> return applicationContext.resources.configuration.locale
+            }
+            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) return applicationContext.resources.configuration.locales[0]
+            else return applicationContext.resources.configuration.locale*/
         }())
 
         //  The timezone
@@ -400,7 +426,7 @@ class ChatActivity : AppCompatActivity()
         p.addPartecipant(Them!!, ChatMessageContainer.Partecipants.User("0"))
 
         ChatID = MainReference.push().key
-        MainReference.child(ChatID).setValue(p){ error, ref ->
+        MainReference.child(ChatID).setValue(p){ error, _ ->
             if(error != null)
             {
                 //  TODO: Dialog: "Sorry we could not send your message, please try again later"
@@ -435,7 +461,7 @@ class ChatActivity : AppCompatActivity()
         }
 
         //  Now push the actual message
-        MessagesReference.child(p).setValue(c) { error, ref ->
+        MessagesReference.child(p).setValue(c) { error, _ ->
             synchronized(t.MostRecentMessage)
             {
                 if(error != null)
@@ -443,10 +469,6 @@ class ChatActivity : AppCompatActivity()
                     // restore it
                     MostRecentMessage = previousRecentMessage
                     //  TODO: Dialog: "Sorry we could not send your message, please try again later"
-                }
-                else
-                {
-
                 }
             }
 
@@ -466,7 +488,7 @@ class ChatActivity : AppCompatActivity()
         //  Reset: Update my last time here and set that I am not writing
 
         TheyAreTyping.parent.child(Me!!).setValue(ChatMessageContainer.Partecipants.User(getCurrentISODate()))
-        { err, ref ->
+        { err, _ ->
             if(err != null)
             {
                 Log.d("CHAT", "could not reset")
