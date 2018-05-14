@@ -41,7 +41,7 @@ public class UserMail {
         for(String b : books)
             this.books.put(b, true);
 
-        status = new UserStatus(false, "", "");
+        status = new UserStatus(false, "", "", "");
     }
 
     public boolean isFb() { return fb; }

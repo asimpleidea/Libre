@@ -59,29 +59,26 @@ public class BooksActivity  extends AppCompatActivity
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
             switch (item.getItemId()) {
                 case mad24.polito.it.R.id.nav_home:
                     //Log.d("frag", "nav_home pressed");
 //                    mTextMessage.setText(R.string.nav_home);
-                    setMeOffline();
                     setFragment(booksFragment);
                     return true;
                 case mad24.polito.it.R.id.nav_search:
                     //Log.d("frag", "nav_search pressed");
 //                    mTextMessage.setText(R.string.nav_search);
-                    setMeOffline();
                     setFragment(searchFragment);
                     return true;
                 case R.id.nav_chat:
                     //Log.d("frag", "nav_profile_pressed");
 //                    mTextMessage.setText(R.string.nav_profile);
-                    setMeOnline();
                     setFragment(chatFragment);
                     return true;
                 case mad24.polito.it.R.id.nav_profile:
                     //Log.d("frag", "nav_profile pressed");
 //                    mTextMessage.setText(R.string.nav_profile);
-                    setMeOffline();
                     setFragment(profileFragment);
                     return true;
             }
@@ -133,6 +130,8 @@ public class BooksActivity  extends AppCompatActivity
         fragmentTransaction.replace(mad24.polito.it.R.id.main_frame, fragment);
 
         fragmentTransaction.commit();
+
+        setMeOnline();
     }
 
     /**
@@ -152,6 +151,8 @@ public class BooksActivity  extends AppCompatActivity
         fragmentTransaction.replace(mad24.polito.it.R.id.main_frame, fragment)
                             .addToBackStack(back)
                             .commit();
+
+        setMeOnline();
     }
 
     public void setViewBookFragment(ViewBookFragment Vb)
@@ -233,8 +234,7 @@ public class BooksActivity  extends AppCompatActivity
         super.onResume();
         Log.d("CHAT", "resumed in chat fregment");
 
-        if(currentFragment == CurrentFragment.ChatFragment) setMeOnline();
-        else setMeOffline();
+        setMeOnline();
     }
 
     @Override
@@ -257,8 +257,10 @@ public class BooksActivity  extends AppCompatActivity
 
     private void updateMyStatus(boolean online, String last, String inChat)
     {
+        String className = online ? currentFragment.name() : "";
+
         //  Set my status as online and here
-        UserStatus u = new UserStatus(online, last, inChat);
+        UserStatus u = new UserStatus(online, last, className, inChat);
 
         MeReference.child("status").setValue(u).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override

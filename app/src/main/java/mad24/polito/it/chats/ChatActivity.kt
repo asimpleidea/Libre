@@ -154,8 +154,18 @@ class ChatActivity : AppCompatActivity()
     {
         //  FINALLY WE CAN SET DEFAULT PARAMETER VALUES IN KOTLIN!!!
 
+        //  The class name
+        val className = (fun() : String
+        {
+           when(status)
+           {
+               true -> return this.localClassName
+               false -> return ""
+           }
+        }())
+
         //  Set my status as online and here
-        val u = UserStatus(status, last, inChat)
+        val u = UserStatus(status, last, className, inChat)
         MainReference.parent.child("users").child(Me).child("status").setValue(u){ err, _ ->
             if(err != null)
             {
@@ -222,6 +232,7 @@ class ChatActivity : AppCompatActivity()
             If yes -> keep my status as online.
             If no -> set my status as offline
          */
+        //  UPDATE: this is probably useless.
     }
 
     private fun setUpStatusListener()
@@ -247,9 +258,9 @@ class ChatActivity : AppCompatActivity()
                 {
                     if(u!!.isOnline)
                     {
+                        //  TODO: change this to @string/blabla
                         TheirStatus.text = "Online"
 
-                        Log.d("CHAT", "in_chat: ${u.in_chat.compareTo(ChatID)} and id: $ChatID")
                         //  Is the user here?
                         when(u.in_chat.compareTo(ChatID) == 0)
                         {
@@ -259,6 +270,7 @@ class ChatActivity : AppCompatActivity()
                     }
                     else
                     {
+                        //  TODO: format this string: last_online is a ISO8609 date string, so it is very easy to format it.
                         TheirStatus.text = "Last online: ${u.last_online}"
                         Adapter.NotHere()
                     }
@@ -450,9 +462,7 @@ class ChatActivity : AppCompatActivity()
                         Adapter.setLastHere(p0.child("last_here").key)
                     }
                 }
-
             }
-
         })
     }
 
@@ -595,7 +605,7 @@ class ChatActivity : AppCompatActivity()
         }())
 
         //  The timezone
-        val tz = TimeZone.getDefault()
+        //val tz = TimeZone.getDefault()
 
         //  The dateformat
         val dateFormat : DateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", locale)
