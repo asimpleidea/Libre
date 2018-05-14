@@ -43,7 +43,9 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
         {
             //  Kotlin sometimes suggests to do a compareTo and sometimes to do just a < or > ... boh
             //  If partner is here, then PartnerLastAccess contains the moment they were here *before* that
-            when(c.sent < PartnerLastAccess)
+            //  Or "0", if never entered this chat
+            Log.d("CHAT", "here: ${c.sent} and ${PartnerLastAccess}")
+            when(c.sent < PartnerLastAccess || PartnerLastAccess.compareTo("0") == 0)
             {
                 true -> notifyItemRangeChanged(0, ++end)
                 false -> ++end

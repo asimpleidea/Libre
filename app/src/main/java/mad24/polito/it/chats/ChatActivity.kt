@@ -208,7 +208,7 @@ class ChatActivity : AppCompatActivity()
         {
             when(::ChatID.isInitialized)
             {
-                true -> {Log.d("CHAT", "ChatActivity $ChatID"); return ChatID}
+                true -> return ChatID
                 false ->  return ""
             }
         }())
@@ -281,8 +281,11 @@ class ChatActivity : AppCompatActivity()
                         PartnerStatus.text = resources.getString(R.string.chat_status_online)
 
                         //  Is the user here?
-                        if(u.in_chat.compareTo(ChatID) == 0) Adapter.here()
-                        else Adapter.notHere()
+                        if(::ChatID.isInitialized)
+                        {
+                            if(u.in_chat.equals(ChatID)) Adapter.here()
+                            else Adapter.notHere()
+                        }
                     }
                     else
                     {
@@ -303,11 +306,7 @@ class ChatActivity : AppCompatActivity()
         synchronized(this.Initialized)
         {
             if(!Initialized) getFirstMessages()
-            else
-            {
-                Log.d("CHAT", "on line 306")
-                listenForNewMessages()
-            }
+            else listenForNewMessages()
         }
     }
 
@@ -339,7 +338,8 @@ class ChatActivity : AppCompatActivity()
 
                 synchronized(t.Adapter)
                 {
-                    Adapter.bulkPush(p0.children.drop(1))
+                    //  Is there only one message
+                    if(p0.childrenCount > 1) Adapter.bulkPush(p0.children.drop(1))
 
                     //  No messages loaded? Then stop doing the scroll to top thing
                     if(p0.childrenCount < Take)
@@ -355,24 +355,28 @@ class ChatActivity : AppCompatActivity()
                     ViewManager.scrollToPosition(0)
                     RV.smoothScrollToPosition(0)
 
-                    //  Scroll to top to load previous messages
-                    RV.addOnScrollListener(object : RecyclerView.OnScrollListener()
+                    if(p0.childrenCount >= Take)
                     {
-                        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-                            super.onScrolled(recyclerView, dx, dy)
+                        //  Scroll to top to load previous messages
+                        RV.addOnScrollListener(object : RecyclerView.OnScrollListener()
+                        {
+                            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                                super.onScrolled(recyclerView, dx, dy)
 
-                            synchronized(t.ScrollListener)
-                            {
-                                //  Already loading?
-                                //if(ScrollListener) return
-
-                                if (ViewManager.isViewPartiallyVisible(RV.getChildAt(RV.childCount - 1), true, true))
+                                synchronized(t.ScrollListener)
                                 {
-                                    getFirstMessages()
+                                    //  Already loading?
+                                    //if(ScrollListener) return
+
+                                    if (ViewManager.isViewPartiallyVisible(RV.getChildAt(RV.childCount - 1), true, true))
+                                    {
+                                        getFirstMessages()
+                                    }
                                 }
                             }
-                        }
-                    })
+                        })
+                    }
+
                     listenForNewMessages()
                 }
 
@@ -416,7 +420,7 @@ class ChatActivity : AppCompatActivity()
                 {
                     //  Discard the message if it is already the same as the last one (like: the one that we just posted)
                     //  NOTE: kotlin suggests doing compareTo() instead of equals(), so I did it like that
-                    if(newMessage.key.compareTo(MostRecentMessage) == 0 && newMessage.child("sent").value.toString() > MostRecentTime )
+                    if(newMessage.key.compareTo(MostRecentMessage) == 0 || newMessage.child("sent").value.toString() <= MostRecentTime )
                     {
                         return
                     }
@@ -459,7 +463,7 @@ class ChatActivity : AppCompatActivity()
                 if(p0.hasChild("is_typing"))
                 {
                     //  TODO: add fade in & fade out animations here
-                    if(p0.child("is_typing")?.value == true) TypingNotifier.visibility = View.VISIBLE
+                    if(p0.child("is_typing").getValue(Boolean::class.java) == true) TypingNotifier.visibility = View.VISIBLE
                     else TypingNotifier.visibility = View.GONE
                 }
 
@@ -555,7 +559,7 @@ class ChatActivity : AppCompatActivity()
             SubmitButton.setOnClickListener(null)
 
             //  Is there a conversation already?
-            if(::ChatID.isInitialized)
+            if(!::ChatID.isInitialized)
             {
                 //  IMPORTANT UPDATE: I was wondering: what if a chat between us does not exist yet, but my partner is actually typing?
                 //  In that case, I *MUST* check if a chat has just been created before posting my message.
@@ -578,6 +582,7 @@ class ChatActivity : AppCompatActivity()
                             //  Hey, my partner just created a chat! I just need to refer to that chat from now on.
                             true ->
                             {
+                                 ChatID = p0.child("chat").value as String
                                 setUps()
                                 postMessage()
                             }
@@ -712,6 +717,11 @@ class ChatActivity : AppCompatActivity()
                         }
                     }
                 })*/
+            }
+
+            synchronized(t.Adapter)
+            {
+                Adapter.push(c)
             }
 
             //  Reset the editext

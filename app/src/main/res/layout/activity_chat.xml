@@ -57,7 +57,7 @@
         android:layout_alignParentBottom="true"
         android:layout_below="@+id/messagesContainer"
         android:animateLayoutChanges="true"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/chatToolbar" />
 
     <android.support.v7.widget.RecyclerView

@@ -34,6 +34,7 @@ import java.security.acl.Owner;
 import mad24.polito.it.R;
 import mad24.polito.it.chats.ChatActivity;
 import mad24.polito.it.models.Book;
+import mad24.polito.it.models.Chat;
 import mad24.polito.it.models.UserMail;
 import mad24.polito.it.registrationmail.User;
 
@@ -172,17 +173,24 @@ public class BookOwnerFragment extends Fragment
                                 //  The chat id
                                 String chat = null;
 
+                                //  Init the intent
+                                Intent intent = new Intent(getActivity(), ChatActivity.class);
+
                                 //  Was a chat already there?
                                 //  NOTE: the second case is actually an error: the chat is found but the id does not exit.
-                                if(dataSnapshot != null && dataSnapshot.hasChild("chat")) chat = dataSnapshot.child("chat").getValue(String.class);
+                                if(dataSnapshot != null && dataSnapshot.hasChild("last_message") && dataSnapshot.hasChild("chat"))
+                                {
+                                    Chat c = dataSnapshot.getValue(Chat.class);
+                                    intent.putExtra("chat", c.getChat());
+                                    intent.putExtra("startId", c.getLast_message().getId());
+                                    intent.putExtra("startTime", c.getLast_message().getBy());
+                                }
 
-                                //  Start the activity
-                                Intent intent = new Intent(getActivity(), ChatActivity.class);
-                                intent.putExtra("chat", /*chat*/ "-LCKY3vRRfzdLMEzrJlQ");
-                                intent.putExtra("startId", /*dataSnapshot.child("id").getValue(String.class)*/"-LCUGtkGcPA1MYdj0HCg");
-                                intent.putExtra("startTime", /*dataSnapshot.child("id").getValue(String.class)*/"2018-05-14T18:42:06Z");
                                 intent.putExtra("with", TheBook.getUser_id());
                                 intent.putExtra("user", new Gson().toJson(User));
+
+
+                                //  Start the activity
                                 startActivity(intent);
                             }
 
