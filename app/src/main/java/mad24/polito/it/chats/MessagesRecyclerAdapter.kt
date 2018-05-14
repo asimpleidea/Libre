@@ -16,7 +16,7 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
     lateinit var RootView : View
     lateinit var Holder : ViewHolder
 
-    private var TheirLastAccess = _lastAccess
+    private var PartnerLastAccess = _lastAccess
     private var IsHere : Boolean = false
     private var Messages : ArrayList<ChatMessage> = ArrayList()
 
@@ -30,7 +30,7 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
 
     fun Here() { Log.d("CHAT", "Here()"); IsHere = true }
     fun NotHere() { Log.d("CHAT", "NotHere()"); IsHere = false }
-    fun setLastHere(last : String){ Log.d("CHAT", "setLastHere()"); TheirLastAccess = last }
+    fun setLastHere(last : String){ Log.d("CHAT", "setLastHere()"); PartnerLastAccess = last }
 
     fun bulkPush(/*messages: DataSnapshot*/messages : Iterable<DataSnapshot>)
     {

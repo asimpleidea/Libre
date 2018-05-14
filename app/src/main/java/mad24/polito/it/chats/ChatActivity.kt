@@ -18,9 +18,7 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import com.google.gson.Gson
-import de.hdodenhof.circleimageview.CircleImageView
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
 import mad24.polito.it.models.ChatMessageContainer
@@ -35,9 +33,9 @@ class ChatActivity : AppCompatActivity()
 {
     lateinit var MainReference : DatabaseReference
     lateinit var MessagesReference : DatabaseReference
-    lateinit var TheyAreTyping : DatabaseReference
+    lateinit var PartnerIsTyping : DatabaseReference
     lateinit var IAmTyping : DatabaseReference
-    lateinit var ReceiverReference : DatabaseReference
+    lateinit var PartnerReference : DatabaseReference
 
     private lateinit var RV: RecyclerView
     private lateinit var Adapter: MessagesRecyclerAdapter
@@ -47,7 +45,7 @@ class ChatActivity : AppCompatActivity()
     lateinit var ChatID : String
     val Take : Int = 20
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
-    var Them : String? = null
+    var PartnerID : String? = null
     var MostRecentMessage : String = ""
     var OldestMessage : String = ""
     var Initialized : Boolean = false
@@ -85,10 +83,10 @@ class ChatActivity : AppCompatActivity()
         if(intent.hasExtra("user") && intent.getStringExtra("user") != null)
         {
             User = Gson().fromJson(intent.getStringExtra("user"), UserMail::class.java)
-            Them = intent.getStringExtra("with")
+            PartnerID = intent.getStringExtra("with")
 
             //  Put the receiver Reference
-            ReceiverReference = MainReference.parent.child("users").child(Them)
+            PartnerReference = MainReference.parent.child("users").child(PartnerID)
 
             //  The name
             findViewById<TextView>(R.id.theirName).text = User?.name
@@ -98,7 +96,7 @@ class ChatActivity : AppCompatActivity()
 
             //  Put user's image
             FirebaseStorage.getInstance().getReference("profile_pictures")
-                    .child("$Them.jpg")
+                    .child("$PartnerID.jpg")
                     .downloadUrl
                     .addOnSuccessListener {url ->
                         Glide.with(applicationContext).load(url).into(findViewById(R.id.theirImage))
@@ -228,11 +226,11 @@ class ChatActivity : AppCompatActivity()
 
     private fun setUpStatusListener()
     {
-        if(!::ReceiverReference.isInitialized) return
+        if(!::PartnerReference.isInitialized) return
 
         val t = this
 
-        ReceiverReference.child("status").addValueEventListener(object : ValueEventListener
+        PartnerReference.child("status").addValueEventListener(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?)
             {
@@ -422,10 +420,10 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Get the reference
-        TheyAreTyping = MainReference.child(ChatID).child("partecipants").child(Them)
+        PartnerIsTyping = MainReference.child(ChatID).child("partecipants").child(PartnerID)
 
         //  Set up listener
-        TheyAreTyping.addValueEventListener(object : ValueEventListener
+        PartnerIsTyping.addValueEventListener(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?)
             {
@@ -542,7 +540,40 @@ class ChatActivity : AppCompatActivity()
             SubmitButton.setOnClickListener(null)
 
             //  Is there a conversation already?
-            if(::ChatID.isInitialized) createConversation()
+            if(::ChatID.isInitialized)
+            {
+                //  IMPORTANT UPDATE: I was wondering: what if a chat between us does not exist yet, but my partner is actually typing?
+                //  In that case, I *MUST* check if a chat has just been created before posting my message.
+                //  Otherwise, my partner has just created the chat and I am actually creating *another*.
+                //  So, before creating a chat, let's see if my partner just created it before me.
+                //  TODO: test this...
+                MainReference.parent.child("chats").child(Me).addListenerForSingleValueEvent(object: ValueEventListener
+                {
+                    override fun onCancelled(p0: DatabaseError?)
+                    {
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot?)
+                    {
+                        //  if p0 is null it means that this user has not started a chat with anyone yet
+                        if(p0 == null) return
+
+                        when(p0.hasChild(PartnerID))
+                        {
+                            //  Hey, my partner just created a chat! I just need to refer to that chat from now on.
+                            true ->
+                            {
+                                setUps()
+                                postMessage()
+                            }
+
+                            //  A conversation between us does not exist yet, let me create it first
+                            //  NOTE: createConversation posts the message when it is done, so no need to add postMessage() here
+                            false -> createConversation()
+                        }
+                    }
+                })
+            }
             else postMessage()
         })
     }
@@ -582,7 +613,7 @@ class ChatActivity : AppCompatActivity()
 
         //  At this point, we are pretty sure that we are logged, that's why I use a !!
         p.addPartecipant(Me!!, me)
-        p.addPartecipant(Them!!, ChatMessageContainer.Partecipants.User("0"))
+        p.addPartecipant(PartnerID!!, ChatMessageContainer.Partecipants.User("0"))
 
         ChatID = MainReference.push().key
         MainReference.child(ChatID).setValue(p){ error, _ ->
@@ -649,7 +680,7 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Reset: Update my last time here and set that I am not writing
-        TheyAreTyping.parent.child(Me!!).setValue(ChatMessageContainer.Partecipants.User(getCurrentISODate()))
+        PartnerIsTyping.parent.child(Me!!).setValue(ChatMessageContainer.Partecipants.User(getCurrentISODate()))
         { err, _ ->
             if(err != null)
             {
