@@ -40,10 +40,11 @@ class ChatActivity : AppCompatActivity()
     private lateinit var RV: RecyclerView
     private lateinit var Adapter: MessagesRecyclerAdapter
     private lateinit var ViewManager: RecyclerView.LayoutManager
+    private lateinit var ScrollListener : RecyclerView.OnScrollListener
 
     //var ChatID : String? = null
     lateinit var ChatID : String
-    val Take : Int = 20
+    val Take : Int = 4
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
     var PartnerID : String? = null
     var MostRecentMessage : String = ""
@@ -120,7 +121,7 @@ class ChatActivity : AppCompatActivity()
         ChatToolbar = findViewById(R.id.chatToolbar)
         ChatToolbar.title = getString(R.string.app_name)
         ChatToolbar.setNavigationIcon(R.drawable.ic_white_back_arrow)
-        ChatToolbar.setNavigationOnClickListener(View.OnClickListener
+        ChatToolbar.setNavigationOnClickListener(
         {
             finish()
         })
@@ -131,7 +132,6 @@ class ChatActivity : AppCompatActivity()
         Adapter = MessagesRecyclerAdapter("0")
 
         RV = findViewById<RecyclerView>(R.id.messagesContainer).apply {
-            //setHasFixedSize(true)
             layoutManager = ViewManager
             adapter = Adapter
         }
@@ -335,52 +335,37 @@ class ChatActivity : AppCompatActivity()
                 }
 
                 //  Little trick to know if this is the first time we are doing this
-                if(OldestMessage.compareTo(MostRecentMessage) == 0) listenForNewMessages()
+                if(OldestMessage.compareTo(MostRecentMessage) == 0)
+                {
+                    ViewManager.scrollToPosition(0)
+                    //RV.smoothScrollToPosition(0)
+                    listenForNewMessages()
+                }
 
                 //  No need to synchronize it now
                 OldestMessage = p0.children.first().key
 
-                //  TODO: scroll on top to get previous messages
-                //  General idea behind this:
-                //  NOTE: this idea must be implemented because I don't know if it works or not
+                //  TODO: TEST THIS!!
+                //  If you got enough elements, then there might be other older elements
+                //  Read below to find why it is crucial to Take+1
                 if(p0.children.count() == Take +1)
                 {
-                    /*- if we got exactly Take message (example 20)
-                        - then here we attach the scroll event to the view:
-                            when user scrolls on top, this function (getFirstMessages) gets called again,
-                            but this time, OldestMessage is a different value (we changed it two lines above)
-                            Since this is a addListerForSINGLEevent this want be triggered more if user keeps scrolling.
-                            So we will be called here again: if 20 messages redo attach scroll event.
-                            So this is going to be a recursive scroll attacher until less than 20 messages are loaded.
-                            In that case, this block won't be called again, thus making scroll just a pure scroll, not an infinite one
-                            NOTE: firebase will get every Take messages until the message provided as endAt,
-                            BUT: the one that you pass to endAt will be included!
-                            So, if you want to get 20 messages, you have to load 21: you show only the last 20;
-                            the first one, you have to *NOT* use but keep it as parameter for the next query when user scrolls.
-                            I know that this general algorithm seems a bit complicated...
-                            If you can find a better algorithm go for it, otherwise contact me on slack for better explanation.
-
-                            I wrote a simulator down below, simulating a user scrolling up every 5 seconds.
-                            Uncomment it to have an example of what I have written above.
-                            You might want to set Take to a smaller value (like 3) to get an idea of what I was talking about.
-                    */
-
-                    //  OldestMessage is now that element which Firebase will stop at (endAt())
-                    //  It will take 20 messages in which this will be the 20th.
-                    //  So, as I said above, better take 21 and keep that first one just as a reference for the next query,
-                    //  and instead show the other 20 (so from 1 to 20, discard message on position 0)
-                    /*Log.d("CHAT", "new oldest: $OldestMessage")
-                    object : CountDownTimer(5*1000, 5*1000)
+                    ScrollListener = object : RecyclerView.OnScrollListener()
+                    {
+                        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int)
                         {
-                            override fun onFinish()
+                            super.onScrolled(recyclerView, dx, dy)
+
+                            if(ViewManager.isViewPartiallyVisible(RV.getChildAt(0), false, false))
                             {
-                                Log.d("CHAT", "Going to reload again")
+                                //  First remove this
+                                RV.removeOnScrollListener(ScrollListener)
                                 getFirstMessages()
                             }
+                        }
+                    }
 
-                            override fun onTick(p0: Long) {}
-
-                        }.start()*/
+                    RV.addOnScrollListener(ScrollListener)
                 }
             }
         })
