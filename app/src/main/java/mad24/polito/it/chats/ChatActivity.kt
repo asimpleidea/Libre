@@ -13,6 +13,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.RelativeLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -40,14 +41,15 @@ class ChatActivity : AppCompatActivity()
     private lateinit var RV: RecyclerView
     private lateinit var Adapter: MessagesRecyclerAdapter
     private lateinit var ViewManager: RecyclerView.LayoutManager
-    private lateinit var ScrollListener : RecyclerView.OnScrollListener
+    private var ScrollListener : Boolean = true
 
     //var ChatID : String? = null
     lateinit var ChatID : String
-    val Take : Int = 4
+    val Take : Int = 5
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
     var PartnerID : String? = null
     var MostRecentMessage : String = ""
+    var MostRecentTime : String = ""
     var OldestMessage : String = ""
     var Initialized : Boolean = false
     var User : UserMail? = null
@@ -134,13 +136,15 @@ class ChatActivity : AppCompatActivity()
         RV = findViewById<RecyclerView>(R.id.messagesContainer).apply {
             layoutManager = ViewManager
             adapter = Adapter
+            setHasFixedSize(true)
         }
 
         //  Do we already have a chat stored?
         if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
         {
             ChatID = intent.getStringExtra("chat")
-            MostRecentMessage = intent.getStringExtra("start")
+            MostRecentMessage = intent.getStringExtra("startId")
+            MostRecentTime = intent.getStringExtra("startTime")
 
             //  At first they are the same of course
             OldestMessage = MostRecentMessage
@@ -299,7 +303,11 @@ class ChatActivity : AppCompatActivity()
         synchronized(this.Initialized)
         {
             if(!Initialized) getFirstMessages()
-            else listenForNewMessages()
+            else
+            {
+                Log.d("CHAT", "on line 306")
+                listenForNewMessages()
+            }
         }
     }
 
@@ -332,41 +340,44 @@ class ChatActivity : AppCompatActivity()
                 synchronized(t.Adapter)
                 {
                     Adapter.bulkPush(p0.children.drop(1))
+
+                    //  No messages loaded? Then stop doing the scroll to top thing
+                    if(p0.childrenCount < Take)
+                    {
+                        RV.clearOnScrollListeners()
+                        Adapter.push(p0.children.first(), true)
+                    }
                 }
 
                 //  Little trick to know if this is the first time we are doing this
                 if(OldestMessage.compareTo(MostRecentMessage) == 0)
                 {
                     ViewManager.scrollToPosition(0)
-                    //RV.smoothScrollToPosition(0)
+                    RV.smoothScrollToPosition(0)
+
+                    //  Scroll to top to load previous messages
+                    RV.addOnScrollListener(object : RecyclerView.OnScrollListener()
+                    {
+                        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                            super.onScrolled(recyclerView, dx, dy)
+
+                            synchronized(t.ScrollListener)
+                            {
+                                //  Already loading?
+                                //if(ScrollListener) return
+
+                                if (ViewManager.isViewPartiallyVisible(RV.getChildAt(RV.childCount - 1), true, true))
+                                {
+                                    getFirstMessages()
+                                }
+                            }
+                        }
+                    })
                     listenForNewMessages()
                 }
 
                 //  No need to synchronize it now
                 OldestMessage = p0.children.first().key
-
-                //  TODO: TEST THIS!!
-                //  If you got enough elements, then there might be other older elements
-                //  Read below to find why it is crucial to Take+1
-                if(p0.children.count() == Take +1)
-                {
-                    ScrollListener = object : RecyclerView.OnScrollListener()
-                    {
-                        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int)
-                        {
-                            super.onScrolled(recyclerView, dx, dy)
-
-                            if(ViewManager.isViewPartiallyVisible(RV.getChildAt(0), false, false))
-                            {
-                                //  First remove this
-                                RV.removeOnScrollListener(ScrollListener)
-                                getFirstMessages()
-                            }
-                        }
-                    }
-
-                    RV.addOnScrollListener(ScrollListener)
-                }
             }
         })
     }
@@ -405,12 +416,13 @@ class ChatActivity : AppCompatActivity()
                 {
                     //  Discard the message if it is already the same as the last one (like: the one that we just posted)
                     //  NOTE: kotlin suggests doing compareTo() instead of equals(), so I did it like that
-                    if(newMessage.key.compareTo(MostRecentMessage) == 0)
+                    if(newMessage.key.compareTo(MostRecentMessage) == 0 && newMessage.child("sent").value.toString() > MostRecentTime )
                     {
                         return
                     }
 
                     MostRecentMessage = newMessage.key
+                    MostRecentTime = newMessage.child("sent").value.toString()
                 }
 
                 synchronized(t.Adapter)
@@ -644,8 +656,8 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Again, the !! is pretty useless because we're sure that the user is authenticated at this point
-        Log.d("CHAT", "message just posted: ${Typer.text.toString()}")
-        val c = ChatMessage(Typer.text.toString(), Me!!, getCurrentISODate())
+        val time = getCurrentISODate()
+        val c = ChatMessage(Typer.text.toString(), Me!!, time)
 
         //  First, push the id
         val p = MessagesReference.push().key
@@ -668,6 +680,38 @@ class ChatActivity : AppCompatActivity()
                     MostRecentMessage = previousRecentMessage
                     //  TODO: Dialog: "Sorry we could not send your message, please try again later"
                 }
+
+                MostRecentTime = time
+
+                //  Listen for received updates
+                //  This listens for updates from Firebase Functions: if the element "received" was changed,
+                //  then we know that a notification to the partner has been sent and the message received.
+                //  It's the equivalent of the second grey tick in whatsapp
+                //  UPDATE: I decided to not implement this yet... this is just a book chat...
+                //          let's not make this too complicated, alright?
+                /*MessagesReference.child(p).addValueEventListener(object : ValueEventListener
+                {
+                    override fun onCancelled(p0: DatabaseError?)
+                    {
+
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot?)
+                    {
+                        //  I got a data, stop listening for changes!
+                        //  NOTE: this does *not* point to the class, but to ValueEventListener!
+                        MessagesReference.child(p).removeEventListener(this)
+
+                        if(p0 != null)
+                        {
+                            if(p0.hasChild("received") && p0.child("received").getValue(String::class.java)!!.length > 1)
+                            {
+                                //  Set my new message as "Received"
+                                Adapter.setAsReceived(p)
+                            }
+                        }
+                    }
+                })*/
             }
 
             //  Reset the editext

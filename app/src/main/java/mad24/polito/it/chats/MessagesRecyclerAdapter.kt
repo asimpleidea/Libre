@@ -71,11 +71,23 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
         notifyItemRangeInserted(count, Messages.size)
     }
 
-    fun push(message : DataSnapshot)
+    fun push(message : DataSnapshot, onTop : Boolean = false)
     {
         val c : ChatMessage? = message.getValue(ChatMessage::class.java)
-        Messages.add(0, c!!)
-        notifyItemInserted(0)
+        push(c!!, onTop)
+    }
+
+    fun push(message : ChatMessage, onTop : Boolean = false)
+    {
+        if(!onTop)
+        {
+            Messages.add(0, message)
+            notifyItemInserted(0)
+            return
+        }
+
+        Messages.add(Messages.size, message)
+        notifyItemInserted(Messages.size -1)
     }
 
     override fun getItemCount(): Int
@@ -92,7 +104,7 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
             //  Was this message sent by me?
             true ->
             {
-                Log.d("CHAT", "message sent in ${Messages[position].sent} and last access ")
+                Log.d("CHAT", "message sent in ${Messages[position].sent} and last access $PartnerLastAccess")
                 holder.Align.text = "DEBUG: my message, so this goes on right"
 
                 //  Did my partner connect to this chat after this message?
