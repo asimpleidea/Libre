@@ -56,7 +56,7 @@ class ChatActivity : AppCompatActivity()
     lateinit var Typer : EditText
     lateinit var SubmitButton : Button
     lateinit var ChatToolbar : Toolbar
-    lateinit var TheirStatus : TextView
+    lateinit var PartnerStatus : TextView
 
     lateinit var StopTyping : CountDownTimer
     var CountDownRunning : Boolean = false
@@ -92,7 +92,7 @@ class ChatActivity : AppCompatActivity()
             findViewById<TextView>(R.id.theirName).text = User?.name
 
             //  The online status
-            TheirStatus = findViewById(R.id.theirStatus)
+            PartnerStatus = findViewById(R.id.theirStatus)
 
             //  Put user's image
             FirebaseStorage.getInstance().getReference("profile_pictures")
@@ -220,6 +220,22 @@ class ChatActivity : AppCompatActivity()
         //  NOTE: we don't actually know where the user is right now, se we have to set offline status.
         //  If the user is getting back to the chats fragment, then the onResume there will take care of putting it online
         updateMyStatus(false, getCurrentISODate(), "0")
+
+        //  Set my last time here
+        if(::ChatID.isInitialized) MainReference
+                                        .child(ChatID)
+                                        .child("partecipants")
+                                        .child(Me)
+                                        .setValue(ChatMessageContainer.Partecipants.User(getCurrentISODate())){
+                                            err, _ ->
+
+                                            if(err != null)
+                                            {
+                                                Log.d("CHAT", "could not update my last here")
+                                                return@setValue
+                                            }
+                                        }
+
     }
 
     override fun onBackPressed()
@@ -258,21 +274,16 @@ class ChatActivity : AppCompatActivity()
                 {
                     if(u!!.isOnline)
                     {
-                        //  TODO: change this to @string/blabla
-                        TheirStatus.text = "Online"
+                        PartnerStatus.text = resources.getString(R.string.chat_status_online)
 
                         //  Is the user here?
-                        when(u.in_chat.compareTo(ChatID) == 0)
-                        {
-                            true -> Adapter.Here()
-                            false -> Adapter.NotHere()
-                        }
+                        if(u.in_chat.compareTo(ChatID) == 0) Adapter.here()
+                        else Adapter.notHere()
                     }
                     else
                     {
-                        //  TODO: format this string: last_online is a ISO8609 date string, so it is very easy to format it.
-                        TheirStatus.text = "Last online: ${u.last_online}"
-                        Adapter.NotHere()
+                        Adapter.notHere()
+                        PartnerStatus.text = String.format(resources.getString(R.string.chat_last_seen, u.last_online))
                     }
                 }
             }
@@ -459,7 +470,7 @@ class ChatActivity : AppCompatActivity()
                 {
                     synchronized(t.Adapter)
                     {
-                        Adapter.setLastHere(p0.child("last_here").key)
+                        Adapter.setLastHere(p0.child("last_here").value.toString())
                     }
                 }
             }
@@ -536,9 +547,6 @@ class ChatActivity : AppCompatActivity()
     {
         //  Already has the event?
         if(SubmitButton.hasOnClickListeners()) return
-
-        //  Reset the editext
-        Typer.text = null
 
         //  Set the event
         SubmitButton.setOnClickListener(View.OnClickListener
@@ -651,6 +659,7 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Again, the !! is pretty useless because we're sure that the user is authenticated at this point
+        Log.d("CHAT", "message just posted: ${Typer.text.toString()}")
         val c = ChatMessage(Typer.text.toString(), Me!!, getCurrentISODate())
 
         //  First, push the id
@@ -675,6 +684,9 @@ class ChatActivity : AppCompatActivity()
                     //  TODO: Dialog: "Sorry we could not send your message, please try again later"
                 }
             }
+
+            //  Reset the editext
+            Typer.text.clear()
 
             //  Error or not, user must be able to write again
             setUpButtonEvent()

@@ -185,4 +185,9 @@
     <string name="published_by">Pubblicato da %1$s</string>
     <!-- /View Book -->
 
+    <!-- Chat -->
+    <string name="chat_status_online">Online</string>
+    <string name="chat_last_seen">Ultimo accesso: %1$s</string>
+    <!-- /Chat -->
+
 </resources>

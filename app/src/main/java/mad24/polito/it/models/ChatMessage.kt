@@ -8,5 +8,4 @@ class ChatMessage constructor(_content: String = "", _by : String = "", _sent: S
 
     //  Because it is not received yet
     var received = "0"
-
 }

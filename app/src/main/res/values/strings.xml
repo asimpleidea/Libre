@@ -218,4 +218,9 @@
     <string name="title_notifications">Notifications</string>
     <!-- /View Book -->
 
+    <!-- Chat -->
+    <string name="chat_status_online">Online</string>
+    <string name="chat_last_seen">Last seen: %1$s</string>
+    <!-- /Chat -->
+
 </resources>

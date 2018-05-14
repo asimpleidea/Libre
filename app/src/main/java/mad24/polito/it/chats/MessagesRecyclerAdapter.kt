@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
@@ -15,22 +16,47 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
 {
     lateinit var RootView : View
     lateinit var Holder : ViewHolder
+    lateinit var Me : String
 
     private var PartnerLastAccess = _lastAccess
-    private var IsHere : Boolean = false
+    private var ParnerIsHere : Boolean = false
     private var Messages : ArrayList<ChatMessage> = ArrayList()
+    private var LastReadMessage : String? = null
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder
     {
         RootView  = LayoutInflater.from(parent!!.context).inflate(R.layout.adapter_chat_layout, parent, false)
         Holder = ViewHolder(RootView)
+        Me = FirebaseAuth.getInstance().currentUser!!.uid
 
         return ViewHolder(RootView)
     }
 
-    fun Here() { Log.d("CHAT", "Here()"); IsHere = true }
-    fun NotHere() { Log.d("CHAT", "NotHere()"); IsHere = false }
-    fun setLastHere(last : String){ Log.d("CHAT", "setLastHere()"); PartnerLastAccess = last }
+    fun here()
+    {
+        ParnerIsHere = true
+
+        //  Read all unread
+
+        var end = 0
+        for(c in Messages)
+        {
+            //  Kotlin sometimes suggests to do a compareTo and sometimes to do just a < or > ... boh
+            //  If partner is here, then PartnerLastAccess contains the moment they were here *before* that
+            when(c.sent < PartnerLastAccess)
+            {
+                true -> notifyItemRangeChanged(0, ++end)
+                false -> ++end
+            }
+        }
+    }
+
+    fun notHere()
+    {
+        ParnerIsHere = false
+    }
+
+    fun setLastHere(last : String){ PartnerLastAccess = last }
 
     fun bulkPush(/*messages: DataSnapshot*/messages : Iterable<DataSnapshot>)
     {
@@ -39,7 +65,7 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
         for(m in messages.reversed())
         {
             val c : ChatMessage? = m.getValue(ChatMessage::class.java)
-            if(m != null) Messages.add(c!!)
+            Messages.add(c!!)
         }
 
         notifyItemRangeInserted(count, Messages.size)
@@ -59,7 +85,35 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int)
     {
-        holder!!.Content.text = Messages[position].content
+        if(holder == null) return
+
+        when(Messages[position].by.compareTo(Me) == 0)
+        {
+            //  Was this message sent by me?
+            true ->
+            {
+                Log.d("CHAT", "message sent in ${Messages[position].sent} and last access ")
+                holder.Align.text = "DEBUG: my message, so this goes on right"
+
+                //  Did my partner connect to this chat after this message?
+                if(PartnerLastAccess > Messages[position].sent || ParnerIsHere)
+                {
+                    holder.Read.text = "DEBUG: message has been read"
+                    holder.Read.visibility = View.VISIBLE
+                }
+            }
+            false ->
+            {
+                holder.Align.text = "DEBUG: Partner's message, so this goes on left"
+            }
+        }
+
+        //  Set the content
+        holder.Content.text = Messages[position].content
+
+        //  For debug purposes
+        holder.Sent.text = "DEBUG: sent: ${Messages[position].sent}"
+        holder.Received.text = "DEBUG: received: ${Messages[position].received}"
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -67,17 +121,18 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
         var Content : TextView
 
         //  Just for test:
-        lateinit private var Sent : TextView
-        lateinit private var Received : TextView
-        lateinit private var Read : TextView
+        var Align : TextView
+        var Sent : TextView
+        var Received : TextView
+        var Read : TextView
 
         init
         {
             Content = itemView.findViewById(R.id.messageContent)
-            /*tv_title = itemView.findViewById<View>(R.id.book_title) as TextView
-            tv_author = itemView.findViewById<View>(R.id.book_author) as TextView
-            tv_location = itemView.findViewById<View>(R.id.book_location) as TextView
-            book_img = itemView.findViewById<View>(R.id.book_img) as ImageView*/
+            Align = itemView.findViewById(R.id.messageAlignment)
+            Sent = itemView.findViewById(R.id.messageSent)
+            Received = itemView.findViewById(R.id.messageReceived)
+            Read = itemView.findViewById(R.id.messageIsRead)
         }
     }
 
