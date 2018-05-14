@@ -127,7 +127,7 @@ class ChatActivity : AppCompatActivity()
             finish()
         })
 
-        ViewManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+        ViewManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, true)
 
         //  This is just temporary, it will be updated later, in statusListener
         Adapter = MessagesRecyclerAdapter("0")
@@ -253,16 +253,16 @@ class ChatActivity : AppCompatActivity()
 
                         Log.d("CHAT", "in_chat: ${u.in_chat.compareTo(ChatID)} and id: $ChatID")
                         //  Is the user here?
-                        /*when(u.in_chat.compareTo(ChatID) == 0)
+                        when(u.in_chat.compareTo(ChatID) == 0)
                         {
                             true -> Adapter.Here()
                             false -> Adapter.NotHere()
-                        }*/
+                        }
                     }
                     else
                     {
                         TheirStatus.text = "Last online: ${u.last_online}"
-                        //Adapter.NotHere()
+                        Adapter.NotHere()
                     }
                 }
             }
@@ -289,8 +289,8 @@ class ChatActivity : AppCompatActivity()
         //  Set the event
         var query = MessagesReference.orderByKey()
 
-        //  TODO: check the limitToLast
-        .limitToLast(Take).endAt(OldestMessage)
+        //  Read below why I do Take +1
+        .limitToLast(Take +1).endAt(OldestMessage)
 
         query.addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -310,7 +310,7 @@ class ChatActivity : AppCompatActivity()
 
                 synchronized(t.Adapter)
                 {
-                    Adapter.pushMessages(p0)
+                    Adapter.bulkPush(p0.children.drop(1))
                 }
 
                 //  Little trick to know if this is the first time we are doing this
@@ -322,7 +322,7 @@ class ChatActivity : AppCompatActivity()
                 //  TODO: scroll on top to get previous messages
                 //  General idea behind this:
                 //  NOTE: this idea must be implemented because I don't know if it works or not
-                if(p0.children.count() == Take)
+                if(p0.children.count() == Take +1)
                 {
                     /*- if we got exactly Take message (example 20)
                         - then here we attach the scroll event to the view:
@@ -343,12 +343,12 @@ class ChatActivity : AppCompatActivity()
                             Uncomment it to have an example of what I have written above.
                             You might want to set Take to a smaller value (like 3) to get an idea of what I was talking about.
                     */
-                    /*
+
                     //  OldestMessage is now that element which Firebase will stop at (endAt())
                     //  It will take 20 messages in which this will be the 20th.
                     //  So, as I said above, better take 21 and keep that first one just as a reference for the next query,
                     //  and instead show the other 20 (so from 1 to 20, discard message on position 0)
-                    Log.d("CHAT", "new oldest: $OldestMessage")
+                    /*Log.d("CHAT", "new oldest: $OldestMessage")
                     object : CountDownTimer(5*1000, 5*1000)
                         {
                             override fun onFinish()
@@ -406,6 +406,13 @@ class ChatActivity : AppCompatActivity()
 
                     MostRecentMessage = newMessage.key
                 }
+
+                synchronized(t.Adapter)
+                {
+                    Adapter.push(newMessage)
+
+                    //  TODO: play sound after new messages is received?
+                }
             }
         })
     }
@@ -442,7 +449,7 @@ class ChatActivity : AppCompatActivity()
                 {
                     synchronized(t.Adapter)
                     {
-                        //Adapter.setLastHere(p0.child("last_here").key)
+                        Adapter.setLastHere(p0.child("last_here").key)
                     }
                 }
 

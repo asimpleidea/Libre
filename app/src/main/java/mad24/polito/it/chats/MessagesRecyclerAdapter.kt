@@ -9,6 +9,7 @@ import android.widget.TextView
 import com.google.firebase.database.DataSnapshot
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
+import java.util.*
 
 class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Adapter<MessagesRecyclerAdapter.ViewHolder>()
 {
@@ -31,18 +32,24 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
     fun NotHere() { Log.d("CHAT", "NotHere()"); IsHere = false }
     fun setLastHere(last : String){ Log.d("CHAT", "setLastHere()"); TheirLastAccess = last }
 
-    fun pushMessages(messages: DataSnapshot)
+    fun bulkPush(/*messages: DataSnapshot*/messages : Iterable<DataSnapshot>)
     {
         val count : Int = Messages.size
 
-        for(m in messages.children)
+        for(m in messages.reversed())
         {
             val c : ChatMessage? = m.getValue(ChatMessage::class.java)
             if(m != null) Messages.add(c!!)
         }
 
         notifyItemRangeInserted(count, Messages.size)
-        //notifyItemInserted(Messages.size)
+    }
+
+    fun push(message : DataSnapshot)
+    {
+        val c : ChatMessage? = message.getValue(ChatMessage::class.java)
+        Messages.add(0, c!!)
+        notifyItemInserted(0)
     }
 
     override fun getItemCount(): Int
