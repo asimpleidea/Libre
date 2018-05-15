@@ -52,7 +52,7 @@ class MessagingService : FirebaseMessagingService()
         notificationBuilder.setSmallIcon(R.drawable.ic_icon_notification)
 
         //  Does it have a payload?
-        /*if (p0.data != null && p0.data.isNotEmpty())
+        if (p0.data != null && p0.data.isNotEmpty())
         {
             val data = p0.data
 
@@ -96,27 +96,7 @@ class MessagingService : FirebaseMessagingService()
                 //  Merge all this stuff together
                 notificationBuilder.setContentIntent(pendingIntent).setAutoCancel(true)
             }
-        }*/
-
-        val intent = Intent(applicationContext, ChatActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtra("chat", "-LCXi0QQHej336SyF2Ah")
-        intent.putExtra("startId", "-LCXi0SgGgpcAosZAnAA")
-        intent.putExtra("startTime", "2018-05-15T07:33:39Z" )
-        intent.putExtra("partner_id", "P1f7ozEcOQNgHvuMXL4tSDxapgF3")
-        intent.putExtra("partner_name", "Marco Schiuma")
-
-        var pendingIntent : PendingIntent? = null
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-        {
-            val stackBuilder = TaskStackBuilder.create(applicationContext)
-            stackBuilder.addNextIntentWithParentStack(intent)
-            pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
         }
-        else pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
-
-        //  Merge all this stuff together
-        notificationBuilder.setContentIntent(pendingIntent).setAutoCancel(true)
 
         //  Does it have a notification body?
         if(p0.notification == null) return
@@ -137,7 +117,5 @@ class MessagingService : FirebaseMessagingService()
 
         // notificationId is a unique int for each notification that you must define
         notificationManager.notify(++lastNotificationId, notificationBuilder.build())
-
-        Log.d(tag, "finished with the notification")
     }
 }
