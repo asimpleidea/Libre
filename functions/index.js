@@ -2,8 +2,18 @@
 const functions = require('firebase-functions');
 
 // The Firebase Admin SDK to access the Firebase Realtime Database.
+const account = require("./mad24-admin.json");
 const admin = require('firebase-admin');
-admin.initializeApp();
+const mkdirp = require('mkdirp-promise');
+const gcs = require('@google-cloud/storage')(({keyFilename: './mad24-admin.json'}));
+admin.initializeApp({
+    credential: admin.credential.cert(account),
+    databaseURL: "https://mad24-ac626.firebaseio.com"
+  });
+const spawn = require('child-process-promise').spawn;
+const path = require('path');
+const os = require('os');
+const fs = require('fs');
 
 //  On partecipants created
 exports.createChat = functions.database.ref('/chat_messages/{chatId}/partecipants').onCreate((snapshot, context) => 
@@ -78,14 +88,28 @@ exports.sendNotification = functions.database.ref("/chat_messages/{chatId}/messa
                 users = Object.keys(partecipants),
                 dest = users[0] === src ? users[1] : users[0];
 
-        console.log("srcData: " + srcData);
-        console.log("partecipants: " + partecipants);
+        console.log("srcData: ", srcData);
 
-        //  Get the device token of the dest
-        return admin.database().ref("users/" + dest).once("value").then(_d =>
+        return admin.database().ref("users/" + dest).once("value")
+        .then((_d) =>
         {
             //  Has the device token?
-            if(!_d.hasChild("device_token")) return console.log("no token found");
+            if(!_d.hasChild("device_token")) return true;
+            if(_d.hasChild("status"))
+            {
+                //  Don't send the notification if the user is in this chat
+                if(_d.child("status") === "online" && _d.child("in_chat") === context.params.chatId) return true;
+            }
+
+
+
+            //  Image
+            const picType = ( function()
+            {
+                if('thumbnail_exists' in srcData) return "thumb";
+                if('has_image' in srcData) return "original";
+                return "uknown";
+            }());
 
             //  Get data
             const token = _d.child("device_token").val(),
@@ -100,15 +124,124 @@ exports.sendNotification = functions.database.ref("/chat_messages/{chatId}/messa
                 },
                 data:
                 {
-                    sender_name: srcData.name,
+                    partner_name: srcData.name,
                     chat_id : context.params.chatId,
                     last_message_id: context.params.messageId,
                     last_message_time: original.sent,
+                    partner_id : src,
+                    partner_image : picType
                 }
-          };
+            };
+
+            console.log("payload", payload);
 
             //  Ok, send the notification
             return admin.messaging().sendToDevice(token, payload);
-        });
-    });
+
+        }); 
+    });       
+});
+
+//  Generate avatar thumb
+exports.generateThumbnail = functions.storage.bucket().object().onFinalize(object =>
+{
+  // File and directory paths
+  const filePath = object.name,
+
+        //  The MIME type
+        contentType = object.contentType,
+
+        //  File directory
+        fileDir = path.dirname(filePath),
+
+        //  The file name
+        fileName = path.basename(filePath),
+
+        //  The thumb path
+        thumbFilePath = path.normalize(path.join(fileDir, "thumb_" + fileName)),
+
+        //  Temp local file
+        tempLocalFile = path.join(os.tmpdir(), filePath),
+
+        //  Temp directory
+        tempLocalDir = path.dirname(tempLocalFile),
+
+        //  Temp thumb
+        tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
+
+        //  Is this an image?
+        if (!contentType.startsWith('image/')) return null;
+
+        //  Already a thumbnail?
+        if (fileName.startsWith("thumb_")) return null;
+
+        // Cloud Storage files.
+        const bucket = gcs.bucket(object.bucket),
+                file = bucket.file(filePath),
+                thumbFile = bucket.file(thumbFilePath),
+                metadata = { contentType: contentType };
+
+        // Create the temp directory where the storage file will be downloaded.
+        return mkdirp(tempLocalDir).then(() => 
+        {
+            // Download file from bucket.
+            return file.download({destination: tempLocalFile});
+        })
+        .then(() => 
+        {
+            //console.log('The file has been downloaded to', tempLocalFile);
+            
+            // Generate a thumbnail using ImageMagick.
+            return spawn('convert', [tempLocalFile, '-thumbnail', `150x150>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});
+        })
+        .then(() => 
+        {
+            //console.log('Thumbnail created at', tempLocalThumbFile);
+    
+            // Uploading the Thumbnail.
+            return bucket.upload(tempLocalThumbFile, {destination: thumbFilePath, metadata: metadata});
+        })
+        .then(() => 
+        {
+            //console.log('Thumbnail uploaded to Storage at', thumbFilePath);
+
+            // Once the image has been uploaded delete the local files to free up disk space.
+            fs.unlinkSync(tempLocalFile);
+            fs.unlinkSync(tempLocalThumbFile);
+
+            // Get the Signed URLs for the thumbnail and original image.
+            /*const config = {
+            action: 'read',
+            expires: '03-01-2500',
+            };
+            return Promise.all([
+                thumbFile.getSignedUrl(config),
+                file.getSignedUrl(config),
+                ]);*/
+            return Promise.resolve(thumbFile.exists());
+        })
+        .then(result =>
+        {
+            if(!result) return false;
+            
+            //  Get the id
+            const id = fileName.split(".")[0];
+
+            //  Set the thumb
+            if(fileDir === "profile_pictures")  return admin.database().ref("users/" + id).update({has_image: true, thumbnail_exists : true});
+
+            return admin.database().ref("books/" + id).update({has_image: true, thumbnail_exists : true});
+        })
+        /*.then((results) => 
+        {
+            console.log('Got Signed URLs.');
+            const thumbResult = results[0];
+            const originalResult = results[1];
+            const thumbFileUrl = thumbResult[0];
+            const fileUrl = originalResult[0];
+
+            // Add the URLs to the Database
+            //return admin.database().ref('images').push({path: fileUrl, thumbnail: thumbFileUrl});
+            return console.log("thumbUrl: " + thumbFileUrl + ", fileUrl: " + fileUrl);
+        })*/;
 });
