@@ -57,3 +57,58 @@ exports.updateChat = functions.database.ref('/chat_messages/{chatId}/messages/{m
                                 admin.database().ref("chats/" + users[1] + "/" + users[0] + "/last_message").update(last_message) ]);
     });
 });
+
+//  Send notifications
+exports.sendNotification = functions.database.ref("/chat_messages/{chatId}/messages/{messageId}").onCreate((snapshot, context) =>
+{
+    const original = snapshot.val(),
+            src = original.by,
+
+    //  Get the data of the src
+    srcDataPromise = admin.database().ref("users/" + src).once("value"),
+    
+    //  Get the user to be notified
+    partecipantsPromise = admin.database().ref("/chat_messages/" + context.params.chatId + "/partecipants").once("value");
+
+    //  Do something with those promises
+    return Promise.all([srcDataPromise, partecipantsPromise]).then(results => 
+    {
+        const srcData = results[0].val(),
+                partecipants = results[1].val(),
+                users = Object.keys(partecipants),
+                dest = users[0] === src ? users[1] : users[0];
+
+        console.log("srcData: " + srcData);
+        console.log("partecipants: " + partecipants);
+
+        //  Get the device token of the dest
+        return admin.database().ref("users/" + dest).once("value").then(_d =>
+        {
+            //  Has the device token?
+            if(!_d.hasChild("device_token")) return console.log("no token found");
+
+            //  Get data
+            const token = _d.child("device_token").val(),
+
+            //  Build the payload
+            payload = 
+            {
+                notification: 
+                {
+                    title: srcData.name,
+                    body: original.content,
+                },
+                data:
+                {
+                    sender_name: srcData.name,
+                    chat_id : context.params.chatId,
+                    last_message_id: context.params.messageId,
+                    last_message_time: original.sent,
+                }
+          };
+
+            //  Ok, send the notification
+            return admin.messaging().sendToDevice(token, payload);
+        });
+    });
+});
