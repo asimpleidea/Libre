@@ -183,11 +183,11 @@ public class BookOwnerFragment extends Fragment
                                     Chat c = dataSnapshot.getValue(Chat.class);
                                     intent.putExtra("chat", c.getChat());
                                     intent.putExtra("startId", c.getLast_message().getId());
-                                    intent.putExtra("startTime", c.getLast_message().getBy());
+                                    intent.putExtra("startTime", c.getLast_message().getTime());
                                 }
 
-                                intent.putExtra("with", TheBook.getUser_id());
-                                intent.putExtra("user", new Gson().toJson(User));
+                                intent.putExtra("partner_id", TheBook.getUser_id());
+                                intent.putExtra("partner_name", User.getName());
 
 
                                 //  Start the activity

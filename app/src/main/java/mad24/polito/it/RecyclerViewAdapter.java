@@ -100,7 +100,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
                             //  Set the url of cover *INSIDE* the object (so we won't have to query it again later).
                             //mData.get(holder.getAdapterPosition()).setBookImageLink(uri.toString());
-                            Glide.with(mContext).load(imageURL).into(holder.book_img);
+                            //  IMPORTANT UPDATE: without this condition, an error is raised when clicking a notification.
+                            if(!((BooksActivity) mContext).isFinishing())
+                            Glide.with(holder.itemView.getContext()).load(imageURL).into(holder.book_img);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {

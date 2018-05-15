@@ -84,16 +84,16 @@ class ChatActivity : AppCompatActivity()
         MainReference = FirebaseDatabase.getInstance().getReference("chat_messages")
 
         //  Get the other user
-        if(intent.hasExtra("user") && intent.getStringExtra("user") != null)
+        if(intent.hasExtra("partner_id") && intent.getStringExtra("partner_id") != null)
         {
-            User = Gson().fromJson(intent.getStringExtra("user"), UserMail::class.java)
-            PartnerID = intent.getStringExtra("with")
+            //User = Gson().fromJson(intent.getStringExtra("user"), UserMail::class.java)
+            PartnerID = intent.getStringExtra("partner_id")
 
             //  Put the receiver Reference
             PartnerReference = MainReference.parent.child("users").child(PartnerID)
 
             //  The name
-            findViewById<TextView>(R.id.theirName).text = User?.name
+            findViewById<TextView>(R.id.theirName).text = intent.getStringExtra("partner_name")
 
             //  The online status
             PartnerStatus = findViewById(R.id.theirStatus)

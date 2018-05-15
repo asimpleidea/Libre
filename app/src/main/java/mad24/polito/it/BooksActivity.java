@@ -1,5 +1,7 @@
 package mad24.polito.it;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 
 import java.text.DateFormat;
@@ -35,6 +38,7 @@ import mad24.polito.it.fragments.SearchFragment;
 import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 import mad24.polito.it.models.UserStatus;
 import mad24.polito.it.registrationmail.LoginActivity;
+import mad24.polito.it.services.MessagingService;
 
 public class BooksActivity  extends AppCompatActivity
 {
@@ -91,10 +95,15 @@ public class BooksActivity  extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(mad24.polito.it.R.layout.activity_books);
+
         //Log.d("frag", "onCreate");
         /*mTextMessage = (TextView) findViewById(R.id.message);*/
         mMainFrame = (FrameLayout) findViewById(mad24.polito.it.R.id.main_frame);
         mMainNav = (BottomNavigationView) findViewById(mad24.polito.it.R.id.main_nav);
+
+        //  Get the token, for the notifications!
+        //  TODO: as per documentation, the token is not always returned! So, test this!
+        Log.d("CHAT", FirebaseInstanceId.getInstance().getToken());
 
         booksFragment = new BooksFragment();
         searchFragment = new SearchFragment();
@@ -232,7 +241,9 @@ public class BooksActivity  extends AppCompatActivity
     public void onResume()
     {
         super.onResume();
-        Log.d("CHAT", "resumed in chat fregment");
+
+        //  Create the notification channel
+        createNotificationChannel();
 
         setMeOnline();
     }
@@ -266,7 +277,6 @@ public class BooksActivity  extends AppCompatActivity
             @Override
             public void onSuccess(Void aVoid)
             {
-                Log.d("CHAT", "updated status");
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -275,6 +285,24 @@ public class BooksActivity  extends AppCompatActivity
                 Log.d("CHAT", "failed updating status");
             }
         });
+    }
+
+    private void createNotificationChannel()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel(getString(R.string.channel_name), name, importance);
+            channel.setDescription(description);
+
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
 }
