@@ -345,20 +345,20 @@ public class ManualInsertActivity extends AppCompatActivity {
                 Log.d("isbn", scanContent);
                 Log.d("isbn", scanFormat);
 
-                Toast.makeText(getApplicationContext(),
-                        "format: " + scanFormat + " code: " + scanContent, Toast.LENGTH_LONG).show();
+//                Toast.makeText(getApplicationContext(),
+//                        "format: " + scanFormat + " code: " + scanContent, Toast.LENGTH_LONG).show();
 
                 //get info by isbn
                 try {
-                    mISBNField.setText(scanContent);
                     JSONObject responseJson = new RetrieveBookGoogle().execute(scanContent).get();
 
-                    if (responseJson == null) {
+                    if ((responseJson == null) || (responseJson.getInt("totalItems") == 0)){
                         Log.i("state", "NULL");
-
+                        Toast.makeText(getApplicationContext(), getString(R.string.isbn_not_valid), Toast.LENGTH_LONG).show();
                         //alert dialog
                     } else {
                         Log.i("state", "OK");
+                        mISBNField.setText(scanContent);
                         Book book = new Book();
 
                         try {
@@ -380,8 +380,9 @@ public class ManualInsertActivity extends AppCompatActivity {
 
                             mAuthorField.setText(authors);
 
-                            //set edition year
-                            mEditionYearField.setText(bookJSON.getString("publishedDate") );
+                            if(bookJSON.has("publishedDate"))
+                                //set edition year
+                                mEditionYearField.setText(bookJSON.getString("publishedDate") );
 
                         } catch (Exception e) {
                             e.printStackTrace();

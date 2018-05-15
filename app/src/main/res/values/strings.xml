@@ -149,6 +149,7 @@
     <string name="edition_year">Edition Year</string>
     <string name="book_conditions">Book conditions</string>
     <string name="book_submitted">Book successfully submitted!</string>
+    <string name="isbn_not_valid">ISBN code is not valid!</string>
 
     <!-- search strings -->
     <string name="search_search">Search...</string>

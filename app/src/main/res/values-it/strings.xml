@@ -144,6 +144,7 @@
     <string name="ISBN_explain">L\'ISBN è un codice di 13 cifre!</string>
     <string name="edition_year">Anno pubblicazione</string>
     <string name="book_conditions">Condizioni del libro</string>
+    <string name="isbn_not_valid">Il codice ISBN non è valido</string>
 
     <!-- search strings -->
     <string name="search_search">Cerca...</string>
