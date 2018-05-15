@@ -13,13 +13,11 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.RelativeLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
-import com.google.gson.Gson
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
 import mad24.polito.it.models.ChatMessageContainer
@@ -38,6 +36,8 @@ class ChatActivity : AppCompatActivity()
     lateinit var IAmTyping : DatabaseReference
     lateinit var PartnerReference : DatabaseReference
     lateinit var ChatCreationListener : ValueEventListener
+
+    private val KeysSeparator = '&'
 
     private lateinit var RV: RecyclerView
     private lateinit var Adapter: MessagesRecyclerAdapter
@@ -70,7 +70,10 @@ class ChatActivity : AppCompatActivity()
     {
         super.onCreate(savedInstanceState)
 
-        //  Login, man!
+        //------------------------------------
+        //  Is user logged?
+        //------------------------------------
+
         if(FirebaseAuth.getInstance().currentUser == null)
         {
             val i : Intent = Intent(applicationContext, LoginActivity::class.java)
@@ -78,41 +81,40 @@ class ChatActivity : AppCompatActivity()
             finish()
         }
 
+        //------------------------------------
+        //  Init
+        //------------------------------------
+
         setContentView(R.layout.activity_chat)
 
-        //  Initialize the main DB reference
-        MainReference = FirebaseDatabase.getInstance().getReference("chat_messages")
+        //------------------------------------
+        //  Get data about the other user
+        //------------------------------------
 
-        //  Get the other user
-        if(intent.hasExtra("partner_id") && intent.getStringExtra("partner_id") != null)
+        //  Do I have any information about my partner?
+        if(!intent.hasExtra("partner_id") || (intent.hasExtra("partner_id") && intent.getStringExtra("partner_id").isBlank()))
         {
-            //User = Gson().fromJson(intent.getStringExtra("user"), UserMail::class.java)
-            PartnerID = intent.getStringExtra("partner_id")
-
-            //  Put the receiver Reference
-            PartnerReference = MainReference.parent.child("users").child(PartnerID)
-
-            //  The name
-            findViewById<TextView>(R.id.theirName).text = intent.getStringExtra("partner_name")
-
-            //  The online status
-            PartnerStatus = findViewById(R.id.theirStatus)
-
-            //  Put user's image
-            FirebaseStorage.getInstance().getReference("profile_pictures")
-                    .child("$PartnerID.jpg")
-                    .downloadUrl
-                    .addOnSuccessListener {url ->
-                        Glide.with(applicationContext).load(url).into(findViewById(R.id.theirImage))
-                    }.addOnFailureListener {
-                        Glide.with(applicationContext).load(R.drawable.unknown_user).into(findViewById(R.id.theirImage))
-                    }
+            //  We finish, because what's the point of having chat if I have no data about my partner?
+            //  TODO: show a dialog: "sorry there was a problem loading this chat...". For now, we just finish
+            finish()
         }
+
+        PartnerID = intent.getStringExtra("partner_id")
+
+        //------------------------------------
+        //  Views
+        //------------------------------------
+
+        //  Set my partner's name
+        findViewById<TextView>(R.id.theirName).text = intent.getStringExtra("partner_name")
+
+        //  The online status
+        PartnerStatus = findViewById(R.id.theirStatus)
 
         //  Set typing text
         //  TODO: use String.format(id, User?.name) instead of this hardcoded string
         TypingNotifier = findViewById(R.id.userIsTyping)
-        TypingNotifier.text = ("${User?.name} is typing... (THREE DOTS ANIMATION HERE?")
+        TypingNotifier.text = "${intent.getStringExtra("partner_name")} is typing... (THREE DOTS ANIMATION HERE?"
 
         //  The typer (edit text)
         Typer = findViewById(R.id.typeText)
@@ -129,6 +131,21 @@ class ChatActivity : AppCompatActivity()
             finish()
         })
 
+        //  Put user's image
+        //  TODO: CHANGE THIS WITH NEW METHOD
+        FirebaseStorage.getInstance().getReference("profile_pictures")
+                .child("$PartnerID.jpg")
+                .downloadUrl
+                .addOnSuccessListener {url ->
+                    Glide.with(applicationContext).load(url).into(findViewById(R.id.theirImage))
+                }.addOnFailureListener {
+                    Glide.with(applicationContext).load(R.drawable.unknown_user).into(findViewById(R.id.theirImage))
+                }
+
+        //------------------------------------
+        //  The recycler adapter
+        //------------------------------------
+
         ViewManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, true)
 
         //  This is just temporary, it will be updated later, in statusListener
@@ -140,8 +157,37 @@ class ChatActivity : AppCompatActivity()
             setHasFixedSize(true)
         }
 
+        //------------------------------------
+        //  Set up references
+        //------------------------------------
+
+        //  Initialize the main DB reference
+        MainReference = FirebaseDatabase.getInstance().getReference("chat_messages")
+
+        //  Put the receiver Reference
+        PartnerReference = MainReference.parent.child("users").child(PartnerID)
+
+        //  The chat ID
+        //  We create a chat id as a concatenation between the two users IDs, starting from the lowest one
+        when(Me!! < PartnerID!!)
+        {
+            true -> ChatID = "$Me$KeysSeparator$PartnerID"
+            false -> ChatID = "$PartnerID$KeysSeparator$Me"
+        }
+
+        //------------------------------------
+        //  Finally, load the chat
+        //------------------------------------
+
+        load()
+
+        //  UPDATE: we load the chat here!
+        // BookOwnerFragment must handle book stuff, it's not its business to handle chat things!
+
+
+
         //  Do we already have a chat stored?
-        if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
+        /*if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
         {
             ChatID = intent.getStringExtra("chat")
             MostRecentMessage = intent.getStringExtra("startId")
@@ -152,7 +198,28 @@ class ChatActivity : AppCompatActivity()
         }
 
         //  Set up stuff
-        setUps()
+        setUps()*/
+    }
+
+    private fun load()
+    {
+        MainReference.child(ChatID).addListenerForSingleValueEvent(object : ValueEventListener
+        {
+            override fun onCancelled(p0: DatabaseError?) { }
+
+            override fun onDataChange(p0: DataSnapshot?)
+            {
+                if(p0 != null)
+                {
+                    when(p0.exists())
+                    {
+                        true -> setUps()
+                        else -> createConversation()
+                    }
+                }
+                else createConversation()
+            }
+        })
     }
 
     private fun updateMyStatus(status: Boolean = true, last : String = "", inChat : String = "home")
@@ -182,25 +249,17 @@ class ChatActivity : AppCompatActivity()
 
     private fun setUps()
     {
+        //  Set up messages listener
+        setUpMessagesListener()
+
         //  Typing observer
         setUpTypingObserver()
 
         //  Status listener
         setUpStatusListener()
 
-        if(::ChatID.isInitialized)
-        {
-            //  Set up typing listener
-            setUpTypingListener()
-
-            //  Set up messages listener
-            setUpMessagesListener()
-        }
-        else
-        {
-            //  If a chat between us does not exist, then go listen for the creation of it
-            listenForChatCreation()
-        }
+        //  Set up typing listener
+        setUpTypingListener()
     }
 
     override fun onResume()
@@ -263,16 +322,11 @@ class ChatActivity : AppCompatActivity()
 
     private fun setUpStatusListener()
     {
-        if(!::PartnerReference.isInitialized) return
-
         val t = this
 
         PartnerReference.child("status").addValueEventListener(object : ValueEventListener
         {
-            override fun onCancelled(p0: DatabaseError?)
-            {
-                Log.d("CHAT", "status listener cancelled")
-            }
+            override fun onCancelled(p0: DatabaseError?){ }
 
             override fun onDataChange(p0: DataSnapshot?)
             {
@@ -287,10 +341,10 @@ class ChatActivity : AppCompatActivity()
                         PartnerStatus.text = resources.getString(R.string.chat_status_online)
 
                         //  Is the user here?
-                        if(::ChatID.isInitialized)
+                        when(u.in_chat.compareTo(ChatID) == 0)
                         {
-                            if(u.in_chat.compareTo(ChatID) == 0) Adapter.here()
-                            else Adapter.notHere()
+                            true -> Adapter.here()
+                            false -> Adapter.notHere()
                         }
                     }
                     else
@@ -321,73 +375,90 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Set the event
-        var query = MessagesReference.orderByKey()
+        var query = MessagesReference./*orderByKey()*/orderByChild("sent")
 
         //  Read below why I do Take +1
-        .limitToLast(Take +1).endAt(OldestMessage)
+        .limitToLast(Take +1)
+
+        synchronized(this.OldestMessage)
+        {
+            //  Basically, the very first time that you call this function, OldestMessage is still blank.
+            //  All the other times (this function is called recursively-asynchronously when scrolling up),
+            //  it is not blank. So, we're basically asking if this is the first time we're running this function
+            if(!OldestMessage.isBlank()) query.endAt(OldestMessage)
+        }
 
         query.addListenerForSingleValueEvent(object : ValueEventListener
         {
-            override fun onCancelled(p0: DatabaseError?)
-            {
-                Log.d("CHAT", "on Cancelled")
-            }
+            override fun onCancelled(p0: DatabaseError?) { }
 
             override fun onDataChange(p0: DataSnapshot?)
             {
                 synchronized(t.Initialized)
                 {
+                    //  Ok, this means: we have loaded the first messages.
+                    //  So, next time don't load this messages again
                     Initialized = true
                 }
 
-                if(p0 == null) return
+                if(p0 == null || !p0.hasChildren()) return
 
                 synchronized(t.Adapter)
                 {
-                    //  Is there only one message
+                    //  Is there only one message?
                     if(p0.childrenCount > 1) Adapter.bulkPush(p0.children.drop(1))
 
                     //  No messages loaded? Then stop doing the scroll to top thing
                     if(p0.childrenCount < Take)
                     {
                         RV.clearOnScrollListeners()
+
+                        //  Push the first message (it is hidden because we use it as offset on the endAt)...
+                        //  well... this is the way firebase wants it so...
                         Adapter.push(p0.children.first(), true)
                     }
                 }
 
+                //  Update the newest message, so that we won't take this twice in listenForNewMessages
+                synchronized(t.MostRecentMessage)
+                {
+                    MostRecentMessage = p0.children.first().key
+                }
+
                 //  Little trick to know if this is the first time we are doing this
-                if(OldestMessage.compareTo(MostRecentMessage) == 0)
+                //if(OldestMessage.compareTo(MostRecentMessage) == 0)
+                if(OldestMessage.isBlank())
                 {
                     ViewManager.scrollToPosition(0)
                     RV.smoothScrollToPosition(0)
-
-                    if(p0.childrenCount >= Take)
-                    {
-                        //  Scroll to top to load previous messages
-                        RV.addOnScrollListener(object : RecyclerView.OnScrollListener()
-                        {
-                            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-                                super.onScrolled(recyclerView, dx, dy)
-
-                                synchronized(t.ScrollListener)
-                                {
-                                    //  Already loading?
-                                    //if(ScrollListener) return
-
-                                    if (ViewManager.isViewPartiallyVisible(RV.getChildAt(RV.childCount - 1), true, true))
-                                    {
-                                        getFirstMessages()
-                                    }
-                                }
-                            }
-                        })
-                    }
-
                     listenForNewMessages()
+
+                    //  No need to synchronize it now, because it is the first time
+                    OldestMessage = p0.children.first().key
                 }
 
-                //  No need to synchronize it now
-                OldestMessage = p0.children.first().key
+                //  Did we get as many elements as we wanted?
+                if(p0.childrenCount >= Take)
+                {
+                    //  Scroll to top to load previous messages
+                    RV.addOnScrollListener(object : RecyclerView.OnScrollListener()
+                    {
+                        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int)
+                        {
+                            super.onScrolled(recyclerView, dx, dy)
+
+                            synchronized(t.ScrollListener)
+                            {
+                                if (ViewManager.isViewPartiallyVisible(RV.getChildAt(RV.childCount - 1), true, true))
+                                {
+                                    //  Stop listening for now
+                                    RV.clearOnScrollListeners()
+                                    getFirstMessages()
+                                }
+                            }
+                        }
+                    })
+                }
             }
         })
     }
@@ -455,15 +526,10 @@ class ChatActivity : AppCompatActivity()
         //  Set up listener
         PartnerIsTyping.addValueEventListener(object : ValueEventListener
         {
-            override fun onCancelled(p0: DatabaseError?)
-            {
-                Log.d("CHAT", "typing listener error")
-            }
+            override fun onCancelled(p0: DatabaseError?){ }
 
             override fun onDataChange(p0: DataSnapshot?)
             {
-                if(!::TypingNotifier.isInitialized) return
-
                 if(p0 == null) return
 
                 if(p0.hasChild("is_typing"))
@@ -490,8 +556,6 @@ class ChatActivity : AppCompatActivity()
 
         //  Set the button
         setUpButtonEvent()
-
-        if(!::ChatID.isInitialized) return
 
         //  Set the typing reference
         IAmTyping = MainReference.child(ChatID).child("partecipants").child(Me)
@@ -546,7 +610,6 @@ class ChatActivity : AppCompatActivity()
             }
 
             return@OnKeyListener false
-
         })
     }
 
@@ -564,44 +627,7 @@ class ChatActivity : AppCompatActivity()
             //  Prevent user from double-tapping, thus sending twice
             SubmitButton.setOnClickListener(null)
 
-            //  Is there a conversation already?
-            if(!::ChatID.isInitialized)
-            {
-                createConversation()
-                //  IMPORTANT UPDATE: I was wondering: what if a chat between us does not exist yet, but my partner is actually typing?
-                //  In that case, I *MUST* check if a chat has just been created before posting my message.
-                //  Otherwise, my partner has just created the chat and I am actually creating *another*.
-                //  So, before creating a chat, let's see if my partner just created it before me.
-                //  TODO: test this...
-                /*MainReference.parent.child("chats").child(Me).addListenerForSingleValueEvent(object: ValueEventListener
-                {
-                    override fun onCancelled(p0: DatabaseError?)
-                    {
-                    }
-
-                    override fun onDataChange(p0: DataSnapshot?)
-                    {
-                        //  if p0 is null it means that this user has not started a chat with anyone yet
-                        if(p0 == null) return
-
-                        when(p0.hasChild(PartnerID))
-                        {
-                            //  Hey, my partner just created a chat! I just need to refer to that chat from now on.
-                            true ->
-                            {
-                                 ChatID = p0.child("chat").value as String
-                                setUps()
-                                postMessage()
-                            }
-
-                            //  A conversation between us does not exist yet, let me create it first
-                            //  NOTE: createConversation posts the message when it is done, so no need to add postMessage() here
-                            false -> createConversation()
-                        }
-                    }
-                })*/
-            }
-            else postMessage()
+            postMessage()
         })
     }
 
@@ -682,11 +708,10 @@ class ChatActivity : AppCompatActivity()
         p.addPartecipant(Me!!, me)
         p.addPartecipant(PartnerID!!, ChatMessageContainer.Partecipants.User("0"))
 
-        ChatID = MainReference.push().key
         MainReference.child(ChatID).setValue(p){ error, _ ->
             if(error != null)
             {
-                //  TODO: Dialog: "Sorry we could not send your message, please try again later"
+                //  TODO: dialog: could not create conversation
                 return@setValue
             }
 
@@ -697,8 +722,6 @@ class ChatActivity : AppCompatActivity()
             //  The chat has been created! Let's update this status
             updateMyStatus(true, "", ChatID)
             setUps()
-
-            postMessage()
         }
     }
 

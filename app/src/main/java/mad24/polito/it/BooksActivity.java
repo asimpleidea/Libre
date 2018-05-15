@@ -102,10 +102,6 @@ public class BooksActivity  extends AppCompatActivity
         mMainFrame = (FrameLayout) findViewById(mad24.polito.it.R.id.main_frame);
         mMainNav = (BottomNavigationView) findViewById(mad24.polito.it.R.id.main_nav);
 
-        //  Get the token, for the notifications!
-        //  TODO: as per documentation, the token is not always returned! So, test this!
-        Log.d("CHAT", FirebaseInstanceId.getInstance().getToken());
-
         booksFragment = new BooksFragment();
         searchFragment = new SearchFragment();
         chatFragment = new ChatFragment();

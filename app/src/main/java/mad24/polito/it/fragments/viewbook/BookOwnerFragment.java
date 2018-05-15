@@ -159,7 +159,7 @@ public class BookOwnerFragment extends Fragment
             @Override
             public void onClick(View view)
             {
-                Log.d("CHAT", "I AM CLICKED");
+
                 /*DatabaseReference chats =*/ FirebaseDatabase.getInstance()
                         .getReference()
                         .child("chats")
