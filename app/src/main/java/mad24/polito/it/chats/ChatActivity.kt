@@ -37,6 +37,7 @@ class ChatActivity : AppCompatActivity()
     lateinit var PartnerIsTyping : DatabaseReference
     lateinit var IAmTyping : DatabaseReference
     lateinit var PartnerReference : DatabaseReference
+    lateinit var ChatCreationListener : ValueEventListener
 
     private lateinit var RV: RecyclerView
     private lateinit var Adapter: MessagesRecyclerAdapter
@@ -45,7 +46,7 @@ class ChatActivity : AppCompatActivity()
 
     //var ChatID : String? = null
     lateinit var ChatID : String
-    val Take : Int = 5
+    val Take : Int = 20
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
     var PartnerID : String? = null
     var MostRecentMessage : String = ""
@@ -195,6 +196,11 @@ class ChatActivity : AppCompatActivity()
             //  Set up messages listener
             setUpMessagesListener()
         }
+        else
+        {
+            //  If a chat between us does not exist, then go listen for the creation of it
+            listenForChatCreation()
+        }
     }
 
     override fun onResume()
@@ -283,7 +289,7 @@ class ChatActivity : AppCompatActivity()
                         //  Is the user here?
                         if(::ChatID.isInitialized)
                         {
-                            if(u.in_chat.equals(ChatID)) Adapter.here()
+                            if(u.in_chat.compareTo(ChatID) == 0) Adapter.here()
                             else Adapter.notHere()
                         }
                     }
@@ -561,12 +567,13 @@ class ChatActivity : AppCompatActivity()
             //  Is there a conversation already?
             if(!::ChatID.isInitialized)
             {
+                createConversation()
                 //  IMPORTANT UPDATE: I was wondering: what if a chat between us does not exist yet, but my partner is actually typing?
                 //  In that case, I *MUST* check if a chat has just been created before posting my message.
                 //  Otherwise, my partner has just created the chat and I am actually creating *another*.
                 //  So, before creating a chat, let's see if my partner just created it before me.
                 //  TODO: test this...
-                MainReference.parent.child("chats").child(Me).addListenerForSingleValueEvent(object: ValueEventListener
+                /*MainReference.parent.child("chats").child(Me).addListenerForSingleValueEvent(object: ValueEventListener
                 {
                     override fun onCancelled(p0: DatabaseError?)
                     {
@@ -592,10 +599,50 @@ class ChatActivity : AppCompatActivity()
                             false -> createConversation()
                         }
                     }
-                })
+                })*/
             }
             else postMessage()
         })
+    }
+
+    private fun listenForChatCreation()
+    {
+        ChatCreationListener = MainReference.parent.child("chats")
+                .child(Me)
+                .child(PartnerID)
+                .addValueEventListener(object : ValueEventListener
+                {
+                    override fun onCancelled(p0: DatabaseError?)
+                    {
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot?)
+                    {
+                        if(p0 == null) return
+
+                        if(p0.hasChild("chat") && p0.child("chat").value != null)
+                        {
+                            //  These checks are getting obvious... but kotlin wants them for non-null thing
+                            if(p0.hasChild("last_message"))
+                            {
+                                //  Was this just created by my partner?
+                                if (p0.child("last_message").child("by").getValue(String::class.java).equals(PartnerID))
+                                {
+                                    //  If so then update the chatID and start setting up stuff
+                                    ChatID = p0.child("chat").value as String
+                                    updateMyStatus(true, "", ChatID)
+                                    Initialized = true
+                                    setUps()
+                                }
+
+                                //  Finally, stop listening for changes
+                                MainReference.parent.child("chats")
+                                        .child(Me)
+                                        .child(PartnerID).removeEventListener(ChatCreationListener)
+                            }
+                        }
+                    }
+                })
     }
 
     private fun getCurrentISODate() : String
@@ -649,7 +696,6 @@ class ChatActivity : AppCompatActivity()
 
             //  The chat has been created! Let's update this status
             updateMyStatus(true, "", ChatID)
-
             setUps()
 
             postMessage()
