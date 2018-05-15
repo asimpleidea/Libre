@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -244,6 +245,15 @@ public class BooksActivity  extends AppCompatActivity
 
         //  Create the notification channel
         createNotificationChannel();
+
+        //  Get the device token of the logged user, so we can send them notifications
+        String token = FirebaseInstanceId.getInstance().getToken();
+
+        //  Sometimes the token is null, so we have to check this
+        if(token != null && MeReference != null)
+        {
+            MeReference.child("device_token").setValue(token);
+        }
 
         setMeOnline();
     }
