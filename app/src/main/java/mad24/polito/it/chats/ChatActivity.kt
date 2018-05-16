@@ -184,7 +184,7 @@ class ChatActivity : AppCompatActivity()
 
     private fun load()
     {
-        MainReference.child(ChatID).addListenerForSingleValueEvent(object : ValueEventListener
+        MainReference.parent.child("chats").child(Me).child(PartnerID).addListenerForSingleValueEvent(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?) { }
 
@@ -194,7 +194,13 @@ class ChatActivity : AppCompatActivity()
                 {
                     when(p0.exists())
                     {
-                        true -> setUps()
+                        true ->
+                        {
+                            OldestMessage = p0.child("last_message").child("id").value as String
+                            NewestMessage = p0.child("last_message").child("id").value as String
+                            MostRecentTime = p0.child("last_message").child("time").value as String
+                            setUps()
+                        }
                         else -> createConversation()
                     }
                 }
@@ -361,20 +367,13 @@ class ChatActivity : AppCompatActivity()
         //  Read below why I do Take +1
         .limitToLast(Take +1)
 
-        if(!OldestMessage.isBlank()) query.endAt(OldestMessage)
-
-        /*synchronized(this.OldestMessage)
+        synchronized(this.OldestMessage)
         {
             //  Basically, the very first time that you call this function, OldestMessage is still blank.
             //  All the other times (this function is called recursively-asynchronously when scrolling up),
             //  it is not blank. So, we're basically asking if this is the first time we're running this function
-            if(!OldestMessage.isBlank())
-            {
-                Log.d("CHAT", "oldest message is not blank: $OldestMessage and newest is $NewestMessage")
-                query.endAt(OldestMessage)
-            }
-            else Log.d("CHAT", "oldest message is blank")
-        }*/
+            if(!OldestMessage.isBlank()) query.endAt(OldestMessage)
+        }
 
         query.addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -429,6 +428,7 @@ class ChatActivity : AppCompatActivity()
                     }
 
                     OldestMessage = p0.children.first().key
+                    Log.d("CHAT", "oldest message is now $OldestMessage")
                 }
 
                 //  Did we get as many elements as we wanted?
