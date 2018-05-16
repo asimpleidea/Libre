@@ -46,10 +46,10 @@ class ChatActivity : AppCompatActivity()
 
     //var ChatID : String? = null
     lateinit var ChatID : String
-    val Take : Int = 20
+    val Take : Int = 5
     val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
     var PartnerID : String? = null
-    var MostRecentMessage : String = ""
+    var NewestMessage : String = ""
     var MostRecentTime : String = ""
     var OldestMessage : String = ""
     var Initialized : Boolean = false
@@ -180,25 +180,6 @@ class ChatActivity : AppCompatActivity()
         //------------------------------------
 
         load()
-
-        //  UPDATE: we load the chat here!
-        // BookOwnerFragment must handle book stuff, it's not its business to handle chat things!
-
-
-
-        //  Do we already have a chat stored?
-        /*if(intent.hasExtra("chat") && intent.getStringExtra("chat") != null)
-        {
-            ChatID = intent.getStringExtra("chat")
-            MostRecentMessage = intent.getStringExtra("startId")
-            MostRecentTime = intent.getStringExtra("startTime")
-
-            //  At first they are the same of course
-            OldestMessage = MostRecentMessage
-        }
-
-        //  Set up stuff
-        setUps()*/
     }
 
     private fun load()
@@ -375,18 +356,25 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Set the event
-        var query = MessagesReference./*orderByKey()*/orderByChild("sent")
+        var query = MessagesReference.orderByChild("sent")
 
         //  Read below why I do Take +1
         .limitToLast(Take +1)
 
-        synchronized(this.OldestMessage)
+        if(!OldestMessage.isBlank()) query.endAt(OldestMessage)
+
+        /*synchronized(this.OldestMessage)
         {
             //  Basically, the very first time that you call this function, OldestMessage is still blank.
             //  All the other times (this function is called recursively-asynchronously when scrolling up),
             //  it is not blank. So, we're basically asking if this is the first time we're running this function
-            if(!OldestMessage.isBlank()) query.endAt(OldestMessage)
-        }
+            if(!OldestMessage.isBlank())
+            {
+                Log.d("CHAT", "oldest message is not blank: $OldestMessage and newest is $NewestMessage")
+                query.endAt(OldestMessage)
+            }
+            else Log.d("CHAT", "oldest message is blank")
+        }*/
 
         query.addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -419,21 +407,27 @@ class ChatActivity : AppCompatActivity()
                     }
                 }
 
-                //  Update the newest message, so that we won't take this twice in listenForNewMessages
-                synchronized(t.MostRecentMessage)
+                //  Update oldest Message.
+                //  NOTE: why do we need two locks (NewestMessage and OldestMessage)?
+                //  Because the first is used to listen for new message async and the other for scroll to top async
+                synchronized(t.OldestMessage)
                 {
-                    MostRecentMessage = p0.children.first().key
-                }
+                    //  Little trick to know if this is the first time we are doing this
+                    //if(OldestMessage.compareTo(NewestMessage) == 0)
+                    if(OldestMessage.isBlank())
+                    {
+                        Log.d("CHAT", "line 419")
+                        ViewManager.scrollToPosition(0)
+                        RV.smoothScrollToPosition(0)
 
-                //  Little trick to know if this is the first time we are doing this
-                //if(OldestMessage.compareTo(MostRecentMessage) == 0)
-                if(OldestMessage.isBlank())
-                {
-                    ViewManager.scrollToPosition(0)
-                    RV.smoothScrollToPosition(0)
-                    listenForNewMessages()
+                        //  Update the newest message, so that we won't take this twice in listenForNewMessages
+                        //  No need to synchronize the newest message because this is the first time, so no one is accessing this
+                        NewestMessage = p0.children.last().key
+                        MostRecentTime = p0.children.last().child("sent").value as String
 
-                    //  No need to synchronize it now, because it is the first time
+                        //listenForNewMessages()
+                    }
+
                     OldestMessage = p0.children.first().key
                 }
 
@@ -471,7 +465,7 @@ class ChatActivity : AppCompatActivity()
         //  Set the event
         var query = MessagesReference.orderByChild("sent")
 
-        .startAt(MostRecentMessage).limitToLast(1)
+        .startAt(NewestMessage).limitToLast(1)
 
         query.addValueEventListener(object : ValueEventListener
         {
@@ -493,16 +487,16 @@ class ChatActivity : AppCompatActivity()
                 //  If you're here, it means that the new message was caught
                 //  NOTE: a new message can arrive when we are still parsing the previous new one.
                 //  In that case, we have to wait for the previous onDataChange to finish this part
-                synchronized(t.MostRecentMessage)
+                synchronized(t.NewestMessage)
                 {
                     //  Discard the message if it is already the same as the last one (like: the one that we just posted)
                     //  NOTE: kotlin suggests doing compareTo() instead of equals(), so I did it like that
-                    if(newMessage.key.compareTo(MostRecentMessage) == 0 || newMessage.child("sent").value.toString() <= MostRecentTime )
+                    if(newMessage.key.compareTo(NewestMessage) == 0 || newMessage.child("sent").value.toString() <= MostRecentTime )
                     {
                         return
                     }
 
-                    MostRecentMessage = newMessage.key
+                    NewestMessage = newMessage.key
                     MostRecentTime = newMessage.child("sent").value.toString()
                 }
 
@@ -738,20 +732,20 @@ class ChatActivity : AppCompatActivity()
         var previousRecentMessage = ""
 
         //  This must happen in a synchronized way
-        synchronized(this.MostRecentMessage)
+        synchronized(this.NewestMessage)
         {
-            previousRecentMessage = MostRecentMessage
-            MostRecentMessage = p
+            previousRecentMessage = NewestMessage
+            NewestMessage = p
         }
 
         //  Now push the actual message
         MessagesReference.child(p).setValue(c) { error, _ ->
-            synchronized(t.MostRecentMessage)
+            synchronized(t.NewestMessage)
             {
                 if(error != null)
                 {
                     // restore it
-                    MostRecentMessage = previousRecentMessage
+                    NewestMessage = previousRecentMessage
                     //  TODO: Dialog: "Sorry we could not send your message, please try again later"
                 }
 
