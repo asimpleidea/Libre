@@ -113,9 +113,6 @@ class ChatActivity : AppCompatActivity()
         //  Views
         //------------------------------------
 
-        //  Set my partner's name
-        findViewById<TextView>(R.id.theirName).text = intent.getStringExtra("partner_name")
-
         //  The online status
         PartnerStatus = findViewById(R.id.theirStatus)
 
@@ -137,17 +134,6 @@ class ChatActivity : AppCompatActivity()
         {
             finish()
         })
-
-        //  Put user's image
-        //  TODO: CHANGE THIS WITH NEW METHOD
-        FirebaseStorage.getInstance().getReference("profile_pictures")
-                .child("$PartnerID.jpg")
-                .downloadUrl
-                .addOnSuccessListener {url ->
-                    Glide.with(applicationContext).load(url).into(findViewById(R.id.theirImage))
-                }.addOnFailureListener {
-                    Glide.with(applicationContext).load(R.drawable.unknown_user).into(findViewById(R.id.theirImage))
-                }
 
         //------------------------------------
         //  The recycler adapter
@@ -174,9 +160,11 @@ class ChatActivity : AppCompatActivity()
         //  Put the receiver Reference
         PartnerReference = MainReference.parent.child("users").child(PartnerID)
 
+        loadPartnerData()
+
         //  The chat ID
         //  We create a chat id as a concatenation between the two users IDs, starting from the lowest one
-        when(Me!! < PartnerID!!)
+        when(Me < PartnerID)
         {
             true -> ChatID = "$Me$KeysSeparator$PartnerID"
             false -> ChatID = "$PartnerID$KeysSeparator$Me"
@@ -187,6 +175,47 @@ class ChatActivity : AppCompatActivity()
         //------------------------------------
 
         load()
+    }
+
+    private fun loadPartnerData()
+    {
+        PartnerReference.addListenerForSingleValueEvent(object : ValueEventListener
+        {
+            override fun onCancelled(p0: DatabaseError?) { }
+
+            override fun onDataChange(p0: DataSnapshot?)
+            {
+                //  p0 null?? well, this is weird
+                if(p0 == null) return
+
+                //  Got user data
+                Log.d("CHAT", "Got user data")
+
+                //  Set my partner's name
+                findViewById<TextView>(R.id.theirName).text = p0.child("name").value as String
+
+                //  Put user's image
+                var prefix = (fun() : String?
+                {
+                    if(p0.hasChild("thumbnail_exists")) return "thumb_"
+                    if(p0.hasChild("has_image")) return ""
+                    return null
+                }())
+
+                if(prefix == null) Glide.with(applicationContext).load(R.drawable.unknown_user).into(findViewById(R.id.theirImage))
+                else
+                {
+                    FirebaseStorage.getInstance().getReference("profile_pictures")
+                            .child("$prefix$PartnerID.jpg")
+                            .downloadUrl
+                            .addOnSuccessListener {url ->
+                                Glide.with(applicationContext).load(url).into(findViewById(R.id.theirImage))
+                            }.addOnFailureListener {
+                                Glide.with(applicationContext).load(R.drawable.unknown_user).into(findViewById(R.id.theirImage))
+                            }
+                }
+            }
+        })
     }
 
     private fun load()
@@ -457,7 +486,7 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Get the reference
-        PartnerIsTyping = ChatMessagesDocument.collection("partecipants").document(PartnerID!!)
+        PartnerIsTyping = ChatMessagesDocument.collection("partecipants").document(PartnerID)
 
         //  Set up listener
         PartnerIsTyping.addSnapshotListener { s, e ->
@@ -506,7 +535,7 @@ class ChatActivity : AppCompatActivity()
         setUpButtonEvent()
 
         //  Set the typing reference
-        IAmTyping = ChatMessagesDocument.collection("partecipants").document(Me!!)
+        IAmTyping = ChatMessagesDocument.collection("partecipants").document(Me)
 
         //  Set the countdown timer
         StopTyping = object : CountDownTimer(Seconds, Seconds)
