@@ -12,6 +12,7 @@ import mad24.polito.it.R
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.support.v4.app.NotificationManagerCompat
+import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
 import mad24.polito.it.chats.ChatActivity
 import java.net.HttpURLConnection
@@ -21,7 +22,7 @@ import java.net.URI
 class MessagingService : FirebaseMessagingService()
 {
     private var lastNotificationId = 0
-    lateinit var notificationBuilder : NotificationCompat.Builder
+    private lateinit var notificationBuilder : NotificationCompat.Builder
 
     override fun onMessageReceived(p0: RemoteMessage?)
     {
@@ -37,6 +38,7 @@ class MessagingService : FirebaseMessagingService()
 
         //  Does it have a notification body?
         if(p0.notification == null) return
+
         notificationBuilder.setContentTitle(p0.notification!!.title)
                 .setContentText(p0.notification!!.body)
                 .setDefaults(Notification.DEFAULT_ALL)
@@ -81,6 +83,7 @@ class MessagingService : FirebaseMessagingService()
                 if(data.getValue("partner_pic") == "unknown")
                 {
                     notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.unknown_user))
+                    send()
                 }
                 else
                 {
@@ -115,6 +118,7 @@ class MessagingService : FirebaseMessagingService()
                     }
                 }
             }
+            else send()
         }
     }
 
