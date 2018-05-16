@@ -71,6 +71,37 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
         notifyItemRangeInserted(count, Messages.size)
     }
 
+    fun bulkPush(messages : List<ChatMessage>, queue: Boolean = true)
+    {
+        val count : Int = Messages.size
+
+        /*for(m in messages.reversed())
+        {
+            val c : ChatMessage? = m.getValue(ChatMessage::class.java)
+            Messages.add(c!!)
+        }*/
+
+        var pushed = 0
+
+        for(m in messages)
+        {
+            if(queue) Messages.add(m)
+            else
+            {
+                Messages.add(0, m)
+                ++pushed
+            }
+        }
+
+        if(queue)
+        {
+            notifyItemRangeInserted(count, Messages.size)
+            return
+        }
+
+        notifyItemRangeInserted(0, pushed)
+    }
+
     fun push(message : DataSnapshot, onTop : Boolean = false)
     {
         val c : ChatMessage? = message.getValue(ChatMessage::class.java)

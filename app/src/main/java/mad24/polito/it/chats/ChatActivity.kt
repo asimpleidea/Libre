@@ -17,12 +17,11 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.firestore.*
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import mad24.polito.it.R
-import mad24.polito.it.models.ChatMessage
-import mad24.polito.it.models.ChatMessageContainer
-import mad24.polito.it.models.UserMail
-import mad24.polito.it.models.UserStatus
+import mad24.polito.it.models.*
 import mad24.polito.it.registrationmail.LoginActivity
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -31,29 +30,30 @@ import java.util.*
 class ChatActivity : AppCompatActivity()
 {
     lateinit var MainReference : DatabaseReference
-    lateinit var MessagesReference : DatabaseReference
-    lateinit var PartnerIsTyping : DatabaseReference
-    lateinit var IAmTyping : DatabaseReference
     lateinit var PartnerReference : DatabaseReference
-    lateinit var ChatCreationListener : ValueEventListener
 
-    private val KeysSeparator = '&'
+    val FireStore : FirebaseFirestore = FirebaseFirestore.getInstance()
+    lateinit var ChatMessagesDocument : DocumentReference
+    lateinit var MessagesCollection : CollectionReference
+    lateinit var IAmTyping : DocumentReference
+    lateinit var PartnerIsTyping : DocumentReference
+    lateinit var NewMessagesListener : ListenerRegistration
 
     private lateinit var RV: RecyclerView
     private lateinit var Adapter: MessagesRecyclerAdapter
     private lateinit var ViewManager: RecyclerView.LayoutManager
     private var ScrollListener : Boolean = true
 
-    //var ChatID : String? = null
     lateinit var ChatID : String
-    val Take : Int = 5
-    val Me : String? = FirebaseAuth.getInstance().currentUser?.uid
-    var PartnerID : String? = null
-    var NewestMessage : String = ""
-    var MostRecentTime : String = ""
-    var OldestMessage : String = ""
-    var Initialized : Boolean = false
-    var User : UserMail? = null
+    lateinit var OldestMessage : String
+    lateinit var NewestMessage : String
+
+    val Take : Long = 20
+    lateinit var Me : String
+    lateinit var PartnerID : String
+    private val KeysSeparator = '&'
+
+    lateinit var User : UserMail
 
     //  TODO: Change this type: it won't be a textview on production, of course
     lateinit var TypingNotifier : TextView
@@ -76,16 +76,24 @@ class ChatActivity : AppCompatActivity()
 
         if(FirebaseAuth.getInstance().currentUser == null)
         {
-            val i : Intent = Intent(applicationContext, LoginActivity::class.java)
+            val i = Intent(applicationContext, LoginActivity::class.java)
             startActivity(i)
             finish()
         }
+
+        //  At this point the user is logged, so there is no point in doing !!, but kotlin wants it so...
+        Me = FirebaseAuth.getInstance().currentUser!!.uid
 
         //------------------------------------
         //  Init
         //------------------------------------
 
         setContentView(R.layout.activity_chat)
+
+        //  Initialize oldest message, so that we can properly load messages on srollToTop
+        //  We want to get messages older than now, so now is the oldestMessage for now
+        OldestMessage = getCurrentISODate()
+        NewestMessage = getCurrentISODate()
 
         //------------------------------------
         //  Get data about the other user
@@ -124,7 +132,6 @@ class ChatActivity : AppCompatActivity()
 
         //  Put a back button
         ChatToolbar = findViewById(R.id.chatToolbar)
-        ChatToolbar.title = getString(R.string.app_name)
         ChatToolbar.setNavigationIcon(R.drawable.ic_white_back_arrow)
         ChatToolbar.setNavigationOnClickListener(
         {
@@ -184,29 +191,25 @@ class ChatActivity : AppCompatActivity()
 
     private fun load()
     {
-        MainReference.parent.child("chats").child(Me).child(PartnerID).addListenerForSingleValueEvent(object : ValueEventListener
-        {
-            override fun onCancelled(p0: DatabaseError?) { }
+        ChatMessagesDocument = FireStore.collection("chat_messages").document(ChatID)
 
-            override fun onDataChange(p0: DataSnapshot?)
+        ChatMessagesDocument.collection("partecipants").get().addOnCompleteListener{ task ->
+
+            //  Everything ok?
+            if(!task.isSuccessful)
             {
-                if(p0 != null)
-                {
-                    when(p0.exists())
-                    {
-                        true ->
-                        {
-                            OldestMessage = p0.child("last_message").child("id").value as String
-                            NewestMessage = p0.child("last_message").child("id").value as String
-                            MostRecentTime = p0.child("last_message").child("time").value as String
-                            setUps()
-                        }
-                        else -> createConversation()
-                    }
-                }
-                else createConversation()
+                //  Not ok. Get back, there's no point in going further
+                //  TODO: alert user that the chat is not available right now
+                finish()
             }
-        })
+
+            //  Does the chat exist?
+            when(task.result.size() == 2)
+            {
+                true -> setUps()
+                false -> createConversation()
+            }
+        }
     }
 
     private fun updateMyStatus(status: Boolean = true, last : String = "", inChat : String = "home")
@@ -254,18 +257,7 @@ class ChatActivity : AppCompatActivity()
         super.onResume()
 
         //  Update my status: set me online here.
-        //  when(stuff) ecc is very good to do... but a ternary operator would be better...
-
-        val onChat = ( fun() : String
-        {
-            when(::ChatID.isInitialized)
-            {
-                true -> return ChatID
-                false ->  return ""
-            }
-        }())
-
-        updateMyStatus(true, "", onChat)
+        updateMyStatus(true, "", ChatID)
     }
 
     override fun onPause()
@@ -278,21 +270,12 @@ class ChatActivity : AppCompatActivity()
         updateMyStatus(false, getCurrentISODate(), "0")
 
         //  Set my last time here
-        if(::ChatID.isInitialized) MainReference
-                                        .child(ChatID)
-                                        .child("partecipants")
-                                        .child(Me)
-                                        .setValue(ChatMessageContainer.Partecipants.User(getCurrentISODate())){
-                                            err, _ ->
-
-                                            if(err != null)
-                                            {
-                                                Log.d("CHAT", "could not update my last here")
-                                                return@setValue
-                                            }
-                                        }
-
+        IAmTyping.set(ChatMessageContainer.Partecipants.User(getCurrentISODate())).addOnCompleteListener { task ->
+            if(!task.isSuccessful)     Log.w("CHAT", "could not update my document in onPause")
+        }
     }
+
+    // TODO: onInstanceSaved and resumed
 
     override fun onBackPressed()
     {
@@ -341,100 +324,67 @@ class ChatActivity : AppCompatActivity()
                     }
                 }
             }
-
         })
     }
 
     private fun setUpMessagesListener()
     {
         //  Set it up
-        MessagesReference = MainReference.child(ChatID).child("messages")
+        MessagesCollection = FireStore.collection("chat_messages/$ChatID/messages")
 
-        synchronized(this.Initialized)
-        {
-            if(!Initialized) getFirstMessages()
-            else listenForNewMessages()
-        }
+        getFirstMessages()
     }
 
     private fun getFirstMessages()
     {
+        //  Reference to this class
         val t = this
 
-        //  Set the event
-        var query = MessagesReference.orderByChild("sent")
+        //  Set up the query
+        MessagesCollection
 
-        //  Read below why I do Take +1
-        .limitToLast(Take +1)
+            //  FINALLY A FUCKING WHERE CLAUSE!
+            .whereLessThan("sent", OldestMessage)
 
-        synchronized(this.OldestMessage)
-        {
-            //  Basically, the very first time that you call this function, OldestMessage is still blank.
-            //  All the other times (this function is called recursively-asynchronously when scrolling up),
-            //  it is not blank. So, we're basically asking if this is the first time we're running this function
-            if(!OldestMessage.isBlank()) query.endAt(OldestMessage)
-        }
+            //  FINALLY A FUCKING ORDER BY. FUCK YEAH
+            .orderBy("sent", Query.Direction.DESCENDING)
 
-        query.addListenerForSingleValueEvent(object : ValueEventListener
-        {
-            override fun onCancelled(p0: DatabaseError?) { }
+            //  How many to get?
+            .limit(Take +1)
 
-            override fun onDataChange(p0: DataSnapshot?)
-            {
-                synchronized(t.Initialized)
+            //  Finally get
+            .get()
+
+            //  Do something with the data
+            .addOnCompleteListener { task ->
+
+                if(!task.isSuccessful)
                 {
-                    //  Ok, this means: we have loaded the first messages.
-                    //  So, next time don't load this messages again
-                    Initialized = true
+                    Log.w("CHAT", "Could not load previous chats!")
+                    return@addOnCompleteListener
                 }
 
-                if(p0 == null || !p0.hasChildren()) return
+                //  Hmm... wonder if these two are just the same thing
+                if(task.result.isEmpty || task.result.size() < 1) return@addOnCompleteListener
 
+                val messages = task.result
+
+                //  Push the messages
                 synchronized(t.Adapter)
                 {
-                    //  Is there only one message?
-                    if(p0.childrenCount > 1) Adapter.bulkPush(p0.children.drop(1))
+                    //  Push the messages
+                    Adapter.bulkPush(messages.toObjects(ChatMessage::class.java))
 
-                    //  No messages loaded? Then stop doing the scroll to top thing
-                    if(p0.childrenCount < Take)
-                    {
-                        RV.clearOnScrollListeners()
-
-                        //  Push the first message (it is hidden because we use it as offset on the endAt)...
-                        //  well... this is the way firebase wants it so...
-                        Adapter.push(p0.children.first(), true)
-                    }
+                    //  Update the oldest message, so when user scrolls up we know where to start from
+                    OldestMessage = messages.last().data["sent"] as String
                 }
 
-                //  Update oldest Message.
-                //  NOTE: why do we need two locks (NewestMessage and OldestMessage)?
-                //  Because the first is used to listen for new message async and the other for scroll to top async
-                synchronized(t.OldestMessage)
+                //  If we loaded less than we ask for, then we have to stop doing the scroll to top thing
+                if(messages.size() < Take) RV.clearOnScrollListeners()
+
+                //  Scroll on top to load older messages
+                else
                 {
-                    //  Little trick to know if this is the first time we are doing this
-                    //if(OldestMessage.compareTo(NewestMessage) == 0)
-                    if(OldestMessage.isBlank())
-                    {
-                        Log.d("CHAT", "line 419")
-                        ViewManager.scrollToPosition(0)
-                        RV.smoothScrollToPosition(0)
-
-                        //  Update the newest message, so that we won't take this twice in listenForNewMessages
-                        //  No need to synchronize the newest message because this is the first time, so no one is accessing this
-                        NewestMessage = p0.children.last().key
-                        MostRecentTime = p0.children.last().child("sent").value as String
-
-                        //listenForNewMessages()
-                    }
-
-                    OldestMessage = p0.children.first().key
-                    Log.d("CHAT", "oldest message is now $OldestMessage")
-                }
-
-                //  Did we get as many elements as we wanted?
-                if(p0.childrenCount >= Take)
-                {
-                    //  Scroll to top to load previous messages
                     RV.addOnScrollListener(object : RecyclerView.OnScrollListener()
                     {
                         override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int)
@@ -447,14 +397,18 @@ class ChatActivity : AppCompatActivity()
                                 {
                                     //  Stop listening for now
                                     RV.clearOnScrollListeners()
+
+                                    //  Asynchronously & recursively load older messages
                                     getFirstMessages()
                                 }
                             }
                         }
                     })
                 }
+
+                //  Listen for new messages
+                listenForNewMessages()
             }
-        })
     }
 
     private fun listenForNewMessages()
@@ -462,52 +416,40 @@ class ChatActivity : AppCompatActivity()
         //  Reference to this class
         val t = this
 
-        //  Set the event
-        var query = MessagesReference.orderByChild("sent")
+        //  Listen for new messages
+        NewMessagesListener = MessagesCollection.whereGreaterThan("sent", NewestMessage)
+                .addSnapshotListener { s, e ->
 
-        .startAt(NewestMessage).limitToLast(1)
-
-        query.addValueEventListener(object : ValueEventListener
-        {
-            override fun onCancelled(p0: DatabaseError?)
+            //  Has an exception?
+            if(e != null)
             {
-                Log.d("CHAT", "on Cancelled")
+                Log.e("CHAT", "Error while trying to listen for new messages")
+
+                //  TODO: what to do here?
+                return@addSnapshotListener
             }
 
-            override fun onDataChange(p0: DataSnapshot?)
+            //  Has data?
+            //  NOTE: the second condition is actually useless: if you're here, it means that the value exists
+            if(s != null && s.size() > 0 )
             {
-                if(p0 == null) return
-
-                //  TODO: probably a check to see if we loaded them all
-                if(p0.children.count() < 1) return
-
-                //  Get the actual message (we are taking just one, so we're getting the first)
-                val newMessage = p0.children.first()
-
-                //  If you're here, it means that the new message was caught
-                //  NOTE: a new message can arrive when we are still parsing the previous new one.
-                //  In that case, we have to wait for the previous onDataChange to finish this part
-                synchronized(t.NewestMessage)
-                {
-                    //  Discard the message if it is already the same as the last one (like: the one that we just posted)
-                    //  NOTE: kotlin suggests doing compareTo() instead of equals(), so I did it like that
-                    if(newMessage.key.compareTo(NewestMessage) == 0 || newMessage.child("sent").value.toString() <= MostRecentTime )
-                    {
-                        return
-                    }
-
-                    NewestMessage = newMessage.key
-                    MostRecentTime = newMessage.child("sent").value.toString()
-                }
-
                 synchronized(t.Adapter)
                 {
-                    Adapter.push(newMessage)
+                    NewestMessage = s.first().data["sent"] as String
+                    NewMessagesListener.remove()
 
-                    //  TODO: play sound after new messages is received?
+                    //  Push the messages
+                    Adapter.bulkPush(s.toObjects(ChatMessage::class.java)/*.drop(Drop)*/, false)
+
+                    //  When you're done, redo this function again, so we can update Where clause and set it to the latest message
+                    //  NOTE: doing it like this, prevents us from loading messages that are sent at the very same instant.
+                    //  This is a very rare occasion, but who cares... this is still a university project, right?
+                    listenForNewMessages()
+
+                    //  TODO: play sound after new partner messages is received?
                 }
             }
-        })
+        }
     }
 
     private fun setUpTypingListener()
@@ -515,33 +457,45 @@ class ChatActivity : AppCompatActivity()
         val t = this
 
         //  Get the reference
-        PartnerIsTyping = MainReference.child(ChatID).child("partecipants").child(PartnerID)
+        PartnerIsTyping = ChatMessagesDocument.collection("partecipants").document(PartnerID!!)
 
         //  Set up listener
-        PartnerIsTyping.addValueEventListener(object : ValueEventListener
-        {
-            override fun onCancelled(p0: DatabaseError?){ }
+        PartnerIsTyping.addSnapshotListener { s, e ->
 
-            override fun onDataChange(p0: DataSnapshot?)
+            //  Has an exception?
+            if(e != null)
             {
-                if(p0 == null) return
+                Log.e("CHAT", "Error while trying to listen for partner typing")
+                return@addSnapshotListener
+            }
 
-                if(p0.hasChild("is_typing"))
+            //  Has data?
+            //  NOTE: the second condition is actually useless: if you're here, it means that the value exists
+            if(s != null && s.exists() )
+            {
+                //  Is typing?
+                //  The !! already check for null
+                val data = s.data!!
+
+                if(data.containsKey("is_typing"))
                 {
-                    //  TODO: add fade in & fade out animations here
-                    if(p0.child("is_typing").getValue(Boolean::class.java) == true) TypingNotifier.visibility = View.VISIBLE
-                    else TypingNotifier.visibility = View.GONE
+                    when(data["is_typing"])
+                    {
+                        true -> TypingNotifier.visibility = View.VISIBLE
+                        false -> TypingNotifier.visibility = View.GONE
+
+                    }
                 }
 
-                if(p0.hasChild("last_here"))
+                if(data.containsKey("last_here"))
                 {
                     synchronized(t.Adapter)
                     {
-                        Adapter.setLastHere(p0.child("last_here").value.toString())
+                        Adapter.setLastHere(data["last_here"].toString())
                     }
                 }
             }
-        })
+        }
     }
 
     private fun setUpTypingObserver()
@@ -552,7 +506,7 @@ class ChatActivity : AppCompatActivity()
         setUpButtonEvent()
 
         //  Set the typing reference
-        IAmTyping = MainReference.child(ChatID).child("partecipants").child(Me)
+        IAmTyping = ChatMessagesDocument.collection("partecipants").document(Me!!)
 
         //  Set the countdown timer
         StopTyping = object : CountDownTimer(Seconds, Seconds)
@@ -561,12 +515,8 @@ class ChatActivity : AppCompatActivity()
             {
                 synchronized(t.CountDownRunning)
                 {
-                    IAmTyping.child("is_typing").setValue(false) { error, _ ->
-                        if(error != null)
-                        {
-                            Log.d("CHAT", "error: could not reset iamtyping")
-                            return@setValue
-                        }
+                    IAmTyping.update("is_typing", false).addOnCompleteListener { task ->
+                        if(!task.isSuccessful) Log.w("CHAT", "could not reset the typing observer")
                     }
 
                     CountDownRunning = false
@@ -583,14 +533,9 @@ class ChatActivity : AppCompatActivity()
                 {
                     if(!CountDownRunning)
                     {
-                        IAmTyping.child("is_typing").setValue(true) { p0, _ ->
-                            if(p0 != null)
-                            {
-                                Log.d("CHAT", "error")
-                                return@setValue
-                            }
+                        IAmTyping.update("is_typing", true).addOnCompleteListener { task ->
 
-                            StopTyping.start()
+                            if(task.isSuccessful) StopTyping.start()
                         }
 
                         CountDownRunning = true
@@ -625,46 +570,6 @@ class ChatActivity : AppCompatActivity()
         })
     }
 
-    private fun listenForChatCreation()
-    {
-        ChatCreationListener = MainReference.parent.child("chats")
-                .child(Me)
-                .child(PartnerID)
-                .addValueEventListener(object : ValueEventListener
-                {
-                    override fun onCancelled(p0: DatabaseError?)
-                    {
-                    }
-
-                    override fun onDataChange(p0: DataSnapshot?)
-                    {
-                        if(p0 == null) return
-
-                        if(p0.hasChild("chat") && p0.child("chat").value != null)
-                        {
-                            //  These checks are getting obvious... but kotlin wants them for non-null thing
-                            if(p0.hasChild("last_message"))
-                            {
-                                //  Was this just created by my partner?
-                                if (p0.child("last_message").child("by").getValue(String::class.java).equals(PartnerID))
-                                {
-                                    //  If so then update the chatID and start setting up stuff
-                                    ChatID = p0.child("chat").value as String
-                                    updateMyStatus(true, "", ChatID)
-                                    Initialized = true
-                                    setUps()
-                                }
-
-                                //  Finally, stop listening for changes
-                                MainReference.parent.child("chats")
-                                        .child(Me)
-                                        .child(PartnerID).removeEventListener(ChatCreationListener)
-                            }
-                        }
-                    }
-                })
-    }
-
     private fun getCurrentISODate() : String
     {
         //  Locale with a lambda initialization, like Javascript
@@ -685,6 +590,8 @@ class ChatActivity : AppCompatActivity()
         //val tz = TimeZone.getDefault()
 
         //  The dateformat
+        //  In case we want to provide milliseconds, for better precision message posting (very useful in listenForNewMessages)
+        //val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS")
         val dateFormat : DateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", locale)
 
         //  UPDATE: all dates will be formatted according to UTC. Later, at display, it will be adjusted with user's timezone
@@ -696,102 +603,87 @@ class ChatActivity : AppCompatActivity()
     private fun createConversation()
     {
         val me : ChatMessageContainer.Partecipants.User = ChatMessageContainer.Partecipants.User(getCurrentISODate())
-        val p : ChatMessageContainer.Partecipants = ChatMessageContainer.Partecipants()
+        val u = ChatMessageContainer.Partecipants.User("0")
 
-        //  At this point, we are pretty sure that we are logged, that's why I use a !!
-        p.addPartecipant(Me!!, me)
-        p.addPartecipant(PartnerID!!, ChatMessageContainer.Partecipants.User("0"))
+        FireStore.collection("chat_messages/$ChatID/partecipants").document(Me).set(me)
+                .addOnCompleteListener {  task ->
+                    if(!task.isSuccessful)
+                    {
+                        //  TODO: alert user that chat is not available right now
+                        finish()
+                    }
 
-        MainReference.child(ChatID).setValue(p){ error, _ ->
-            if(error != null)
-            {
-                //  TODO: dialog: could not create conversation
-                return@setValue
-            }
+                    FireStore.collection("chat_messages/$ChatID/partecipants").document(PartnerID).set(u)
+                            .addOnCompleteListener {
+                                if(!task.isSuccessful)
+                                {
+                                    //  TODO: alert user that chat is not available right now
+                                    finish()
+                                }
 
-            //  Set up stuff
-            //  NOTE: no need to synchronize this block, because at this point I am the only one who modifies it
-            Initialized = true
+                                //  The chat has been created! Let's update this status
+                                updateMyStatus(true, "", ChatID)
 
-            //  The chat has been created! Let's update this status
-            updateMyStatus(true, "", ChatID)
-            setUps()
-        }
+                                //  Set up stuff
+                                setUps()
+                            }
+                }
     }
 
     private fun postMessage()
     {
-        val t = this
-
-        //  Again, the !! is pretty useless because we're sure that the user is authenticated at this point
         val time = getCurrentISODate()
-        val c = ChatMessage(Typer.text.toString(), Me!!, time)
+        val c = ChatMessage(Typer.text.toString(), Me, time)
 
-        //  First, push the id
-        val p = MessagesReference.push().key
-        var previousRecentMessage = ""
+        MessagesCollection.add(c).addOnCompleteListener { task ->
 
-        //  This must happen in a synchronized way
-        synchronized(this.NewestMessage)
-        {
-            previousRecentMessage = NewestMessage
-            NewestMessage = p
-        }
-
-        //  Now push the actual message
-        MessagesReference.child(p).setValue(c) { error, _ ->
-            synchronized(t.NewestMessage)
+            if(!task.isSuccessful)
             {
-                if(error != null)
-                {
-                    // restore it
-                    NewestMessage = previousRecentMessage
-                    //  TODO: Dialog: "Sorry we could not send your message, please try again later"
-                }
-
-                MostRecentTime = time
-
-                //  Listen for received updates
-                //  This listens for updates from Firebase Functions: if the element "received" was changed,
-                //  then we know that a notification to the partner has been sent and the message received.
-                //  It's the equivalent of the second grey tick in whatsapp
-                //  UPDATE: I decided to not implement this yet... this is just a book chat...
-                //          let's not make this too complicated, alright?
-                /*MessagesReference.child(p).addValueEventListener(object : ValueEventListener
-                {
-                    override fun onCancelled(p0: DatabaseError?)
-                    {
-
-                    }
-
-                    override fun onDataChange(p0: DataSnapshot?)
-                    {
-                        //  I got a data, stop listening for changes!
-                        //  NOTE: this does *not* point to the class, but to ValueEventListener!
-                        MessagesReference.child(p).removeEventListener(this)
-
-                        if(p0 != null)
-                        {
-                            if(p0.hasChild("received") && p0.child("received").getValue(String::class.java)!!.length > 1)
-                            {
-                                //  Set my new message as "Received"
-                                Adapter.setAsReceived(p)
-                            }
-                        }
-                    }
-                })*/
+                Log.d("CHAT", "message not deployed")
+                return@addOnCompleteListener
             }
 
-            synchronized(t.Adapter)
+            //  UPDATE: No need for this, listen for new messages will take care of this
+            /*synchronized(t.Adapter)
             {
                 Adapter.push(c)
-            }
+            }*/
 
             //  Reset the editext
             Typer.text.clear()
 
             //  Error or not, user must be able to write again
             setUpButtonEvent()
+
+            //  Listen for received updates
+            //  This listens for updates from Firebase Functions: if the element "received" was changed,
+            //  then we know that a notification to the partner has been sent and the message received.
+            //  It's the equivalent of the second grey tick in whatsapp
+            //  UPDATE: I decided to not implement this yet... this is just a book chat...
+            //          let's not make this too complicated, alright?
+            /*MessagesReference.child(p).addValueEventListener(object : ValueEventListener
+            {
+                override fun onCancelled(p0: DatabaseError?)
+                {
+
+                }
+
+                override fun onDataChange(p0: DataSnapshot?)
+                {
+                    //  I got a data, stop listening for changes!
+                    //  NOTE: this does *not* point to the class, but to ValueEventListener!
+                    MessagesReference.child(p).removeEventListener(this)
+
+                    if(p0 != null)
+                    {
+                        if(p0.hasChild("received") && p0.child("received").getValue(String::class.java)!!.length > 1)
+                        {
+                            //  Set my new message as "Received"
+                            Adapter.setAsReceived(p)
+                        }
+                    }
+                }
+            })*/
         }
     }
 
@@ -799,31 +691,24 @@ class ChatActivity : AppCompatActivity()
     {
         super.onDestroy()
 
-        if(::ChatID.isInitialized) return
-
         val t = this
 
-        //  Reset: Update my last time here and set that I am not writing
-        PartnerIsTyping.parent.child(Me!!).setValue(ChatMessageContainer.Partecipants.User(getCurrentISODate()))
-        { err, _ ->
-            if(err != null)
-            {
-                Log.d("CHAT", "could not reset")
-                //return@setValue
-            }
+        IAmTyping.update("is_typing", false).addOnCompleteListener { task ->
+            if(!task.isSuccessful) Log.w("CHAT", "could not reset the typing observer in onDestroy")
 
             //  Stop the counting
             synchronized(t.CountDownRunning)
             {
                 if(CountDownRunning) StopTyping.cancel()
             }
-
-            //  Detach everything
-            //  NOTE: I don't actually know if this is necessary or android handles this on its own but... whatever
-            Typer.setOnClickListener(null)
-            SubmitButton.setOnClickListener(null)
-
-            //  TODO: Remove events as well? I think that is not necessary
         }
+
+        //  Detach everything
+        //  NOTE: I don't actually know if this is necessary or android handles this on its own but... whatever
+        Typer.setOnClickListener(null)
+        SubmitButton.setOnClickListener(null)
+        NewMessagesListener.remove()
+
+        //  TODO: Remove events as well? I think that is not necessary
     }
 }
