@@ -117,9 +117,7 @@ class ChatActivity : AppCompatActivity()
         PartnerStatus = findViewById(R.id.theirStatus)
 
         //  Set typing text
-        //  TODO: use String.format(id, User?.name) instead of this hardcoded string
         TypingNotifier = findViewById(R.id.userIsTyping)
-        TypingNotifier.text = "${intent.getStringExtra("partner_name")} is typing... (THREE DOTS ANIMATION HERE?"
 
         //  The typer (edit text)
         Typer = findViewById(R.id.typeText)
@@ -189,7 +187,9 @@ class ChatActivity : AppCompatActivity()
                 if(p0 == null) return
 
                 //  Got user data
-                Log.d("CHAT", "Got user data")
+
+                //  TODO: change this
+                TypingNotifier.text = "${p0.child("name")} is typing... (THREE DOTS ANIMATION HERE?"
 
                 //  Set my partner's name
                 findViewById<TextView>(R.id.theirName).text = p0.child("name").value as String

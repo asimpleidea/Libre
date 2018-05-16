@@ -25,9 +25,12 @@ import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.target.BaseTarget
 import com.bumptech.glide.request.target.SimpleTarget
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.support.v4.app.NotificationManagerCompat
 import com.bumptech.glide.Priority
+import com.google.android.gms.tasks.Task
+import com.google.firebase.storage.FirebaseStorage
 import mad24.polito.it.chats.ChatActivity
 import java.net.HttpURLConnection
 import java.net.URI
@@ -36,8 +39,8 @@ import java.net.URL
 
 class MessagingService : FirebaseMessagingService()
 {
-    private val tag : String  = "CHAT"
     private var lastNotificationId = 0
+    lateinit var notificationBuilder : NotificationCompat.Builder
 
     override fun onMessageReceived(p0: RemoteMessage?)
     {
@@ -46,43 +49,37 @@ class MessagingService : FirebaseMessagingService()
         if(p0 == null) return
 
         //  Set up the notification builder
-        val notificationBuilder : NotificationCompat.Builder = NotificationCompat.Builder(applicationContext, getString(R.string.channel_name))
+        notificationBuilder = NotificationCompat.Builder(applicationContext, getString(R.string.channel_name))
 
         //  Set the icon
         notificationBuilder.setSmallIcon(R.drawable.ic_icon_notification)
+
+        //  Does it have a notification body?
+        if(p0.notification == null) return
+        notificationBuilder.setContentTitle(p0.notification!!.title)
+                .setContentText(p0.notification!!.body)
+                .setDefaults(Notification.DEFAULT_ALL)
+
+
+        //  Set it to be a heads up display
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) notificationBuilder.priority = NotificationManager.IMPORTANCE_HIGH
+        else
+        {
+            notificationBuilder.priority = NotificationCompat.PRIORITY_HIGH
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) notificationBuilder.setVibrate(LongArray(0))
+        }
 
         //  Does it have a payload?
         if (p0.data != null && p0.data.isNotEmpty())
         {
             val data = p0.data
 
-            //  Get my partner's image
-            if(data.containsKey("partner_pic") && data.getValue("partner_pic").isNotBlank())
-            {
-                //  Get the image url
-                val u = URI(data.getValue("partner_pic"))
-                val connection = u.toURL().openConnection() as HttpURLConnection
-                connection.doInput = true
-                connection.connect()
-
-                //  Get the input stream
-                val ins = connection.inputStream
-                val bitmap = BitmapFactory.decodeStream(ins)
-
-                //  Finally set the image
-                notificationBuilder.setLargeIcon(bitmap)
-            }
-
             //  Get the chat id, so that when we tap the notification, we get directed there
             if(data.containsKey("chat_id") && data.containsKey("partner_id"))
             {
                 val intent = Intent(this, ChatActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                intent.putExtra("chat", data.getValue("chat_id"))
-                if(data.containsKey("last_message_id")) intent.putExtra("startId", data.getValue("last_message_id"))
-                if(data.containsKey("last_message_time")) intent.putExtra("startTime", data.getValue("last_message_time") )
                 intent.putExtra("partner_id", data.getValue("partner_id"))
-                intent.putExtra("partner_name", data.getValue("partner_name"))
 
                 var pendingIntent : PendingIntent? = null
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
@@ -96,22 +93,52 @@ class MessagingService : FirebaseMessagingService()
                 //  Merge all this stuff together
                 notificationBuilder.setContentIntent(pendingIntent).setAutoCancel(true)
             }
+
+            //  Get my partner's image
+            if(data.containsKey("partner_pic") && data.getValue("partner_pic").isNotBlank())
+            {
+                if(data.getValue("partner_pic") == "unknown")
+                {
+                    notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.unknown_user))
+                }
+                else
+                {
+                    val prefix = (fun() : String
+                    {
+                        if(data.getValue("partner_pic") == "thumb") return "thumb_"
+                        return ""
+                    }())
+
+                    FirebaseStorage.getInstance().reference.child("profile_pictures/$prefix${data.getValue("partner_id")}")
+                            .downloadUrl.addOnSuccessListener { uri ->
+
+                        //  Get the image url
+                        val u = URI(uri.toString())
+                        val connection = u.toURL().openConnection() as HttpURLConnection
+                        connection.doInput = true
+                        connection.connect()
+
+                        //  Get the input stream
+                        val ins = connection.inputStream
+                        val bitmap = BitmapFactory.decodeStream(ins)
+
+                        //  Finally set the image
+                        notificationBuilder.setLargeIcon(bitmap)
+
+                        //  Send it
+                        send()
+                    }.addOnFailureListener {_ ->
+
+                        //  Send it without the user's image
+                        send()
+                    }
+                }
+            }
         }
+    }
 
-        //  Does it have a notification body?
-        if(p0.notification == null) return
-        notificationBuilder.setContentTitle(p0.notification!!.title)
-                            .setContentText(p0.notification!!.body)
-                            .setDefaults(Notification.DEFAULT_ALL)
-
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) notificationBuilder.priority = NotificationManager.IMPORTANCE_HIGH
-        else
-        {
-            notificationBuilder.priority = NotificationCompat.PRIORITY_HIGH
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) notificationBuilder.setVibrate(LongArray(0))
-        }
-
+    private fun send()
+    {
         //  Finally, display it
         val notificationManager = NotificationManagerCompat.from(applicationContext)
 
