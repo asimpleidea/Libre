@@ -58,6 +58,8 @@ import mad24.polito.it.registrationmail.SignupMailActivity;
 
 public class ManualInsertActivity extends AppCompatActivity {
 
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
+
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
     private int ISBN_SCAN = 3;
@@ -458,7 +460,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 selectedGenres.add(i);
         }
 
-        DatabaseReference mRef = mDatabase.child("books");
+        DatabaseReference mRef = mDatabase.child(FIREBASE_DATABASE_LOCATION_BOOKS);
         String bookKey = mRef.push().getKey();
         Date date = new Date();
 //        Log.d("anotherbug", (mBitmap==null)?"no image":"there is something!");
@@ -495,7 +497,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 //        Log.d("anotherbug", "book uploaded");
         mRef = mDatabase.child("users");
 
-        mRef.child(FirebaseAuth.getInstance().getUid()).child("books").child(bookKey).setValue(true);
+        mRef.child(FirebaseAuth.getInstance().getUid()).child(FIREBASE_DATABASE_LOCATION_BOOKS).child(bookKey).setValue(true);
 
         Toast.makeText(this, getString(R.string.book_submitted),Toast.LENGTH_LONG).show();
         finish();

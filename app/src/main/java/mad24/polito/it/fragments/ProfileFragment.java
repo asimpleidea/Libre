@@ -65,6 +65,8 @@ import static android.content.Context.MODE_PRIVATE;
 public class ProfileFragment extends Fragment {
 
     private static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
+
     private int SHOW_PROFILE = 1;
 
     View v;
@@ -231,14 +233,14 @@ public class ProfileFragment extends Fragment {
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_USERS)
                     .child(FirebaseAuth.getInstance().getUid())
-                    .child("books")
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
                     .limitToFirst(mBooksPerPage);
         }else{
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_USERS)
                     .child(FirebaseAuth.getInstance().getUid())
-                    .child("books")
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
                     .startAt(nodeId)
                     .limitToFirst(mBooksPerPage);

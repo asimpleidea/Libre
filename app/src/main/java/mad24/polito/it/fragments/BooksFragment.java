@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
  */
 public class BooksFragment extends Fragment {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
 
     /**
      * Distance threshold.
@@ -176,9 +176,6 @@ public class BooksFragment extends Fragment {
 
         books = new ArrayList<Book>();
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
-
-        //  This is needed in order to set the new fragment without using new code!
-        recyclerViewAdapter.setBooksActivity((BooksActivity) getActivity());
 
         rv.setAdapter(recyclerViewAdapter);
 
