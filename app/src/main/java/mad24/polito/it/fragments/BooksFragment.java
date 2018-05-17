@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -66,6 +67,7 @@ public class BooksFragment extends Fragment {
     private RecyclerView rv;
     private RecyclerViewAdapter recyclerViewAdapter;
     private FloatingActionButton new_book_button;
+    private TextView tv;
 
     // Array lists
     private List<Book> books;
@@ -117,6 +119,8 @@ public class BooksFragment extends Fragment {
         //Log.d("booksfragment", "onCreateView");
         // Inflate the layout for this fragment
         v =  inflater.inflate(R.layout.fragment_book, container, false);
+
+        tv = (TextView) v.findViewById(R.id.books_emptyView);
 
         rv = (RecyclerView) v.findViewById(R.id.book_list);
         new_book_button = (FloatingActionButton) v.findViewById(R.id.newBookBtn);
@@ -327,6 +331,7 @@ public class BooksFragment extends Fragment {
                         if(recyclerViewAdapter.contains(book))
                             return;
 
+                        v.findViewById(R.id.books_emptyView).setVisibility(View.INVISIBLE);
                         recyclerViewAdapter.add(book);
                         actualItemCount++;
                     }
@@ -394,20 +399,6 @@ public class BooksFragment extends Fragment {
 
     //intent to access the camera
     private void scanIntent() {
-
-        /*IntentIntegrator scanIntegrator = new IntentIntegrator(getActivity());
-        scanIntegrator.setDesiredBarcodeFormats(IntentIntegrator.EAN_13);
-        scanIntegrator.setBeepEnabled(false);*/
-
-        //TODO: actual code for scan book
-        //startActivityForResult(intent, REQUEST_CAMERA);
-        Log.d("booksfragment", "camera intent should start");
-//            Toast.makeText(getActivity().getBaseContext(), "Camera intent should start", Toast.LENGTH_LONG).show();
-        Log.d("isbn", "initiating scan");
-        /*IntentIntegrator.forSupportFragment(BooksFragment.this)
-                .setBeepEnabled(false)
-                .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
-                .initiateScan();*/
 
         Intent intent = new Intent(getActivity(), ManualInsertActivity.class);
         Bundle b = new Bundle();

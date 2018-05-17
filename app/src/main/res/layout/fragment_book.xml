@@ -6,23 +6,61 @@
     android:layout_height="match_parent"
     tools:context="mad24.polito.it.fragments.BooksFragment">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/newBookBtn"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom|right"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"
-        android:clickable="true"
-        android:src="@android:drawable/ic_input_add"
-        android:tint="@color/colorWhite"
-        />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/book_list"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/search_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        app:contentInsetStart="0dp"
+        >
 
-    </android.support.v7.widget.RecyclerView>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Books"
+            android:textSize="25sp"
+            android:textColor="@color/colorWhite"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"/>
+
+    </android.support.v7.widget.Toolbar>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize" >
+
+        <TextView
+            android:id="@+id/books_emptyView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/books_noResults"
+            android:textSize="15sp"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/newBookBtn"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@android:drawable/ic_input_add"
+            android:tint="@color/colorWhite"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/book_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+        </android.support.v7.widget.RecyclerView>
+    </RelativeLayout>
 
 </FrameLayout>

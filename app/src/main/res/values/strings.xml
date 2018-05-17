@@ -44,7 +44,7 @@
     <string name="deny_permission_camera">Camera permission is necessary</string>
 
     //string for savings
-    <string name="saving">Saving...</string>
+    <string name="saving">Saving…</string>
     <string name="saved">Saved!</string>
 
     //string for email error
@@ -59,8 +59,8 @@
     <string name="google_connection_failed">Google Places API connection failed</string>
 
     //utils
-    <string name="ok">ok</string>
-    <string name="cancel">cancel</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 
     <string name="title_genre_alertdialog">Choose your favourite genres</string>
 
@@ -123,13 +123,14 @@
     <string name="reset_password_failed">Reset password failed</string>
     <string name="reset_password_failed_mail">Failed sending reset email, check if email is correct</string>
 
-    //string for login
+    <!-- string for login-->
     <string name="login_insert_mail">Insert your email</string>
     <string name="login_insert_password">Insert your password</string>
     <string name="login_login_failed">Login failed</string>
     <string name="login_wrong_mail_pass">Wrong mail or password. Insert your credentials and retry</string>
     <string name="login_or">OR</string>
     <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_insertValidPassword">Your password must be at least 6 characters long</string>
 
     <string name="login">Login</string>
     <string name="logout">Log out</string>
@@ -152,13 +153,13 @@
     <string name="isbn_not_valid">ISBN code is not valid!</string>
 
     <!-- search strings -->
-    <string name="search_search">Search...</string>
+    <string name="search_search">Search…</string>
     <string name="search_noResults">No results in your area</string>
 
     <!--upload strings -->
     <string name="manualInsert_uploadSuccessful">Upload successful</string>
     <string name="manualInsert_uploadError">Error in uploading!</string>
-    <string name="manualInsert_uploading">Uploading...</string>
+    <string name="manualInsert_uploading">Uploading…</string>
 
     <!--error getting coordinates-->
     <string name="coordinates_error">Error</string>
@@ -182,9 +183,9 @@
     <string name="login_with_fb">Access with Facebook</string>
     <string name="signup_with_fb">Sign up with Facebook</string>
     <string name="logout_from_fb">Log out</string>
-    <string name="fb_wait">Loading data...</string>
-    <string name="fb_wait_message">Please wait while we fetch your data...</string>
-    <string name="fb_error">Whoops...</string>
+    <string name="fb_wait">Loading data…</string>
+    <string name="fb_wait_message">Please wait while we fetch your data…</string>
+    <string name="fb_error">Whoops…</string>
 
     <!-- Error Strings -->
     <string name="fb_error_get_me">Whoops! An error occurred while trying to fetch your user data!</string>
@@ -199,7 +200,7 @@
     <!-- /Facebook -->
 
     <!-- View Book -->
-    <string name="read_more">More...</string>
+    <string name="read_more">More…</string>
     <string name="book_by">By %1$s</string>
     <string name="book_language">Language</string>
     <string name="book_pages">%1$d Pages</string>
@@ -213,6 +214,7 @@
     <string name="published_in">Published in %1$s</string>
     <string name="title_activity_view_book">ViewBookActivity</string>
     <string name="action_settings">Settings</string>
+    <string name="books_noResults">There are no books available</string>
     <!-- /View Book -->
 
 </resources>

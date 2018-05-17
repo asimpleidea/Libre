@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.ChatFragment">
 
-    <TextView
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/search_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/nav_chat" />
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        app:contentInsetStart="0dp"
+        >
+        <!-- TODO: string value -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Chat"
+            android:textSize="25sp"
+            android:textColor="@color/colorWhite"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"/>
+
+    </android.support.v7.widget.Toolbar>
 
 </FrameLayout>

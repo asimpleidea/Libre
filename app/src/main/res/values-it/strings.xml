@@ -44,7 +44,7 @@
     <string name="deny_permission_camera">Permesso della fotocamera necessario</string>
 
     //string for savings
-    <string name="saving">Salvataggio...</string>
+    <string name="saving">Salvataggio…</string>
     <string name="saved">Salvato!</string>
 
     //string for email error
@@ -126,6 +126,7 @@
     <string name="login_wrong_mail_pass">Mail o password errati. Inserisci le tue credenziali e riprova</string>
     <string name="login_or">OPPURE</string>
     <string name="login_forgot_password">Password dimenticata?</string>
+    <string name="login_insertValidPassword">Inserisci un password di almeno 6 caratteri</string>
 
     <string name="login">Login</string>
     <string name="logout">Disconnetti</string>
@@ -147,13 +148,13 @@
     <string name="isbn_not_valid">Il codice ISBN non è valido</string>
 
     <!-- search strings -->
-    <string name="search_search">Cerca...</string>
+    <string name="search_search">Cerca…</string>
     <string name="search_noResults">Nessun risultato nella tua zona</string>
 
     <!--upload strings -->
     <string name="manualInsert_uploadSuccessful">Caricato con successo</string>
     <string name="manualInsert_uploadError">Errore durante il carimento!</string>
-    <string name="manualInsert_uploading">Caricamento...</string>
+    <string name="manualInsert_uploading">Caricamento…</string>
 
     <!--error getting coordinates-->
     <string name="coordinates_error">Errore</string>
@@ -170,7 +171,7 @@
     <string name="fb_error_get_me">Opss! Non siamo riusciti a ottenere i tuoi dati da facebook. Riprova più tardi o prova un altro metodo.</string>
     <string name="fb_error_authenticate">Non siamo riusciti ad autenticarti. Riprova più tardi o prova un altro metodo.</string>
     <string name="myBooks">I miei libri:</string>
-    <string name="noBooks">Non hai ancora postato nessun libro, aggiungine uno nella home page!</string>
+    <string name="noBooks">Non hai ancora postato nessun libro, aggiungine uno dalla home page!</string>
     <!-- View Book -->
     <string name="read_more">Altro…</string>
     <string name="book_by">Di %1$s</string>
@@ -184,6 +185,7 @@
     <string name="italian_language">Italiano</string>
     <string name="published_in">Pubblicato nel %1$s</string>
     <string name="published_by">Pubblicato da %1$s</string>
+    <string name="books_noResults">Non ci sono libri disponibili</string>
     <!-- /View Book -->
 
 </resources>
