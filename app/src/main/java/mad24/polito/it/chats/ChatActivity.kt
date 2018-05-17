@@ -5,6 +5,7 @@ import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatEditText
 import android.support.v7.widget.LinearLayoutManager
@@ -13,10 +14,7 @@ import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -68,6 +66,8 @@ class ChatActivity : AppCompatActivity()
     lateinit var StopTyping : CountDownTimer
     var CountDownRunning : Boolean = false
     val Seconds : Long = 3 *1000
+    private var StuffLoaded : Int = 0
+    private var StuffToLoad : Int = 3
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -180,12 +180,15 @@ class ChatActivity : AppCompatActivity()
 
     private fun loadPartnerData()
     {
+        val t = this
+
         PartnerReference.addListenerForSingleValueEvent(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?) { }
 
             override fun onDataChange(p0: DataSnapshot?)
             {
+                Log.d("CHAT", "line 191")
                 //  p0 null?? well, this is weird
                 if(p0 == null) return
 
@@ -217,8 +220,25 @@ class ChatActivity : AppCompatActivity()
                                 Glide.with(applicationContext).load(R.drawable.unknown_user).into(findViewById(R.id.theirImage))
                             }
                 }
+
+                synchronized(t.StuffLoaded)
+                {
+                    ++StuffLoaded
+                    Log.d("CHAT", "Loaded in load partner data: $StuffLoaded")
+                    if(StuffLoaded == StuffToLoad) show()
+                }
             }
         })
+    }
+
+    private fun show()
+    {
+        //  Show the chat
+        Log.d("CHAT", "OK, you can show")
+        (findViewById<ProgressBar>(R.id.loadingScreen).parent as RelativeLayout).visibility = View.GONE
+        ChatToolbar.visibility = View.VISIBLE
+        findViewById<RecyclerView>(R.id.messagesContainer).visibility = View.VISIBLE
+        findViewById<BottomNavigationView>(R.id.navigation).visibility = View.VISIBLE
     }
 
     private fun load()
@@ -333,6 +353,7 @@ class ChatActivity : AppCompatActivity()
             override fun onDataChange(p0: DataSnapshot?)
             {
                 if(p0 == null) return
+                if(p0.childrenCount < 1) return
 
                 val u = p0.getValue(UserStatus::class.java)
 
@@ -389,7 +410,7 @@ class ChatActivity : AppCompatActivity()
 
             //  Do something with the data
             .addOnCompleteListener { task ->
-
+                Log.d("CHAT", "getFirstMessages line 418")
                 if(!task.isSuccessful)
                 {
                     Log.w("CHAT", "Could not load previous chats!")
@@ -400,10 +421,14 @@ class ChatActivity : AppCompatActivity()
                 if(task.result.isEmpty || task.result.size() < 1) return@addOnCompleteListener
 
                 val messages = task.result
+                var checkLoad = false
 
                 //  Push the messages
                 synchronized(t.Adapter)
                 {
+                    //  Is this the first time?
+                    if(Adapter.itemCount == 0) checkLoad = true
+
                     //  Push the messages
                     Adapter.bulkPush(messages.toObjects(ChatMessage::class.java))
 
@@ -436,6 +461,16 @@ class ChatActivity : AppCompatActivity()
                             }
                         }
                     })
+                }
+
+                if(checkLoad)
+                {
+                    synchronized(t.StuffLoaded)
+                    {
+                        ++StuffLoaded
+                        Log.d("CHAT", "loaded in getFirstMessages: $StuffLoaded")
+                        if(StuffLoaded == StuffToLoad) show()
+                    }
                 }
 
                 //  Listen for new messages
@@ -596,6 +631,13 @@ class ChatActivity : AppCompatActivity()
 
             return@OnKeyListener false
         })
+
+        synchronized(t.StuffLoaded)
+        {
+            ++StuffLoaded
+            Log.d("CHAT", "loaded in typing observer: $StuffLoaded")
+            if(StuffLoaded == StuffToLoad) show()
+        }
     }
 
     private fun setUpButtonEvent()
@@ -637,6 +679,7 @@ class ChatActivity : AppCompatActivity()
 
     private fun createConversation()
     {
+        val t = this
         val me : ChatMessageContainer.Partecipants.User = ChatMessageContainer.Partecipants.User(getCurrentISODate())
         val u = ChatMessageContainer.Partecipants.User("0")
 
@@ -658,6 +701,13 @@ class ChatActivity : AppCompatActivity()
 
                                 //  The chat has been created! Let's update this status
                                 updateMyStatus(true, "", ChatID)
+
+                                synchronized(t.StuffLoaded)
+                                {
+                                    ++StuffLoaded
+                                    Log.d("CHAT", "loaded in create conversaiont: $StuffLoaded")
+                                    if(StuffLoaded == StuffToLoad) show()
+                                }
 
                                 //  Set up stuff
                                 setUps()
@@ -746,7 +796,7 @@ class ChatActivity : AppCompatActivity()
         //  NOTE: I don't actually know if this is necessary or android handles this on its own but... whatever
         Typer.setOnClickListener(null)
         SubmitButton.setOnClickListener(null)
-        NewMessagesListener.remove()
+        if(::NewMessagesListener.isInitialized) NewMessagesListener.remove()
 
         //  TODO: Remove events as well? I think that is not necessary
     }
