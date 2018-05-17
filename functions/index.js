@@ -16,25 +16,40 @@ const os = require('os');
 const fs = require('fs');
 
 //  On partecipants created
-exports.createChat = functions.database.ref('/chat_messages/{chatId}/partecipants').onCreate((snapshot, context) => 
+/*exports.generateChat = functions.firestore.document("chat_messages/{$chatId}/partecipants/{$userId}").onCreate((snapshot, context) => 
 {
     //  Original Value
-    const original = snapshot.val(),
+    const original = snapshot.data(),
             chatId = context.params.chatId,
-            users = Object.keys(original);
+            user = context.params.userId,
+            users = chatId.split('&');
 
-    //  Wrong key number? this is actually impossible but who knows
-    if(users.length < 2 || users.length > 2) return false;
+    return console.log("original", original);
+    if(users.length != 2) return console.log("error: id is not correct");
 
-    //  Replicate for the first user
-    const first = {};
-    first[users[1]] = {chat : chatId};
-    
-    //  Replicate the second user    
-    const second = {};
-    second[users[0]] = {chat: chatId};
-    
-    return Promise.all([ admin.database().ref("chats/" + users[0] + "/").update(first), admin.database().ref("chats/" + users[1] + "/").update(second)]);
+    const otherUser = user === users[0] ? user[1] : user[0];
+
+    const data = {};
+    data[otherUser] =   {
+                            chat_id : chatId
+                        };
+
+    return admin.firestore().document("chats/" + user).update(data);
+});*/
+
+exports.createChat = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onCreate((snap, context) => 
+{
+    //  Original value
+    const original = snap.data();
+            chatId = context.params.chatId,
+            user = context.params.userId,
+            users = chatId.split('&');
+
+    if(users.length !== 2) return console.log("error: id is not correct");
+
+    const otherUser = user === users[0] ? user[1] : user[0];
+
+    return admin.firestore().doc("chats/" + user + "/conversations/" + otherUser).set({chat_id : chatId});
 });
 
 //  On New message
