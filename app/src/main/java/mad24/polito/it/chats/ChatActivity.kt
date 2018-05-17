@@ -1,6 +1,7 @@
 package mad24.polito.it.chats
 
 import android.content.Intent
+import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -14,6 +15,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -59,7 +61,7 @@ class ChatActivity : AppCompatActivity()
     //  TODO: Change this type: it won't be a textview on production, of course
     lateinit var TypingNotifier : TextView
     lateinit var Typer : AppCompatEditText
-    lateinit var SubmitButton : Button
+    lateinit var SubmitButton : ImageButton
     lateinit var ChatToolbar : Toolbar
     lateinit var PartnerStatus : TextView
 
@@ -559,6 +561,9 @@ class ChatActivity : AppCompatActivity()
         Typer.setOnKeyListener(View.OnKeyListener { _, _, keyEvent ->
             if(keyEvent.action == KeyEvent.ACTION_DOWN)
             {
+                //  Prevent default
+                if(Typer.text.trim(' ', '\n').isBlank()) return@OnKeyListener false
+
                 synchronized(t.CountDownRunning)
                 {
                     if(!CountDownRunning)
@@ -576,6 +581,17 @@ class ChatActivity : AppCompatActivity()
                         StopTyping.start()
                     }
                 }
+            }
+
+            if(keyEvent.action == KeyEvent.ACTION_UP)
+            {
+                if(Typer.text.trim(' ', '\n').isBlank())
+                {
+                    SubmitButton.visibility = View.GONE
+                    return@OnKeyListener false
+                }
+
+                SubmitButton.visibility = View.VISIBLE
             }
 
             return@OnKeyListener false
