@@ -188,6 +188,9 @@
     <!-- Chat -->
     <string name="chat_status_online">Online</string>
     <string name="chat_last_seen">Ultimo accesso: %1$s</string>
+    <string name="channel_name">MAD24</string>
+    <string name="channel_description">Ricevi notifiche riguardo gli ultimi messaggi</string>
+    <string name="type_something">Type something…</string>
     <!-- /Chat -->
 
 </resources>

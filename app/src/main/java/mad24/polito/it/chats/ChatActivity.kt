@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.AppCompatEditText
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
@@ -57,7 +58,7 @@ class ChatActivity : AppCompatActivity()
 
     //  TODO: Change this type: it won't be a textview on production, of course
     lateinit var TypingNotifier : TextView
-    lateinit var Typer : EditText
+    lateinit var Typer : AppCompatEditText
     lateinit var SubmitButton : Button
     lateinit var ChatToolbar : Toolbar
     lateinit var PartnerStatus : TextView

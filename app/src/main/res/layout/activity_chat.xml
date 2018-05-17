@@ -80,40 +80,60 @@
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:layout_height="56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintRight_toRightOf="parent"
+        app:itemBackground="@color/colorWhite"
+        android:elevation="2dp"
+        app:elevation="2dp">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
-
-            <!-- This needs *HEAVY* styling as it is very ugly.
-            Maybe a white background with black text to improve readability? -->
-            <EditText
-                android:id="@+id/typeText"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
-                android:layout_marginRight="15dp"
-                android:ems="10"
-                android:inputType="textMultiLine"
-                android:maxLines="3" />
+                android:layout_weight="0.8">
+                <!--<EditText
+                    android:id="@+id/typeText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:ems="10"
+                    android:inputType="textMultiLine"
+                    android:maxLines="3"
+                    android:hint="Type Something"
+                    android:background="@color/colorWhiteTransparent"/>-->
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/typeText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:ems="10"
+                    android:inputType="textMultiLine"
+                    android:maxLines="3"
+                    android:hint="@string/type_something"
+                    android:fontFamily="@font/opensans_regular"
+                    app:backgroundTint="@color/transparent" />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.20">
+                <Button
+                    android:id="@+id/submitButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:text="Button" />
+            </RelativeLayout>
+        </LinearLayout>
 
-            <!-- Maybe a round button with a -> icon or a paper airplane (à la telegram) here? -->
-            <Button
-                android:id="@+id/submitButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_toEndOf="@id/typeText"
-                android:layout_toRightOf="@id/typeText"
-                android:text="Button" />
-        </RelativeLayout>
 
     </android.support.design.widget.BottomNavigationView>
 

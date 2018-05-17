@@ -15,10 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
-import org.w3c.dom.Text
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.*
 
 class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : String): RecyclerView.Adapter<MessagesRecyclerAdapter.ViewHolder>()
@@ -31,7 +28,7 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
     private var context = _context
     private var ParnerIsHere : Boolean = false
     private var Messages : ArrayList<ChatMessage> = ArrayList()
-    private var LastReadMessage : String? = null
+    private var LastDate : String? = null
 
     private val MY_MESSAGE = 0
     private val PARTNER_MESSAGE = 1
@@ -41,7 +38,7 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
         val layout = (fun() : Int
         {
             if(viewType == MY_MESSAGE) return R.layout.my_message
-            return R.layout.adapter_chat_layout
+            return R.layout.partner_message
         }())
 
         RootView = LayoutInflater.from(parent!!.context).inflate(layout, parent, false)
@@ -98,7 +95,7 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
 
             c.time = hourFormat.format(date)
             c.date = dateFormat.format(date)
-            Log.d("CHAT", "${c.content}: ${c.date}")
+
             if(queue) Messages.add(c)
             else
             {
@@ -164,12 +161,15 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
             }
         }
 
-        if(Messages.size == 0
-                || (Messages.size > 0 && position > 0 && Messages[position -1].date != Messages[position].date)
-                || (Messages.size > 0 && position == 0 && Messages[position +1].date != Messages[position].date))
+        if(Messages.size == 0 || (Messages.size > 0 && position > 0 && Messages[position].date != Messages[position-1].date))
         {
             if(Messages.size == 0) holder.DateDivider.text = Messages[position].date
-            else holder.DateDivider.text = Messages[position+1].date
+            else
+            {
+                if(position > 0) holder.DateDivider.text = Messages[position-1].date
+                else holder.DateDivider.text = Messages[position+1].date
+            }
+
             (holder.DateDivider.parent as FrameLayout).visibility = View.VISIBLE
         }
 

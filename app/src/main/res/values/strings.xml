@@ -223,6 +223,7 @@
     <string name="chat_last_seen">Last seen: %1$s</string>
     <string name="channel_name">MAD24</string>
     <string name="channel_description">Get notified about new books and conversations</string>
+    <string name="type_something">Type something…</string>
     <!-- /Chat -->
 
 </resources>
