@@ -1,33 +1,52 @@
 package mad24.polito.it.chats
 
+import android.content.Context
+import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import mad24.polito.it.R
 import mad24.polito.it.models.ChatMessage
+import org.w3c.dom.Text
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
-class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Adapter<MessagesRecyclerAdapter.ViewHolder>()
+class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : String): RecyclerView.Adapter<MessagesRecyclerAdapter.ViewHolder>()
 {
     lateinit var RootView : View
     lateinit var Holder : ViewHolder
-    lateinit var Me : String
+    val Me : String = FirebaseAuth.getInstance().currentUser!!.uid
 
     private var PartnerLastAccess = _lastAccess
+    private var context = _context
     private var ParnerIsHere : Boolean = false
     private var Messages : ArrayList<ChatMessage> = ArrayList()
     private var LastReadMessage : String? = null
 
+    private val MY_MESSAGE = 0
+    private val PARTNER_MESSAGE = 1
+
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder
     {
-        RootView  = LayoutInflater.from(parent!!.context).inflate(R.layout.adapter_chat_layout, parent, false)
+        val layout = (fun() : Int
+        {
+            if(viewType == MY_MESSAGE) return R.layout.my_message
+            return R.layout.adapter_chat_layout
+        }())
+
+        RootView = LayoutInflater.from(parent!!.context).inflate(layout, parent, false)
+
         Holder = ViewHolder(RootView)
-        Me = FirebaseAuth.getInstance().currentUser!!.uid
 
         return ViewHolder(RootView)
     }
@@ -58,37 +77,32 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
 
     fun setLastHere(last : String){ PartnerLastAccess = last }
 
-    fun bulkPush(/*messages: DataSnapshot*/messages : Iterable<DataSnapshot>)
-    {
-        val count : Int = Messages.size
-
-        for(m in messages.reversed())
-        {
-            val c : ChatMessage? = m.getValue(ChatMessage::class.java)
-            Messages.add(c!!)
-        }
-
-        notifyItemRangeInserted(count, Messages.size)
-    }
-
     fun bulkPush(messages : List<ChatMessage>, queue: Boolean = true)
     {
         val count : Int = Messages.size
 
-        /*for(m in messages.reversed())
-        {
-            val c : ChatMessage? = m.getValue(ChatMessage::class.java)
-            Messages.add(c!!)
-        }*/
-
         var pushed = 0
 
+        val hourFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd MMMM", Locale.getDefault())
         for(m in messages)
         {
-            if(queue) Messages.add(m)
+            val date = (fun() : Date
+            {
+                val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+
+                return df.parse(m.sent)
+            }())
+
+            val c = ChatMessage(m.content, m.by, m.sent)
+
+            c.time = hourFormat.format(date)
+            c.date = dateFormat.format(date)
+            Log.d("CHAT", "${c.content}: ${c.date}")
+            if(queue) Messages.add(c)
             else
             {
-                Messages.add(0, m)
+                Messages.add(0, c)
                 ++pushed
             }
         }
@@ -121,46 +135,58 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
         notifyItemInserted(Messages.size -1)
     }
 
+    override fun getItemViewType(position: Int): Int
+    {
+        //return super.getItemViewType(position)
+
+        if(Messages[position].by == Me) return MY_MESSAGE
+        return PARTNER_MESSAGE
+    }
+
     override fun getItemCount(): Int
     {
         return Messages.size
     }
 
+
     override fun onBindViewHolder(holder: ViewHolder?, position: Int)
     {
         if(holder == null) return
 
-        when(Messages[position].by.compareTo(Me) == 0)
+        if(Messages[position].by.compareTo(Me) == 0)
         {
             //  Was this message sent by me?
-            true ->
+            //  Did my partner connect to this chat after this message?
+            if(PartnerLastAccess > Messages[position].sent || ParnerIsHere)
             {
-                holder.Align.text = "DEBUG: my message, so this goes on right"
+                holder.Read.text = "DEBUG: message has been read"
+                holder.Read.visibility = View.VISIBLE
+            }
+        }
 
-                //  Did my partner connect to this chat after this message?
-                if(PartnerLastAccess > Messages[position].sent || ParnerIsHere)
-                {
-                    holder.Read.text = "DEBUG: message has been read"
-                    holder.Read.visibility = View.VISIBLE
-                }
-            }
-            false ->
-            {
-                holder.Align.text = "DEBUG: Partner's message, so this goes on left"
-            }
+        if(Messages.size == 0
+                || (Messages.size > 0 && position > 0 && Messages[position -1].date != Messages[position].date)
+                || (Messages.size > 0 && position == 0 && Messages[position +1].date != Messages[position].date))
+        {
+            if(Messages.size == 0) holder.DateDivider.text = Messages[position].date
+            else holder.DateDivider.text = Messages[position+1].date
+            (holder.DateDivider.parent as FrameLayout).visibility = View.VISIBLE
         }
 
         //  Set the content
         holder.Content.text = Messages[position].content
 
         //  For debug purposes
-        holder.Sent.text = "DEBUG: sent: ${Messages[position].sent}"
+        holder.Sent.text = "${Messages[position].time}"
         holder.Received.text = "DEBUG: received: ${Messages[position].received}"
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
         var Content : TextView
+        var Container : LinearLayout
+        var Card : CardView
+        var DateDivider : TextView
 
         //  Just for test:
         var Align : TextView
@@ -168,13 +194,20 @@ class MessagesRecyclerAdapter constructor(_lastAccess : String): RecyclerView.Ad
         var Received : TextView
         var Read : TextView
 
+
         init
         {
             Content = itemView.findViewById(R.id.messageContent)
+            Container = itemView.findViewById(R.id.messageContainer)
+            Card = itemView.findViewById(R.id.messageContentCard)
+            DateDivider = itemView.findViewById(R.id.dateDivider)
+
             Align = itemView.findViewById(R.id.messageAlignment)
             Sent = itemView.findViewById(R.id.messageSent)
             Received = itemView.findViewById(R.id.messageReceived)
             Read = itemView.findViewById(R.id.messageIsRead)
+
+
         }
     }
 

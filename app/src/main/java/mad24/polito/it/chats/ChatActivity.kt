@@ -48,7 +48,7 @@ class ChatActivity : AppCompatActivity()
     lateinit var OldestMessage : String
     lateinit var NewestMessage : String
 
-    val Take : Long = 20
+    val Take : Long = 10
     lateinit var Me : String
     lateinit var PartnerID : String
     private val KeysSeparator = '&'
@@ -140,7 +140,7 @@ class ChatActivity : AppCompatActivity()
         ViewManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, true)
 
         //  This is just temporary, it will be updated later, in statusListener
-        Adapter = MessagesRecyclerAdapter("0")
+        Adapter = MessagesRecyclerAdapter(applicationContext, "0")
 
         RV = findViewById<RecyclerView>(R.id.messagesContainer).apply {
             layoutManager = ViewManager
@@ -379,7 +379,7 @@ class ChatActivity : AppCompatActivity()
             .orderBy("sent", Query.Direction.DESCENDING)
 
             //  How many to get?
-            .limit(Take +1)
+            .limit(Take)
 
             //  Finally get
             .get()
@@ -602,18 +602,7 @@ class ChatActivity : AppCompatActivity()
     private fun getCurrentISODate() : String
     {
         //  Locale with a lambda initialization, like Javascript
-        val locale = ( fun() : Locale
-        {
-            //  It doesn't matter if it says that it is deprecated. We are supporting from API 15, so we have to do it like this
-            //  Testing it with a when expression
-            when(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                true -> return applicationContext.resources.configuration.locales[0]
-                false -> return applicationContext.resources.configuration.locale
-            }
-            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) return applicationContext.resources.configuration.locales[0]
-            else return applicationContext.resources.configuration.locale*/
-        }())
+        val locale = Locale.getDefault()
 
         //  The timezone
         //val tz = TimeZone.getDefault()
@@ -661,8 +650,9 @@ class ChatActivity : AppCompatActivity()
 
     private fun postMessage()
     {
+        val t = this
         val time = getCurrentISODate()
-        val c = ChatMessage(Typer.text.toString(), Me, time)
+        val c = ChatMessage(Typer.text.toString().trim(' ', '\n'), Me, time)
 
         MessagesCollection.add(c).addOnCompleteListener { task ->
 
@@ -671,6 +661,9 @@ class ChatActivity : AppCompatActivity()
                 Log.d("CHAT", "message not deployed")
                 return@addOnCompleteListener
             }
+
+            //  TODO: is this really helpful?
+            RV.smoothScrollToPosition(0)
 
             //  UPDATE: No need for this, listen for new messages will take care of this
             /*synchronized(t.Adapter)
