@@ -128,9 +128,6 @@ exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}
             sender = message.by,
             receiver = sender === users[0] ? users[1] : users[0];
 
-            console.log("sender id: ", sender);
-            console.log("receiver id: ", receiver);
-
     return Promise.all([    admin.database().ref("users/" + receiver).once("value"),
                             admin.database().ref("users/" + sender).once("value") ])
             .then(results =>
@@ -141,9 +138,6 @@ exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}
                         s = results[1].val();
                 
                 if(!("device_token" in r)) return console.log("user has not device token");
-            
-                console.log("receiver", r);
-                console.log("sender", s);
 
                 //  Already in this chat?
                 if("status" in r)
@@ -161,7 +155,6 @@ exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}
 
                 //  Get token
                 const token = r.device_token;
-                console.log("token", token);
 
                 //  Build the payload
                 const payload = 
@@ -182,7 +175,8 @@ exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}
                     }
                 };
 
-                return console.log("payload", payload);
+                //  Ok, send the notification
+                return admin.messaging().sendToDevice(token, payload);
             });
 });
 
