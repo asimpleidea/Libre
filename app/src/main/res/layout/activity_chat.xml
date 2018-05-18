@@ -28,6 +28,7 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/ToolbarTheme.NoActionBar"
+        android:elevation="5dp"
         android:visibility="gone"
         >
 

@@ -80,13 +80,11 @@
                         android:textSize="12sp"
                          />
 
-                    <TextView
-                        android:id="@+id/messageIsRead"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="@string/message_read"
-                        android:visibility="gone"
-                        />
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:visibility="gone"
+                            android:id="@+id/messageIsRead"/>
 
                 </LinearLayout>
 
