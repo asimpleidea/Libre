@@ -15,146 +15,175 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-//  On partecipants created
-/*exports.generateChat = functions.firestore.document("chat_messages/{$chatId}/partecipants/{$userId}").onCreate((snapshot, context) => 
+exports.debugCreateChat = functions.https.onRequest((req, res) => 
 {
-    //  Original Value
-    const original = snapshot.data(),
-            chatId = context.params.chatId,
-            user = context.params.userId,
-            users = chatId.split('&');
+    const first = "first_user",
+          second = "second_user",
+          chat_id = first + "&" + second;
 
-    return console.log("original", original);
-    if(users.length != 2) return console.log("error: id is not correct");
+    const partecipants = 
+    {
+        first:
+        {
+            is_typing: false,
+            last_here: "2018-05-18T14:42:30Z"
+        },
+        second:
+        {
+            is_typing: false,
+            last_here: "0"
+        }
+    };
 
-    const otherUser = user === users[0] ? user[1] : user[0];
+    return Promise.all([    admin.firestore().doc("chat_messages/" + chat_id + "/partecipants/" + first).set(partecipants.first),
+                            admin.firestore().doc("chat_messages/" + chat_id + "/partecipants/" + second).set(partecipants.second)  ])
+                .then(results =>
+                {
+                    return res.sendStatus(200);
+                });           
 
-    const data = {};
-    data[otherUser] =   {
-                            chat_id : chatId
-                        };
-
-    return admin.firestore().document("chats/" + user).update(data);
-});*/
+});
 
 exports.createChat = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onCreate((snap, context) => 
 {
     //  Original value
-    const original = snap.data();
-            chatId = context.params.chatId,
+    const   chatId = context.params.chatId,
             user = context.params.userId,
             users = chatId.split('&');
 
     if(users.length !== 2) return console.log("error: id is not correct");
 
-    const otherUser = user === users[0] ? user[1] : user[0];
+    const otherUser = user === users[0] ? users[1] : users[0];
 
-    return admin.firestore().doc("chats/" + user + "/conversations/" + otherUser).set({chat_id : chatId});
+    return admin.firestore().doc("chats/" + user + "/conversations/" + otherUser).set({chat_id : chatId, partner_id: otherUser});
 });
 
-//  On New message
-exports.updateChat = functions.database.ref('/chat_messages/{chatId}/messages/{messageId}').onCreate((snapshot, context) => 
+exports.debugPostMessage = functions.https.onRequest((req, res) => 
 {
-    //  Original Value
-    const original = snapshot.val(),
-            chatId = context.params.chatId,
-            messageId = context.params.messageId;
-
-
-    return admin.database().ref("chat_messages/" + chatId + "/partecipants").once("value").then(snapshot =>
+    const chat_id = "6GlvXy7stFPDYzheZ7It5Nob0tf1&P1f7ozEcOQNgHvuMXL4tSDxapgF3";
+    var date = new Date();
+    
+    const message = 
     {
-        //  Get the users
-        const users = Object.keys(snapshot.val());
-
-        //  Wrong key number? this is actually impossible but who knows
-        if(users.length < 2 || users.length > 2) return false;
-
-        //  Generate the object
-        const last_message = {
-                                by : original.by,
-                                preview : original.content,
-                                id :  messageId,
-                                time : original.sent 
-                            };
-
-        //  Replicate
-        return Promise.all([    admin.database().ref("chats/" + users[0] + "/" + users[1] + "/last_message").update(last_message),
-                                admin.database().ref("chats/" + users[1] + "/" + users[0] + "/last_message").update(last_message) ]);
+        by: (('by' in req.query) ? "6GlvXy7stFPDYzheZ7It5Nob0tf1" : "P1f7ozEcOQNgHvuMXL4tSDxapgF3"),
+        content: (!('content' in req.query) ? "new content" : req.query.content),
+        sent: (date.toISOString().split('.')[0]+'Z'),
+        received: '0'
+    };
+            
+    return admin.firestore().collection("chat_messages/" + chat_id + "/messages").doc().set(message)
+    .then(s => 
+    {
+        return res.sendStatus(200);
     });
 });
 
-//  Send notifications
-exports.sendNotification = functions.database.ref("/chat_messages/{chatId}/messages/{messageId}").onCreate((snapshot, context) =>
+exports.debugPostTestMessage = functions.https.onRequest((req, res) => 
 {
-    const original = snapshot.val(),
-            src = original.by,
-
-    //  Get the data of the src
-    srcDataPromise = admin.database().ref("users/" + src).once("value"),
+    const chat_id = "first_user&second_user";
+    var date = new Date();
     
-    //  Get the user to be notified
-    partecipantsPromise = admin.database().ref("/chat_messages/" + context.params.chatId + "/partecipants").once("value");
-
-    //  Do something with those promises
-    return Promise.all([srcDataPromise, partecipantsPromise]).then(results => 
+    const message = 
     {
-        const srcData = results[0].val(),
-                partecipants = results[1].val(),
-                users = Object.keys(partecipants),
-                dest = users[0] === src ? users[1] : users[0];
+        by: (!('by' in req.query) ? "first_user" : "second_user"),
+        content: (!('content' in req.query) ? "new content" : req.query.content),
+        sent: (date.toISOString().split('.')[0]+'Z'),
+        received: '0'
+    };
+            
+    return admin.firestore().collection("chat_messages/" + chat_id + "/messages").doc().set(message)
+    .then(s => 
+    {
+        return res.sendStatus(200);
+    });
+});
 
-        console.log("srcData: ", srcData);
+exports.updateChat = functions.firestore.document('/chat_messages/{chatId}/messages/{messageId}').onCreate((snap, context) => 
+{
+    const chat_id = context.params.chatId,
+            message_id = context.params.messageId,
+            message = snap.data()
+            users = chat_id.split('&');
 
-        return admin.database().ref("users/" + dest).once("value")
-        .then((_d) =>
-        {
-            //  Has the device token?
-            if(!_d.hasChild("device_token")) return true;
-            if(_d.hasChild("status"))
+    //  Build the object
+    const data = 
+    {
+        last_message_id: message_id,
+        last_message_time: message.sent,
+        last_message_by: message.by,
+        preview: message.content
+    };
+
+    //  Create them
+    return Promise.all([    admin.firestore().doc("chats/" + users[0] + "/conversations/" + users[1]).update(data),
+                            admin.firestore().doc("chats/" + users[1] + "/conversations/" + users[0]).update(data)] );
+});
+
+exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}/messages/{messageId}').onCreate((snap, context) => 
+{
+    const chat_id = context.params.chatId,
+            message_id = context.params.messageId,
+            message = snap.data(),
+            users = chat_id.split('&'),
+            sender = message.by,
+            receiver = sender === users[0] ? users[1] : users[0];
+
+            console.log("sender id: ", sender);
+            console.log("receiver id: ", receiver);
+
+    return Promise.all([    admin.database().ref("users/" + receiver).once("value"),
+                            admin.database().ref("users/" + sender).once("value") ])
+            .then(results =>
             {
-                //  Don't send the notification if the user is in this chat
-                if(_d.child("status") === "online" && _d.child("in_chat") === context.params.chatId) return true;
-            }
+                if(results[0] === null || results[1] === null) return false;
 
+                const   r = results[0].val(),
+                        s = results[1].val();
+                
+                if(!("device_token" in r)) return console.log("user has not device token");
+            
+                console.log("receiver", r);
+                console.log("sender", s);
 
-
-            //  Image
-            const picType = ( function()
-            {
-                if('thumbnail_exists' in srcData) return "thumb";
-                if('has_image' in srcData) return "original";
-                return "uknown";
-            }());
-
-            //  Get data
-            const token = _d.child("device_token").val(),
-
-            //  Build the payload
-            payload = 
-            {
-                notification: 
+                //  Already in this chat?
+                if("status" in r)
                 {
-                    title: srcData.name,
-                    body: original.content,
-                },
-                data:
-                {
-                    partner_name: srcData.name,
-                    chat_id : context.params.chatId,
-                    last_message_id: context.params.messageId,
-                    last_message_time: original.sent,
-                    partner_id : src,
-                    partner_image : picType
+                    if(r.status === "online" && r.in_chat === chat_id) return console.log("user is already in this chat");
                 }
-            };
 
-            console.log("payload", payload);
+                //  Image type
+                const picType = ( function()
+                {
+                    if('thumbnail_exists' in s) return "thumb";
+                    if('has_image' in s) return "original";
+                    return "uknown";
+                }());
 
-            //  Ok, send the notification
-            return admin.messaging().sendToDevice(token, payload);
+                //  Get token
+                const token = r.device_token;
+                console.log("token", token);
 
-        }); 
-    });       
+                //  Build the payload
+                const payload = 
+                {
+                    notification: 
+                    {
+                        title: s.name,
+                        body: message.content,
+                    },
+                    data:
+                    {
+                        partner_name: s.name,
+                        chat_id : chat_id,
+                        last_message_id: message_id,
+                        last_message_time: message.sent,
+                        partner_id : sender,
+                        partner_image : picType
+                    }
+                };
+
+                return console.log("payload", payload);
+            });
 });
 
 //  Generate avatar thumb
