@@ -114,14 +114,20 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
         notifyItemRangeInserted(0, pushed)
     }
 
-    fun push(message : DataSnapshot, onTop : Boolean = false)
-    {
-        val c : ChatMessage? = message.getValue(ChatMessage::class.java)
-        push(c!!, onTop)
-    }
-
     fun push(message : ChatMessage, onTop : Boolean = false)
     {
+        val hourFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd MMMM", Locale.getDefault())
+        val date = (fun() : Date
+        {
+            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+
+            return df.parse(message.sent)
+        }())
+
+        message.time = hourFormat.format(date)
+        message.date = dateFormat.format(date)
+
         if(!onTop)
         {
             Messages.add(0, message)

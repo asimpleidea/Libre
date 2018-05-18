@@ -431,6 +431,8 @@ class ChatActivity : AppCompatActivity()
 
                         //  Update the oldest message, so when user scrolls up we know where to start from
                         OldestMessage = messages.last().data["sent"] as String
+
+
                     }
                 }
 
@@ -461,10 +463,13 @@ class ChatActivity : AppCompatActivity()
                     })
                 }
 
-                if(firstLoad) progressiveLoad("getFirstMessages")
+                if(firstLoad)
+                {
+                    progressiveLoad("getFirstMessages")
 
-                //  Listen for new messages
-                listenForNewMessages()
+                    //  Listen for new messages
+                    listenForNewMessages()
+                }
             }
     }
 
@@ -492,16 +497,28 @@ class ChatActivity : AppCompatActivity()
             {
                 synchronized(t.Adapter)
                 {
-                    NewestMessage = s.first().data["sent"] as String
-                    NewMessagesListener.remove()
+                    //NewestMessage = s.first().data["sent"] as String
 
                     //  Push the messages
-                    Adapter.bulkPush(s.toObjects(ChatMessage::class.java)/*.drop(Drop)*/, false)
+                    //  UPDATE: I need to do it like this, otherwise i would get all previous new messages
+                    for (d in s.documentChanges)
+                    {
+                        if(d.type == DocumentChange.Type.ADDED) Adapter.push(d.document.toObject(ChatMessage::class.java))
+                    }
+
+                    //  If we're at the bottom, keep going bottom
+                    if (ViewManager.isViewPartiallyVisible(RV.getChildAt(0), true, false))
+                    {
+                        RV.smoothScrollToPosition(0)
+                    }
+
+                    //Adapter.bulkPush(s.toObjects(ChatMessage::class.java)/*.drop(Drop)*/, false)
 
                     //  When you're done, redo this function again, so we can update Where clause and set it to the latest message
                     //  NOTE: doing it like this, prevents us from loading messages that are sent at the very same instant.
                     //  This is a very rare occasion, but who cares... this is still a university project, right?
-                    listenForNewMessages()
+                    //  UPDATE: THIS DOES NOT WORK IMMEDIATELY, MAKING ALL THE ABOVE POINTLESS. IT'S PROBABLY AN ISSUE FROM FIREBASE.
+                    //listenForNewMessages()
 
                     //  TODO: play sound after new partner messages is received?
                 }

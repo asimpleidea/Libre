@@ -36,6 +36,9 @@ class MessagingService : FirebaseMessagingService()
         //  Set the icon
         notificationBuilder.setSmallIcon(R.drawable.ic_icon_notification)
 
+        //  Set the visibility on screen shut
+        notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC)
+
         //  Does it have a notification body?
         if(p0.notification == null) return
 
