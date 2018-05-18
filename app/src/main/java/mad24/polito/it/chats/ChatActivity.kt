@@ -25,6 +25,10 @@ import mad24.polito.it.registrationmail.LoginActivity
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import android.view.animation.AnimationUtils
+import android.view.animation.Animation
+
+
 
 class ChatActivity : AppCompatActivity()
 {
@@ -192,8 +196,7 @@ class ChatActivity : AppCompatActivity()
 
                 //  Got user data
 
-                //  TODO: change this
-                TypingNotifier.text = "${p0.child("name").value} is typing... (THREE DOTS ANIMATION HERE?"
+                TypingNotifier.text = String.format(getString(R.string.partner_is_typing), p0.child("name").value)
 
                 //  Set my partner's name
                 findViewById<TextView>(R.id.theirName).text = p0.child("name").value as String
@@ -530,8 +533,12 @@ class ChatActivity : AppCompatActivity()
                 {
                     when(data["is_typing"])
                     {
-                        true -> (TypingNotifier.parent as CardView).visibility = View.VISIBLE
-                        false -> (TypingNotifier.parent as CardView).visibility = View.GONE
+                        true ->
+                        {
+
+                            TypingNotifier.visibility = View.VISIBLE
+                        }
+                        false -> TypingNotifier.visibility = View.GONE
 
                     }
                 }
