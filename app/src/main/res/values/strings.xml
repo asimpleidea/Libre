@@ -225,6 +225,9 @@
     <string name="channel_description">Get notified about new books and conversations</string>
     <string name="type_something">Type something…</string>
     <string name="partner_is_typing">%1$s is typing…</string>
+    <string name="last_online">Last seen: </string>
+    <string name="message_read">Read</string>
+    <string name="middot">\u2022</string>
     <!-- /Chat -->
 
 </resources>

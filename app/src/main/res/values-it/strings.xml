@@ -192,6 +192,7 @@
     <string name="channel_description">Ricevi notifiche riguardo gli ultimi messaggi</string>
     <string name="type_something">Scrivi qui…</string>
     <string name="partner_is_typing">%1$s sta scrivendo…</string>
+    <string name="message_read">Letto</string>
     <!-- /Chat -->
 
 </resources>

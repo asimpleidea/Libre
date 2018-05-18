@@ -66,6 +66,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:15.0.2'
     //  Is this the same as above?? Check this...
     implementation "com.android.support:support-compat:26.0.2"
+    //  relative time
+    implementation 'com.github.curioustechizen.android-ago:library:1.4.0'
 
 }
 

@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
@@ -154,11 +155,7 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
         {
             //  Was this message sent by me?
             //  Did my partner connect to this chat after this message?
-            if(PartnerLastAccess > Messages[position].sent || ParnerIsHere)
-            {
-                holder.Read.text = "DEBUG: message has been read"
-                holder.Read.visibility = View.VISIBLE
-            }
+            if(PartnerLastAccess > Messages[position].sent || ParnerIsHere) holder.Read.setImageResource(R.drawable.ic_read)
         }
 
         if(Messages.size == 0 || (Messages.size > 0 && position > 0 && Messages[position].date != Messages[position-1].date))
@@ -176,9 +173,8 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
         //  Set the content
         holder.Content.text = Messages[position].content
 
-        //  For debug purposes
-        holder.Sent.text = "${Messages[position].time}"
-        holder.Received.text = "DEBUG: received: ${Messages[position].received}"
+        //  Set the time
+        holder.Sent.text = Messages[position].time
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -187,12 +183,8 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
         var Container : LinearLayout
         var Card : CardView
         var DateDivider : TextView
-
-        //  Just for test:
-        var Align : TextView
         var Sent : TextView
-        var Received : TextView
-        var Read : TextView
+        var Read : ImageView
 
 
         init
@@ -201,13 +193,8 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
             Container = itemView.findViewById(R.id.messageContainer)
             Card = itemView.findViewById(R.id.messageContentCard)
             DateDivider = itemView.findViewById(R.id.dateDivider)
-
-            Align = itemView.findViewById(R.id.messageAlignment)
-            Sent = itemView.findViewById(R.id.messageSent)
-            Received = itemView.findViewById(R.id.messageReceived)
             Read = itemView.findViewById(R.id.messageIsRead)
-
-
+            Sent = itemView.findViewById(R.id.messageSent)
         }
     }
 

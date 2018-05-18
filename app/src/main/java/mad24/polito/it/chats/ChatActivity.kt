@@ -27,7 +27,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.view.animation.AnimationUtils
 import android.view.animation.Animation
-
+import com.github.curioustechizen.ago.RelativeTimeTextView
+import org.w3c.dom.Text
 
 
 class ChatActivity : AppCompatActivity()
@@ -63,7 +64,7 @@ class ChatActivity : AppCompatActivity()
     lateinit var Typer : AppCompatEditText
     lateinit var SubmitButton : ImageButton
     lateinit var ChatToolbar : Toolbar
-    lateinit var PartnerStatus : TextView
+    lateinit var PartnerStatus : RelativeTimeTextView //TextView
 
     lateinit var StopTyping : CountDownTimer
     var CountDownRunning : Boolean = false
@@ -357,7 +358,8 @@ class ChatActivity : AppCompatActivity()
                 {
                     if(u!!.isOnline)
                     {
-                        PartnerStatus.text = resources.getString(R.string.chat_status_online)
+                        findViewById<TextView>(R.id.status_teller).text = getString(R.string.chat_status_online)
+                        PartnerStatus.visibility = View.INVISIBLE
 
                         //  Is the user here?
                         when(u.in_chat.compareTo(ChatID) == 0)
@@ -369,7 +371,10 @@ class ChatActivity : AppCompatActivity()
                     else
                     {
                         Adapter.notHere()
-                        PartnerStatus.text = String.format(resources.getString(R.string.chat_last_seen, u.last_online))
+                        findViewById<TextView>(R.id.status_teller).text = getString(R.string.last_online)
+                        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+                        PartnerStatus.setReferenceTime(df.parse(u.last_online).time)
+                        PartnerStatus.visibility = View.VISIBLE
                     }
                 }
             }
@@ -533,11 +538,8 @@ class ChatActivity : AppCompatActivity()
                 {
                     when(data["is_typing"])
                     {
-                        true ->
-                        {
+                        true -> TypingNotifier.visibility = View.VISIBLE
 
-                            TypingNotifier.visibility = View.VISIBLE
-                        }
                         false -> TypingNotifier.visibility = View.GONE
 
                     }
