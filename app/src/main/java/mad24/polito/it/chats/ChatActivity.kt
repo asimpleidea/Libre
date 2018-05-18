@@ -221,12 +221,7 @@ class ChatActivity : AppCompatActivity()
                             }
                 }
 
-                synchronized(t.StuffLoaded)
-                {
-                    ++StuffLoaded
-                    Log.d("CHAT", "Loaded in load partner data: $StuffLoaded")
-                    if(StuffLoaded == StuffToLoad) show()
-                }
+                progressiveLoad("loadPartnerData")
             }
         })
     }
@@ -385,10 +380,10 @@ class ChatActivity : AppCompatActivity()
         //  Set it up
         MessagesCollection = FireStore.collection("chat_messages/$ChatID/messages")
 
-        getFirstMessages()
+        getFirstMessages(true)
     }
 
-    private fun getFirstMessages()
+    private fun getFirstMessages(firstLoad : Boolean = false)
     {
         //  Reference to this class
         val t = this
@@ -410,30 +405,27 @@ class ChatActivity : AppCompatActivity()
 
             //  Do something with the data
             .addOnCompleteListener { task ->
-                Log.d("CHAT", "getFirstMessages line 418")
                 if(!task.isSuccessful)
                 {
                     Log.w("CHAT", "Could not load previous chats!")
                     return@addOnCompleteListener
                 }
 
-                //  Hmm... wonder if these two are just the same thing
-                if(task.result.isEmpty || task.result.size() < 1) return@addOnCompleteListener
-
+                //  Get the messages
                 val messages = task.result
-                var checkLoad = false
 
-                //  Push the messages
-                synchronized(t.Adapter)
+                //  Hmm... wonder if these two are just the same thing
+                if(!messages.isEmpty && messages.size() > 0)
                 {
-                    //  Is this the first time?
-                    if(Adapter.itemCount == 0) checkLoad = true
-
                     //  Push the messages
-                    Adapter.bulkPush(messages.toObjects(ChatMessage::class.java))
+                    synchronized(t.Adapter)
+                    {
+                        //  Push the messages
+                        Adapter.bulkPush(messages.toObjects(ChatMessage::class.java))
 
-                    //  Update the oldest message, so when user scrolls up we know where to start from
-                    OldestMessage = messages.last().data["sent"] as String
+                        //  Update the oldest message, so when user scrolls up we know where to start from
+                        OldestMessage = messages.last().data["sent"] as String
+                    }
                 }
 
                 //  If we loaded less than we ask for, then we have to stop doing the scroll to top thing
@@ -463,15 +455,7 @@ class ChatActivity : AppCompatActivity()
                     })
                 }
 
-                if(checkLoad)
-                {
-                    synchronized(t.StuffLoaded)
-                    {
-                        ++StuffLoaded
-                        Log.d("CHAT", "loaded in getFirstMessages: $StuffLoaded")
-                        if(StuffLoaded == StuffToLoad) show()
-                    }
-                }
+                if(firstLoad) progressiveLoad("getFirstMessages")
 
                 //  Listen for new messages
                 listenForNewMessages()
@@ -632,12 +616,7 @@ class ChatActivity : AppCompatActivity()
             return@OnKeyListener false
         })
 
-        synchronized(t.StuffLoaded)
-        {
-            ++StuffLoaded
-            Log.d("CHAT", "loaded in typing observer: $StuffLoaded")
-            if(StuffLoaded == StuffToLoad) show()
-        }
+        progressiveLoad("typingObserver")
     }
 
     private fun setUpButtonEvent()
@@ -702,12 +681,7 @@ class ChatActivity : AppCompatActivity()
                                 //  The chat has been created! Let's update this status
                                 updateMyStatus(true, "", ChatID)
 
-                                synchronized(t.StuffLoaded)
-                                {
-                                    ++StuffLoaded
-                                    Log.d("CHAT", "loaded in create conversaiont: $StuffLoaded")
-                                    if(StuffLoaded == StuffToLoad) show()
-                                }
+                                progressiveLoad()
 
                                 //  Set up stuff
                                 setUps()
@@ -799,5 +773,15 @@ class ChatActivity : AppCompatActivity()
         if(::NewMessagesListener.isInitialized) NewMessagesListener.remove()
 
         //  TODO: Remove events as well? I think that is not necessary
+    }
+
+    private fun progressiveLoad(from : String = "")
+    {
+        synchronized(StuffLoaded)
+        {
+            ++StuffLoaded
+            if(!from.isBlank()) Log.d("CHAT", "loaded from $from: $StuffLoaded")
+            if(StuffLoaded == StuffToLoad) show()
+        }
     }
 }
