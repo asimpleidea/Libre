@@ -190,7 +190,8 @@
     <string name="chat_last_seen">Ultimo accesso: %1$s</string>
     <string name="channel_name">MAD24</string>
     <string name="channel_description">Ricevi notifiche riguardo gli ultimi messaggi</string>
-    <string name="type_something">Type something…</string>
+    <string name="type_something">Scrivi qui…</string>
+    <string name="partner_is_typing">%1$s sta scrivendo…</string>
     <!-- /Chat -->
 
 </resources>

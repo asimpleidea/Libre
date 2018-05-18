@@ -7,9 +7,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.AppCompatEditText
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.*
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.KeyEvent
@@ -195,7 +193,7 @@ class ChatActivity : AppCompatActivity()
                 //  Got user data
 
                 //  TODO: change this
-                TypingNotifier.text = "${p0.child("name")} is typing... (THREE DOTS ANIMATION HERE?"
+                TypingNotifier.text = "${p0.child("name").value} is typing... (THREE DOTS ANIMATION HERE?"
 
                 //  Set my partner's name
                 findViewById<TextView>(R.id.theirName).text = p0.child("name").value as String
@@ -532,8 +530,8 @@ class ChatActivity : AppCompatActivity()
                 {
                     when(data["is_typing"])
                     {
-                        true -> TypingNotifier.visibility = View.VISIBLE
-                        false -> TypingNotifier.visibility = View.GONE
+                        true -> (TypingNotifier.parent as CardView).visibility = View.VISIBLE
+                        false -> (TypingNotifier.parent as CardView).visibility = View.GONE
 
                     }
                 }

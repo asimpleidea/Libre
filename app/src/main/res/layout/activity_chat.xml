@@ -72,25 +72,42 @@
         android:layout_height="0dp"
         android:scrollbars="vertical"
         android:layout_margin="2dp"
-        app:layout_constraintBottom_toTopOf="@+id/userIsTyping"
+        app:layout_constraintBottom_toTopOf="@+id/userIsTypingContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chatToolbar"
         android:visibility="gone">
     </android.support.v7.widget.RecyclerView>
 
-    <TextView
-        android:id="@+id/userIsTyping"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@+id/messagesContainer"
-        android:animateLayoutChanges="true"
-        android:visibility="gone"
+    <android.support.v7.widget.CardView
+        android:id="@+id/userIsTypingContainer"
+        android:layout_width="wrap_content"
+        android:maxWidth="200dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="2dp"
+        app:cardPreventCornerOverlap="false"
+        app:contentPaddingBottom="5dp"
+        app:contentPaddingTop="5dp"
+        app:contentPaddingLeft="10dp"
+        app:contentPaddingRight="10dp"
+        android:minWidth="25dp"
+        app:cardBackgroundColor="#e6b798"
         app:layout_constraintBottom_toTopOf="@+id/navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/messagesContainer" />
+        app:layout_constraintTop_toBottomOf="@+id/messagesContainer"
+        android:layout_below="@+id/messagesContainer"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/userIsTyping"
+            android:layout_width="wrap_content"
+            android:maxWidth="150dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:animateLayoutChanges="true"
+            />
+    </android.support.v7.widget.CardView>
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
@@ -143,13 +160,6 @@
                     android:background="@color/transparent"
                     android:src="@drawable/ic_icon_send"
                     android:visibility="gone"/>
-                <!--<Button
-                    android:id="@+id/submitButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:text="Button" />-->
 
             </RelativeLayout>
         </LinearLayout>
