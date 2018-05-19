@@ -57,6 +57,9 @@ import mad24.polito.it.registrationmail.LoginActivity;
 import mad24.polito.it.registrationmail.SignupMailActivity;
 
 public class ManualInsertActivity extends AppCompatActivity {
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION;
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
 
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
@@ -162,7 +165,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         //get data from Firebase Database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference("users");
+        DatabaseReference usersRef = database.getReference(FIREBASE_DATABASE_LOCATION_USERS);
 
         //get coordinates
         usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
@@ -458,7 +461,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 selectedGenres.add(i);
         }
 
-        DatabaseReference mRef = mDatabase.child("books");
+        DatabaseReference mRef = mDatabase.child(FIREBASE_DATABASE_LOCATION_BOOKS);
         String bookKey = mRef.push().getKey();
         Date date = new Date();
 //        Log.d("anotherbug", (mBitmap==null)?"no image":"there is something!");
@@ -478,7 +481,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 date,
                 selectedGenres));
 
-        GeoFire geoFire = new GeoFire(mDatabase.child("locationBooks"));
+        GeoFire geoFire = new GeoFire(mDatabase.child(FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION));
 
         SharedPreferences prefs = getSharedPreferences("location", MODE_PRIVATE);
         geoFire.setLocation(bookKey, new GeoLocation(lat, lon), new GeoFire.CompletionListener() {
@@ -493,9 +496,9 @@ public class ManualInsertActivity extends AppCompatActivity {
         });
 
 //        Log.d("anotherbug", "book uploaded");
-        mRef = mDatabase.child("users");
+        mRef = mDatabase.child(FIREBASE_DATABASE_LOCATION_USERS);
 
-        mRef.child(FirebaseAuth.getInstance().getUid()).child("books").child(bookKey).setValue(true);
+        mRef.child(FirebaseAuth.getInstance().getUid()).child(FIREBASE_DATABASE_LOCATION_BOOKS).child(bookKey).setValue(true);
 
         Toast.makeText(this, getString(R.string.book_submitted),Toast.LENGTH_LONG).show();
         finish();

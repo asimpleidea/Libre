@@ -154,6 +154,17 @@
     <!-- search strings -->
     <string name="search_search">Search...</string>
     <string name="search_noResults">No results in your area</string>
+    <string name="search_searchBy">Search by</string>
+    <string name="search_searchBy_all">All fields</string>
+    <string name="search_searchBy_title">Title</string>
+    <string name="search_searchBy_author">Author</string>
+    <string name="search_searchInArea">Search in the area of</string>
+    <string name="search_searchPlaceholderCity">Insert a city</string>
+    <string name="search_searchGenre">Genres</string>
+    <string name="search_yourPosition">Your position</string>
+
+    <!-- homepage strings -->
+    <string name="homepage_noBooks">No books in your area. Be the first!</string>
 
     <!--upload strings -->
     <string name="manualInsert_uploadSuccessful">Upload successful</string>

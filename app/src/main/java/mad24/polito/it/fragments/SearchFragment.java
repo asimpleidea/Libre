@@ -1,27 +1,47 @@
 package mad24.polito.it.fragments;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -33,23 +53,37 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.Semaphore;
 
+import mad24.polito.it.BooksActivity;
+import mad24.polito.it.PlaceArrayAdapter;
 import mad24.polito.it.R;
 import mad24.polito.it.RecyclerViewAdapter;
+import mad24.polito.it.locator.LocatorEventsListener;
+import mad24.polito.it.locator.LocatorSearch;
 import mad24.polito.it.models.Book;
 import mad24.polito.it.models.UserMail;
+import mad24.polito.it.radiobutton.PresetRadioGroup;
+import mad24.polito.it.radiobutton.PresetValueButton;
+import mad24.polito.it.search.RecyclerViewAdapterGenre;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SearchFragment extends Fragment {
+public class SearchFragment extends Fragment implements
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+    public static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION;
+
+    private final double RADIUS = 100;
 
     View v;
 
-    SearchView searchView;
+    private SearchView searchView;
 
     // Android Layout
     private RecyclerView rv;
@@ -62,7 +96,14 @@ public class SearchFragment extends Fragment {
 
     private String currentQuery = new String("");
 
-    LinearLayoutManager mLayoutManager;
+    private LinearLayoutManager mLayoutManager;
+    private LinearLayout searchOptions;
+    private PresetRadioGroup mSetDurationPresetRadioGroup;
+    private AutoCompleteTextView city;
+    private TextView emptyView;
+
+    String searchBy;
+    private String[] genresList;
 
     Context context;
 
@@ -70,11 +111,26 @@ public class SearchFragment extends Fragment {
 
     private ArrayList<String> keyBooks = new ArrayList<String>();
 
+    private static final int GOOGLE_API_CLIENT_ID = 1;
+    private GoogleApiClient mGoogleApiClient;
+    private PlaceArrayAdapter mPlaceArrayAdapter;
+    private static final LatLngBounds BOUNDS_MOUNTAIN_VIEW = new LatLngBounds(
+            new LatLng(37.398160, -122.180831), new LatLng(37.430610, -121.972090));
+
+    private double lat;
+    private double lon;
+    private Double latGPS = null;
+    private Double lonGPS = null;
+
+    private Semaphore semaphoreGps = new Semaphore(1);
+    private boolean isGps;
+    LocatorSearch locator;
+
+    private RecyclerViewAdapterGenre myAdapter;
 
     public SearchFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,13 +142,88 @@ public class SearchFragment extends Fragment {
         ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
 
         searchView = (SearchView) v.findViewById(R.id.search_searchView);
+        searchOptions = (LinearLayout) v.findViewById(R.id.search_searchOptions);
+        mSetDurationPresetRadioGroup = (PresetRadioGroup) v.findViewById(R.id.preset_time_radio_group);
+        city = (AutoCompleteTextView) v.findViewById(R.id.search_autoCompleteCity);
+        emptyView = (TextView) v.findViewById(R.id.search_emptyView);
+        genresList = getResources().getStringArray(R.array.genres);
+
+        //event clicking the "search by" radio buttons
+        mSetDurationPresetRadioGroup.setOnCheckedChangeListener(new PresetRadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(View radioGroup, View radioButton, boolean isChecked, int checkedId) {
+                Log.d("debug", "ID:"+checkedId);
+                searchBy = ((PresetValueButton) radioButton).getValue();
+            }
+        });
+
+        //by default --> search by keyword
+        searchBy = getResources().getString(R.string.search_searchBy_all);
+
+        //by default --> "All fields" radio button is selected
+        PresetValueButton buttonSearchByAll = (PresetValueButton) v.findViewById(R.id.search_searchBy_all);
+        buttonSearchByAll.setChecked(true);
+
+        //hide keyboard if you click away
+        city.setOnFocusChangeListener(eventFocusChangeListenerCity);
+
+        //set city suggestion
+        if(mGoogleApiClient == null || !mGoogleApiClient.isConnected() ) {
+            try {
+                mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                        .addApi(Places.GEO_DATA_API)
+                        //.enableAutoManage(getActivity(), GOOGLE_API_CLIENT_ID, this)
+                        .addConnectionCallbacks(this)
+                        .addOnConnectionFailedListener(this)
+                        .build();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        final float scale = getContext().getResources().getDisplayMetrics().density;
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+            city.setDropDownHeight((int)(50 * scale));  //if landscape --> 1 suggestion
+        else
+            city.setDropDownHeight((int)(150 * scale));   //if portrait --> 3 suggestions
+
+        city.setOnItemClickListener(mAutocompleteClickListener);
+        mPlaceArrayAdapter = new PlaceArrayAdapter(getContext(), android.R.layout.simple_list_item_1,
+                BOUNDS_MOUNTAIN_VIEW,
+                new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES).build());
+        city.setAdapter(mPlaceArrayAdapter);
+
+        //set genre buttons
+        RecyclerView myrv = (RecyclerView) v.findViewById(R.id.search_genres);
+        myAdapter = new RecyclerViewAdapterGenre(getContext(), new ArrayList<Integer>(), this);
+        myrv.setLayoutManager(new GridLayoutManager(getContext(),3));
+        myrv.setAdapter(myAdapter);
+
+        //  Get user's current location
+
+        /*try{
+            semaphoreGps.acquire();
+        } catch (Exception e) {
+
+        }*/
+
+        //getLocationGPS();
+
+        //set event GPS location button
+        ((ImageButton) v.findViewById(R.id.search_buttonLocation)).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                getLocationGPS();
+            }
+        });
 
         //get user auth
         FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
 
         //get data from Firebase Database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference("users");
+        DatabaseReference usersRef = database.getReference(FIREBASE_DATABASE_LOCATION_USERS);
 
         usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
             @Override
@@ -100,12 +231,38 @@ public class SearchFragment extends Fragment {
                 //get User object
                 UserMail user = snapshot.getValue(UserMail.class);
 
-                //get coordinates
-                Double lat = user.getLat();
-                Double lon = user.getLon();
+                //set genre buttons
+                ArrayList<Integer> listGenres = new ArrayList<>();
+                ArrayList<Integer> favouriteGenres = user.getGenres();
 
-                //get coordinates and nearby books
-                getKeys(lat, lon);
+                if(favouriteGenres != null) {
+                    for(int genre : favouriteGenres)
+                    listGenres.add(genre);
+                }
+
+                for(int i=0; i < 17; i++) {
+                    if(favouriteGenres == null || !favouriteGenres.contains(i))
+                        listGenres.add(i);
+                }
+
+                myAdapter.addAll(listGenres);
+
+                try {
+                    //semaphoreGps.acquire();
+
+                    //if(!isGps) {
+                        //get coordinates
+                        lat = user.getLat();
+                        lon = user.getLon();
+
+                        city.setText(user.getCity());
+                    //}
+                } catch (Exception e) {
+
+                }
+
+                //get nearby books
+                getKeys(lat, lon, RADIUS);
             }
 
             @Override
@@ -141,10 +298,6 @@ public class SearchFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //inflater.inflate(R.menu.menu_search, menu);
-        //MenuItem searchItem = menu.findItem(R.id.search_searchMenu);
-        //searchItem.expandActionView();
-
         rv = (RecyclerView) v.findViewById(R.id.search_bookList);
         mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
@@ -158,6 +311,9 @@ public class SearchFragment extends Fragment {
                     if(!semaphoreKeyPrepared)
                         return false;
                 }
+
+                rv.setVisibility(View.VISIBLE);
+                searchOptions.setVisibility(View.GONE);
 
                 synchronized (currentQuery) {
                     itemCount = 0;
@@ -201,8 +357,16 @@ public class SearchFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(final String query) {
-                if(query.length() < 3)
+                if(query.length() < 3) {
+                    if(query.length() < 1) {
+                        searchOptions.setVisibility(View.VISIBLE);
+                        rv.setVisibility(View.GONE);
+                    }
                     return false;
+                }
+
+                searchOptions.setVisibility(View.GONE);
+                rv.setVisibility(View.VISIBLE);
 
                 synchronized (semaphoreKeyPrepared) {
                     if(!semaphoreKeyPrepared)
@@ -265,7 +429,7 @@ public class SearchFragment extends Fragment {
             number = itemCount++;
         }
 
-        v.findViewById(R.id.search_emptyView).setVisibility(View.GONE);
+        emptyView.setVisibility(View.GONE);
 
         query = FirebaseDatabase.getInstance().getReference()
                 .child(FIREBASE_DATABASE_LOCATION_BOOKS)
@@ -288,23 +452,48 @@ public class SearchFragment extends Fragment {
                         return;
 
                     //search for a matching
-                    if (book.getTitle().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getTitle().toLowerCase()) ) {
+                    if ( (searchBy.equals(getResources().getString(R.string.search_searchBy_all)) || searchBy.equals(getResources().getString(R.string.search_searchBy_title)) ) &&
+                            (book.getTitle().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getTitle().toLowerCase()) ) ) {
                         recyclerViewAdapter.add(book);
                         remained--;
-                    } else if (book.getAuthor().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getAuthor().toLowerCase()) ) {
+                    } else if ( (searchBy.equals(getResources().getString(R.string.search_searchBy_all)) || searchBy.equals(getResources().getString(R.string.search_searchBy_author)) ) &&
+                            (book.getAuthor().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getAuthor().toLowerCase()) ) ) {
                         recyclerViewAdapter.add(book);
                         remained--;
-                    } else if(book.getIsbn().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getIsbn().toLowerCase()) ) {
+                    } else if(searchBy.equals(getResources().getString(R.string.search_searchBy_all)) &&
+                            (book.getIsbn().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getIsbn().toLowerCase()) ) ) {
                         recyclerViewAdapter.add(book);
                         remained--;
-                    } else if(book.getPublisher() != null && !book.getPublisher().isEmpty()) {
+                    } else if(searchBy.equals(getResources().getString(R.string.search_searchBy_all)) &&
+                            (book.getPublisher() != null && !book.getPublisher().isEmpty() ) ) {
                         if(book.getPublisher().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getPublisher().toLowerCase()) ) {
                             recyclerViewAdapter.add(book);
                             remained--;
                         }
-                    }
+                    } else if(searchBy.equals(getResources().getString(R.string.search_searchBy_all)) ) {
+                        if(book.getGenres() != null) {
+                            int indexGenre = -1;
 
-                    //check match on genre
+                            //find index of genre
+                            for(int i=0; i < genresList.length; i++) {
+                                if (genresList[i].toLowerCase().equals(keywordLowerCase)) {
+                                    indexGenre = i;
+                                    break;
+                                }
+                            }
+
+                            if(indexGenre > -1) {
+                                //Has the book the selected genre?
+                                for (int genre : book.getGenres()) {
+                                    if (indexGenre == genre) {
+                                        recyclerViewAdapter.add(book);
+                                        remained--;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     break;
                 }
@@ -312,9 +501,9 @@ public class SearchFragment extends Fragment {
                 //if not much books are found
                 getBooks(keyword, remained);
                 if(mLayoutManager.getItemCount() < 1) {
-                    v.findViewById(R.id.search_emptyView).setVisibility(View.VISIBLE);
+                    emptyView.setVisibility(View.VISIBLE);
                 } else {
-                    v.findViewById(R.id.search_emptyView).setVisibility(View.GONE);
+                    emptyView.setVisibility(View.GONE);
                 }
 
                 mIsLoading = false;
@@ -327,15 +516,15 @@ public class SearchFragment extends Fragment {
         });
     }
 
-    public void getKeys(double lat, double lon) {
+    public void getKeys(double lat, double lon, double radius) {
         semaphoreKeyPrepared = false;
 
         keyBooks = new ArrayList<>();
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("locationBooks");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION);
         GeoFire geoFire = new GeoFire(ref);
 
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lon), 100);
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lon), radius);
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
@@ -357,6 +546,11 @@ public class SearchFragment extends Fragment {
             @Override
             public void onGeoQueryReady() {
                 //Log.d("debug", "OnGeoQueryReady - all keys are loaded");
+                if(keyBooks.isEmpty()) {
+                    emptyView.setVisibility(View.VISIBLE);
+                } else {
+                    emptyView.setVisibility(View.GONE);
+                }
 
                 //reverse array to have on top the nearest and most recent
                 Collections.reverse(keyBooks);
@@ -369,6 +563,177 @@ public class SearchFragment extends Fragment {
             }
         });
     }
+
+    private AdapterView.OnItemClickListener mAutocompleteClickListener
+            = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            final PlaceArrayAdapter.PlaceAutocomplete item = mPlaceArrayAdapter.getItem(position);
+            final String placeId = String.valueOf(item.placeId);
+            //Log.i("google places api", "Selected: " + item.description);
+            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                    .getPlaceById(mGoogleApiClient, placeId);
+            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+            //Log.i("google places api", "Fetching details for ID: " + item.placeId);
+
+            //selectedCity = item.description.toString();
+            //idSelectedCity = item.placeId.toString();
+
+            InputMethodManager in = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+        }
+    };
+
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                //Log.e(LOG_TAG, "Place query did not complete. Error: " + places.getStatus().toString());
+                return;
+            }
+            // Selecting the first object buffer.
+            final Place place = places.get(0);
+            LatLng latlng = place.getLatLng();
+            lat = latlng.latitude;
+            lon = latlng.longitude;
+
+            getKeys(lat, lon, RADIUS);
+            //Log.v("Latitude is", "" + latlng.latitude);
+            //Log.v("Longitude is", "" + latlng.longitude);
+        }
+    };
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mPlaceArrayAdapter.setGoogleApiClient(mGoogleApiClient);
+        //Log.i("google places api", "Google Places API connected.");
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        //Log.e("google places api", "Google Places API connection failed with error code: " + connectionResult.getErrorCode());
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mPlaceArrayAdapter.setGoogleApiClient(null);
+        //Log.e("google places api", "Google Places API connection suspended.");
+    }
+
+    //hide keyboard when you click away the EditText
+    View.OnFocusChangeListener eventFocusChangeListenerCity = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
+                InputMethodManager inputMethodManager =(InputMethodManager)getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                String insertedCity = city.getText().toString();
+                ArrayList<PlaceArrayAdapter.PlaceAutocomplete> list = mPlaceArrayAdapter.getListAutocomplete();
+                if(list != null && list.size() > 0) {
+                    for (PlaceArrayAdapter.PlaceAutocomplete element : list) {
+                        if (element.description.equals(insertedCity)) {
+                            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                                    .getPlaceById(mGoogleApiClient, list.get(0).placeId.toString());
+                            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+                            city.setText(list.get(0).description);
+                            return;
+                        }
+                    }
+
+                    PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                            .getPlaceById(mGoogleApiClient, list.get(0).placeId.toString());
+                    placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+                    city.setText(list.get(0).description);
+                }
+            }
+        }
+    };
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            //mGoogleApiClient.stopAutoManage(getActivity());
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    public final void selectGenre(int genre) {
+        mSetDurationPresetRadioGroup.check( ((PresetValueButton) v.findViewById(R.id.search_searchBy_all)).getId() );
+        //searchBy = getResources().getString(R.string.search_searchBy_all);
+        searchView.setQuery(genresList[genre], true);
+    }
+
+    public void getLocationGPS() {
+        if(latGPS != null && lonGPS != null) {
+            lat = latGPS;
+            lon = lonGPS;
+            city.setText(getResources().getString(R.string.search_yourPosition));
+            isGps = true;
+
+            //get coordinates and nearby books
+            getKeys(lat, lon, RADIUS);
+            return;
+        }
+
+        //  Get user's current location
+        locator = new LocatorSearch(getActivity(), context, new LocatorEventsListener() {
+
+            @Override
+            public void onSuccess(double latitude, double longitude) {
+                lat = latitude;
+                lon = longitude;
+                latGPS = lat;
+                lonGPS = lon;
+                city.setText(getResources().getString(R.string.search_yourPosition));
+
+                isGps = true;
+                semaphoreGps.release();
+                Log.d("debug", "OnSuccess");
+                locator.removeListener();
+            }
+
+            @Override
+            public void onFailure() {
+                isGps = false;
+                semaphoreGps.release();
+                Log.d("debug", "OnFailure");
+                locator.removeListener();
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                isGps = false;
+                semaphoreGps.release();
+                Log.d("debug", "OnPermissionDenied");
+                locator.removeListener();
+            }
+        });
+
+    }
+
+    /*@Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putDouble("Lat", lat);
+        outState.putDouble("Lon", lat);
+        outState.putDouble("LatGPS", latGPS);
+        outState.putDouble("LonGPS", lonGPS);
+    }*/
 
 }
 

@@ -34,6 +34,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
+import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;
 import mad24.polito.it.models.Book;
 import mad24.polito.it.models.UserMail;
@@ -49,6 +50,8 @@ import mad24.polito.it.models.UserMail;
  */
 public class BookMapFragment extends Fragment
 {
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+
     private View RootView = null;
     private MapView mMapView = null;
     private GoogleMap googleMap = null;
@@ -92,7 +95,7 @@ public class BookMapFragment extends Fragment
             if (TheBook != null) {
                 UID = TheBook.getUser_id();
                 DB = FirebaseDatabase.getInstance().getReference()
-                        .child("users/" + UID);
+                        .child(FIREBASE_DATABASE_LOCATION_USERS +"/" + UID);
             }
         }
     }

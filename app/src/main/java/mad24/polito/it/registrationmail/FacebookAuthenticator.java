@@ -66,6 +66,8 @@ import mad24.polito.it.models.UserMail;
  */
 public class FacebookAuthenticator
 {
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+
     /**
      * The action types
      */
@@ -327,7 +329,7 @@ public class FacebookAuthenticator
                             //  User already exists?
                             //----------------------------------
 
-                            DB.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+                            DB.child(FIREBASE_DATABASE_LOCATION_USERS).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot)
                                 {
@@ -461,7 +463,7 @@ public class FacebookAuthenticator
     private void pushUser(final UserMail u, final FirebaseUser logged)
     {
         //  Finally, store user to DB!
-        DB.child("users")
+        DB.child(FIREBASE_DATABASE_LOCATION_USERS)
                 .child(logged.getUid())
                 .setValue(u, new DatabaseReference.CompletionListener()
                 {

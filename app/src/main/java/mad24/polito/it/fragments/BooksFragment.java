@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -30,6 +31,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
 
 import mad24.polito.it.*;
 import mad24.polito.it.fragments.viewbook.ViewBookFragment;
@@ -49,7 +52,9 @@ import java.util.stream.Collectors;
  */
 public class BooksFragment extends Fragment {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION;
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
 
     /**
      * Distance threshold.
@@ -57,8 +62,8 @@ public class BooksFragment extends Fragment {
      * TODO: Get a good threshold value here. From previous tests 20 seems too low; 100 seems to suit it better
      */
     private final float SCROLL_THRESHOLD = 100;
-    private final int RADIUS = 100;
-    private final int RADIUS_LARGER = 1000;
+    private final double RADIUS = 100;
+    private final double RADIUS_LARGER = 1000;
 
     View v;
 
@@ -66,6 +71,7 @@ public class BooksFragment extends Fragment {
     private RecyclerView rv;
     private RecyclerViewAdapter recyclerViewAdapter;
     private FloatingActionButton new_book_button;
+    private TextView emptyText;
 
     // Array lists
     private List<Book> books;
@@ -120,6 +126,7 @@ public class BooksFragment extends Fragment {
 
         rv = (RecyclerView) v.findViewById(R.id.book_list);
         new_book_button = (FloatingActionButton) v.findViewById(R.id.newBookBtn);
+        emptyText = (TextView) v.findViewById(R.id.homepage_emptyView);
 
         final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
@@ -134,7 +141,7 @@ public class BooksFragment extends Fragment {
 
         //get data from Firebase Database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference("users");
+        DatabaseReference usersRef = database.getReference(FIREBASE_DATABASE_LOCATION_USERS);
 
         usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
             @Override
@@ -463,7 +470,7 @@ public class BooksFragment extends Fragment {
         }
     }
 
-    public void getKeys(final double lat, final double lon, long radius) {
+    public void getKeys(final double lat, final double lon, final double radius) {
         synchronized (semaphoreGetKeys) {
             if(semaphoreGetKeys.booleanValue() == false)
                 return;
@@ -478,7 +485,7 @@ public class BooksFragment extends Fragment {
         keyBooks = new ArrayList<>();
         final long time = timestampKey;
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("locationBooks");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION);
         GeoFire geoFire = new GeoFire(ref);
 
         final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lon), radius);
@@ -509,10 +516,17 @@ public class BooksFragment extends Fragment {
                         semaphoreGetKeys = true;
                     }
 
+                    if(radius >= RADIUS_LARGER) {
+                        emptyText.setVisibility(View.VISIBLE);
+                        return;
+                    }
+
                     getKeys(lat, lon, RADIUS_LARGER);
                     geoQuery.removeGeoQueryEventListener(this);
                     return;
                 }
+
+                emptyText.setVisibility(View.GONE);
 
                 //set Adapter
                 recyclerViewAdapter = new RecyclerViewAdapter(getContext(), new ArrayList<Book>());

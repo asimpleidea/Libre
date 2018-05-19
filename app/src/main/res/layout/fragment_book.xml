@@ -18,11 +18,29 @@
         android:tint="@color/colorWhite"
         />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/book_list"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent">
 
-    </android.support.v7.widget.RecyclerView>
+        <TextView
+            android:id="@+id/homepage_emptyView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/search_noResults"
+            android:textSize="20dp"
+            android:gravity="center_horizontal"
+            android:visibility="gone" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/book_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+        </android.support.v7.widget.RecyclerView>
+
+
+
+    </RelativeLayout>
 
 </FrameLayout>
