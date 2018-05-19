@@ -115,8 +115,35 @@ exports.updateChat = functions.firestore.document('/chat_messages/{chatId}/messa
     };
 
     //  Create them
-    return Promise.all([    admin.firestore().doc("chats/" + users[0] + "/conversations/" + users[1]).update(data),
-                            admin.firestore().doc("chats/" + users[1] + "/conversations/" + users[0]).update(data)] );
+    return Promise.all([    admin.firestore().doc("chats/" + users[0] + "/conversations/" + users[1]).get(),
+                            admin.firestore().doc("chats/" + users[0] + "/conversations/" + users[1]).update(data),
+                            admin.firestore().doc("chats/" + users[1] + "/conversations/" + users[0]).update(data)] )
+            .then(results =>
+                {
+                    const r = results[0],
+                        newDay = message.sent.split('T')[0];
+                        let needFirst = false;
+
+                    if (r.exists && 'last_message_time' in r.data())
+                    {
+                        if(r.data().last_message_time.split('T')[0] !== newDay) needFirst = true;
+                    }
+                    else 
+                    {
+                        console.log("no messages there");
+                        needFirst = true;
+                    }
+
+                    return needFirst;
+                })
+                .then( first => 
+                    {
+                    
+                        if(!first) return;
+
+                        return admin.firestore().doc("/chat_messages/" + chat_id + "/messages/" + message_id).update({firstOfTheDay : true});
+                    
+                    });
 });
 
 exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}/messages/{messageId}').onCreate((snap, context) => 
