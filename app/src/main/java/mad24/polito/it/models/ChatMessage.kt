@@ -1,7 +1,7 @@
 package mad24.polito.it.models
 
-import android.R.attr.data
 import com.google.firebase.firestore.Exclude
+import java.util.*
 
 
 class ChatMessage constructor(_content: String = "", _by : String = "", _sent: String = "")
@@ -13,11 +13,16 @@ class ChatMessage constructor(_content: String = "", _by : String = "", _sent: S
     //  Because it is not received yet
     var received = "0"
 
-    @Exclude
     var time : String = ""
+        @Exclude get
 
-    @Exclude
     var date : String = ""
+        @Exclude get
+
+    var day : String = ""
+        @Exclude get
+
+    var firstOfTheDay : Boolean = false
 
     //@Exclude
     //var dateTime : Date = ""

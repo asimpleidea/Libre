@@ -507,7 +507,7 @@ class ChatActivity : AppCompatActivity()
                     }
 
                     //  If we're at the bottom, keep going bottom
-                    if (ViewManager.isViewPartiallyVisible(RV.getChildAt(0), true, false))
+                    if (Adapter.itemCount > 1 && ViewManager.isViewPartiallyVisible(RV.getChildAt(0), true, false))
                     {
                         RV.smoothScrollToPosition(0)
                     }

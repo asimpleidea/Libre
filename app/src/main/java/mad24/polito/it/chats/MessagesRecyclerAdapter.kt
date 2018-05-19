@@ -1,6 +1,7 @@
 package mad24.polito.it.chats
 
 import android.content.Context
+import android.os.Message
 import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -30,6 +31,7 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
     private var ParnerIsHere : Boolean = false
     private var Messages : ArrayList<ChatMessage> = ArrayList()
     private var LastDate : String? = null
+    private var PreviousHolder : ViewHolder? = null
 
     private val MY_MESSAGE = 0
     private val PARTNER_MESSAGE = 1
@@ -96,6 +98,7 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
 
             c.time = hourFormat.format(date)
             c.date = dateFormat.format(date)
+            c.day = c.sent.split('T')[0]
 
             if(queue) Messages.add(c)
             else
@@ -164,16 +167,10 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
             if(PartnerLastAccess > Messages[position].sent || ParnerIsHere) holder.Read.setImageResource(R.drawable.ic_read)
         }
 
-        if(Messages.size == 0 || (Messages.size > 0 && position > 0 && Messages[position].date != Messages[position-1].date))
+        if(Messages.size == 1 || Messages[position].firstOfTheDay)
         {
-            if(Messages.size == 0) holder.DateDivider.text = Messages[position].date
-            else
-            {
-                if(position > 0) holder.DateDivider.text = Messages[position-1].date
-                else holder.DateDivider.text = Messages[position+1].date
-            }
-
-            (holder.DateDivider.parent as FrameLayout).visibility = View.VISIBLE
+            holder.DateDivider.text = Messages[position].date
+            holder.DateDivider.visibility = View.VISIBLE
         }
 
         //  Set the content
@@ -181,6 +178,8 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
 
         //  Set the time
         holder.Sent.text = Messages[position].time
+
+        PreviousHolder = holder
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
