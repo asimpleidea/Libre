@@ -2,11 +2,12 @@ package mad24.polito.it.fragments;
 
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,24 +16,16 @@ import android.view.ViewGroup;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.TimeZone;
-
 import mad24.polito.it.R;
+import mad24.polito.it.chats.ConversationsAdapter;
+import mad24.polito.it.models.Chat;
 import mad24.polito.it.models.UserMail;
-import mad24.polito.it.models.UserStatus;
 import mad24.polito.it.registrationmail.LoginActivity;
 
 /**
@@ -48,6 +41,11 @@ public class ChatFragment extends Fragment
     private FirebaseFirestore Firestore = null;
     private CollectionReference ChatsCollection = null;
 
+    private ConversationsAdapter Adapter = null;
+    private LinearLayoutManager ViewManager = null;
+    private RecyclerView RV = null;
+    private final Boolean AdapterLock = null;
+
     private View RootView = null;
 
     public ChatFragment()
@@ -61,6 +59,11 @@ public class ChatFragment extends Fragment
         // Inflate the layout for this fragment
         RootView = inflater.inflate(R.layout.fragment_chat, container, false);
 
+        RV = RootView.findViewById(R.id.chatsContainer);
+        RV.setHasFixedSize(true);
+        RV.setAdapter(Adapter);
+        RV.setLayoutManager(ViewManager);
+
         return RootView;
     }
 
@@ -72,7 +75,7 @@ public class ChatFragment extends Fragment
         //---------------------------------------------
         //  Is user logged?
         //---------------------------------------------
-Log.d("CHAT", "TESTING");
+
         if(FirebaseAuth.getInstance().getCurrentUser() == null)
         {
             Intent i =  new Intent(getActivity().getApplicationContext(), LoginActivity.class);
@@ -93,6 +96,12 @@ Log.d("CHAT", "TESTING");
         //  The chats collection
         ChatsCollection = Firestore.collection("chats/" + MyID + "/conversations");
 
+        //---------------------------------------------
+        //  Recycler view related stuff
+        //---------------------------------------------
+
+        Adapter = new ConversationsAdapter(getContext());
+        ViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
 
         load();
         //  Set up MainReference
@@ -121,7 +130,7 @@ Log.d("CHAT", "TESTING");
     private void load()
     {
         //  Load
-        ChatsCollection.orderBy("last_message_time").get()
+        ChatsCollection.orderBy("last_message_time", Query.Direction.DESCENDING).get()
 
                 //  Everything ok?
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -130,7 +139,7 @@ Log.d("CHAT", "TESTING");
                     {
                         if(!queryDocumentSnapshots.isEmpty())
                         {
-                            Log.d("CHAT", "loaded: " + queryDocumentSnapshots.size());
+                            Adapter.bulkPush(queryDocumentSnapshots.toObjects(Chat.class));
                         }
                     }
                 })

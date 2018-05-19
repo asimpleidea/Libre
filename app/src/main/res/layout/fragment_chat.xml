@@ -5,9 +5,12 @@
     android:layout_height="match_parent"
     tools:context=".fragments.ChatFragment">
 
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/chatsContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/nav_chat" />
+        android:scrollbars="vertical"
+        android:layout_margin="2dp" >
+    </android.support.v7.widget.RecyclerView>
 
 </FrameLayout>

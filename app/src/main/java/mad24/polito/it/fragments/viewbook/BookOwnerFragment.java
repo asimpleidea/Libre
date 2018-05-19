@@ -175,20 +175,7 @@ public class BookOwnerFragment extends Fragment
 
                                 //  Init the intent
                                 Intent intent = new Intent(getActivity(), ChatActivity.class);
-
-                                //  Was a chat already there?
-                                //  NOTE: the second case is actually an error: the chat is found but the id does not exit.
-                                if(dataSnapshot != null && dataSnapshot.hasChild("last_message") && dataSnapshot.hasChild("chat"))
-                                {
-                                    Chat c = dataSnapshot.getValue(Chat.class);
-                                    intent.putExtra("chat", c.getChat());
-                                    intent.putExtra("startId", c.getLast_message().getId());
-                                    intent.putExtra("startTime", c.getLast_message().getTime());
-                                }
-
                                 intent.putExtra("partner_id", TheBook.getUser_id());
-                                intent.putExtra("partner_name", User.getName());
-
 
                                 //  Start the activity
                                 startActivity(intent);
