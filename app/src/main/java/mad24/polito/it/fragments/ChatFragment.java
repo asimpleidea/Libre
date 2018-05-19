@@ -22,6 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -71,7 +72,7 @@ public class ChatFragment extends Fragment
         //---------------------------------------------
         //  Is user logged?
         //---------------------------------------------
-
+Log.d("CHAT", "TESTING");
         if(FirebaseAuth.getInstance().getCurrentUser() == null)
         {
             Intent i =  new Intent(getActivity().getApplicationContext(), LoginActivity.class);
@@ -92,6 +93,8 @@ public class ChatFragment extends Fragment
         //  The chats collection
         ChatsCollection = Firestore.collection("chats/" + MyID + "/conversations");
 
+
+        load();
         //  Set up MainReference
        /* MainReference = FirebaseDatabase.getInstance().getReference();
 
@@ -113,6 +116,33 @@ public class ChatFragment extends Fragment
                 Log.d("CHAT", "Error while trying to get user");
             }
         });*/
+    }
+
+    private void load()
+    {
+        //  Load
+        ChatsCollection.orderBy("last_message_time").get()
+
+                //  Everything ok?
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots)
+                    {
+                        if(!queryDocumentSnapshots.isEmpty())
+                        {
+                            Log.d("CHAT", "loaded: " + queryDocumentSnapshots.size());
+                        }
+                    }
+                })
+
+                //  Not ok?
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e)
+                {
+                    Log.d("CHAT", "Could not load chats");
+                }
+            });
     }
 }
 
