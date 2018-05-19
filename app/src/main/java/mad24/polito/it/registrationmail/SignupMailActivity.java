@@ -226,10 +226,17 @@ public class SignupMailActivity extends AppCompatActivity implements
                     isValid = false;
                 }
 
+                if(passwordString.isEmpty()){
+                    TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.signupMail_passwordLayout);
+                    passwordLayout.setError(getString(R.string.login_insert_password));
+
+                    isValid = false;
+                }
+
                 //check password
                 if(passwordString.length() < 6) {
                     TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.signupMail_passwordLayout);
-                    passwordLayout.setError(getString(R.string.login_insert_password));
+                    passwordLayout.setError(getString(R.string.login_insertValidPassword));
 
                     isValid = false;
                 }

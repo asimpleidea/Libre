@@ -41,10 +41,8 @@ import mad24.polito.it.models.Book;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
     private StorageReference mStorageRef;
-    private StorageReference coverRef;
-    private BooksActivity booksActivity = null;
 
     Context mContext;
     List<Book> mData;
@@ -56,11 +54,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.mData = mData;
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
-    }
-    // TODO: remove this method which is not useful anymore
-    public void setBooksActivity(BooksActivity activity)
-    {
-        booksActivity = activity;
     }
 
     @Override

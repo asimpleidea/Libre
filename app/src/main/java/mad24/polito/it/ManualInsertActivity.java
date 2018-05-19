@@ -57,9 +57,9 @@ import mad24.polito.it.registrationmail.LoginActivity;
 import mad24.polito.it.registrationmail.SignupMailActivity;
 
 public class ManualInsertActivity extends AppCompatActivity {
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION;
-    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
+    private static final String FIREBASE_DATABASE_LOCATION_LOCATION = "locationBooks";
 
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
@@ -165,7 +165,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         //get data from Firebase Database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference(FIREBASE_DATABASE_LOCATION_USERS);
+        DatabaseReference usersRef = database.getReference("users");
 
         //get coordinates
         usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
@@ -481,7 +481,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 date,
                 selectedGenres));
 
-        GeoFire geoFire = new GeoFire(mDatabase.child(FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION));
+        GeoFire geoFire = new GeoFire(mDatabase.child(FIREBASE_DATABASE_LOCATION_LOCATION));
 
         SharedPreferences prefs = getSharedPreferences("location", MODE_PRIVATE);
         geoFire.setLocation(bookKey, new GeoLocation(lat, lon), new GeoFire.CompletionListener() {
@@ -496,7 +496,7 @@ public class ManualInsertActivity extends AppCompatActivity {
         });
 
 //        Log.d("anotherbug", "book uploaded");
-        mRef = mDatabase.child(FIREBASE_DATABASE_LOCATION_USERS);
+        mRef = mDatabase.child("users");
 
         mRef.child(FirebaseAuth.getInstance().getUid()).child(FIREBASE_DATABASE_LOCATION_BOOKS).child(bookKey).setValue(true);
 

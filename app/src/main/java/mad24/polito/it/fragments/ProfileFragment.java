@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import mad24.polito.it.BooksActivity;
 import mad24.polito.it.EditProfileActivity;
 import mad24.polito.it.R;
 import mad24.polito.it.RecyclerViewAdapter;
@@ -65,8 +64,9 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class ProfileFragment extends Fragment {
 
-    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
+
     private int SHOW_PROFILE = 1;
 
     View v;
@@ -233,14 +233,14 @@ public class ProfileFragment extends Fragment {
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_USERS)
                     .child(FirebaseAuth.getInstance().getUid())
-                    .child("books")
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
                     .limitToFirst(mBooksPerPage);
         }else{
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_USERS)
                     .child(FirebaseAuth.getInstance().getUid())
-                    .child("books")
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey()
                     .startAt(nodeId)
                     .limitToFirst(mBooksPerPage);
@@ -260,7 +260,7 @@ public class ProfileFragment extends Fragment {
                     flag = true;
                 }
 
-                Log.d(FIREBASE_DATABASE_LOCATION_BOOKS, "adding "+books.size()+" books");
+                Log.d("books", "adding "+books.size()+" books");
                 if(books.size() == 0){
                     tv.setVisibility(View.VISIBLE);
                     rv.setVisibility(View.INVISIBLE);

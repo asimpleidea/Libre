@@ -8,8 +8,8 @@
     >
 
     <ProgressBar
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:indeterminate="true"
         android:layout_gravity="center"
         android:id="@+id/loadingScreen"

@@ -32,8 +32,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
 import mad24.polito.it.*;
 import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 import mad24.polito.it.models.*;
@@ -52,9 +50,7 @@ import java.util.stream.Collectors;
  */
 public class BooksFragment extends Fragment {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION;
-    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
 
     /**
      * Distance threshold.
@@ -62,8 +58,8 @@ public class BooksFragment extends Fragment {
      * TODO: Get a good threshold value here. From previous tests 20 seems too low; 100 seems to suit it better
      */
     private final float SCROLL_THRESHOLD = 100;
-    private final double RADIUS = 100;
-    private final double RADIUS_LARGER = 1000;
+    private final int RADIUS = 100;
+    private final int RADIUS_LARGER = 1000;
 
     View v;
 
@@ -71,7 +67,7 @@ public class BooksFragment extends Fragment {
     private RecyclerView rv;
     private RecyclerViewAdapter recyclerViewAdapter;
     private FloatingActionButton new_book_button;
-    private TextView emptyText;
+    private TextView tv;
 
     // Array lists
     private List<Book> books;
@@ -124,9 +120,10 @@ public class BooksFragment extends Fragment {
         // Inflate the layout for this fragment
         v =  inflater.inflate(R.layout.fragment_book, container, false);
 
+        tv = (TextView) v.findViewById(R.id.books_emptyView);
+
         rv = (RecyclerView) v.findViewById(R.id.book_list);
         new_book_button = (FloatingActionButton) v.findViewById(R.id.newBookBtn);
-        emptyText = (TextView) v.findViewById(R.id.homepage_emptyView);
 
         final LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
@@ -141,7 +138,7 @@ public class BooksFragment extends Fragment {
 
         //get data from Firebase Database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference(FIREBASE_DATABASE_LOCATION_USERS);
+        DatabaseReference usersRef = database.getReference("users");
 
         usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
             @Override
@@ -183,9 +180,6 @@ public class BooksFragment extends Fragment {
 
         books = new ArrayList<Book>();
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(), books);
-
-        //  This is needed in order to set the new fragment without using new code!
-        recyclerViewAdapter.setBooksActivity((BooksActivity) getActivity());
 
         rv.setAdapter(recyclerViewAdapter);
 
@@ -337,6 +331,7 @@ public class BooksFragment extends Fragment {
                         if(recyclerViewAdapter.contains(book))
                             return;
 
+                        v.findViewById(R.id.books_emptyView).setVisibility(View.INVISIBLE);
                         recyclerViewAdapter.add(book);
                         actualItemCount++;
                     }
@@ -405,20 +400,6 @@ public class BooksFragment extends Fragment {
     //intent to access the camera
     private void scanIntent() {
 
-        /*IntentIntegrator scanIntegrator = new IntentIntegrator(getActivity());
-        scanIntegrator.setDesiredBarcodeFormats(IntentIntegrator.EAN_13);
-        scanIntegrator.setBeepEnabled(false);*/
-
-        //TODO: actual code for scan book
-        //startActivityForResult(intent, REQUEST_CAMERA);
-        Log.d("booksfragment", "camera intent should start");
-//            Toast.makeText(getActivity().getBaseContext(), "Camera intent should start", Toast.LENGTH_LONG).show();
-        Log.d("isbn", "initiating scan");
-        /*IntentIntegrator.forSupportFragment(BooksFragment.this)
-                .setBeepEnabled(false)
-                .setDesiredBarcodeFormats(IntentIntegrator.EAN_13)
-                .initiateScan();*/
-
         Intent intent = new Intent(getActivity(), ManualInsertActivity.class);
         Bundle b = new Bundle();
         b.putInt("scan", 1);
@@ -470,7 +451,7 @@ public class BooksFragment extends Fragment {
         }
     }
 
-    public void getKeys(final double lat, final double lon, final double radius) {
+    public void getKeys(final double lat, final double lon, long radius) {
         synchronized (semaphoreGetKeys) {
             if(semaphoreGetKeys.booleanValue() == false)
                 return;
@@ -485,7 +466,7 @@ public class BooksFragment extends Fragment {
         keyBooks = new ArrayList<>();
         final long time = timestampKey;
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("locationBooks");
         GeoFire geoFire = new GeoFire(ref);
 
         final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lon), radius);
@@ -516,17 +497,10 @@ public class BooksFragment extends Fragment {
                         semaphoreGetKeys = true;
                     }
 
-                    if(radius >= RADIUS_LARGER) {
-                        emptyText.setVisibility(View.VISIBLE);
-                        return;
-                    }
-
                     getKeys(lat, lon, RADIUS_LARGER);
                     geoQuery.removeGeoQueryEventListener(this);
                     return;
                 }
-
-                emptyText.setVisibility(View.GONE);
 
                 //set Adapter
                 recyclerViewAdapter = new RecyclerViewAdapter(getContext(), new ArrayList<Book>());
