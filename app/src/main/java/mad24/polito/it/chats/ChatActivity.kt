@@ -183,8 +183,6 @@ class ChatActivity : AppCompatActivity()
 
     private fun loadPartnerData()
     {
-        val t = this
-
         PartnerReference.addListenerForSingleValueEvent(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?) { }
@@ -682,7 +680,6 @@ class ChatActivity : AppCompatActivity()
 
     private fun createConversation()
     {
-        val t = this
         val me : ChatMessageContainer.Partecipants.User = ChatMessageContainer.Partecipants.User(getCurrentISODate())
         val u = ChatMessageContainer.Partecipants.User("0")
 
@@ -715,7 +712,6 @@ class ChatActivity : AppCompatActivity()
 
     private fun postMessage()
     {
-        val t = this
         val time = getCurrentISODate()
         val c = ChatMessage(Typer.text.toString().trim(' ', '\n'), Me, time)
 

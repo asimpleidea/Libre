@@ -30,8 +30,6 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
     private var context = _context
     private var ParnerIsHere : Boolean = false
     private var Messages : ArrayList<ChatMessage> = ArrayList()
-    private var LastDate : String? = null
-    private var PreviousHolder : ViewHolder? = null
 
     private val hourFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     private val dateFormat = SimpleDateFormat("dd MMMM", Locale.getDefault())
@@ -164,8 +162,6 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
 
         //  Set the time
         holder.Sent.text = Messages[position].time
-
-        PreviousHolder = holder
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
