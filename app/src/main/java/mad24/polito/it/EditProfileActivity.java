@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -21,7 +20,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -35,7 +33,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
@@ -71,6 +68,9 @@ import mad24.polito.it.models.UserMail;
 public class EditProfileActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks {
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
+
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
 
@@ -210,9 +210,9 @@ public class EditProfileActivity extends AppCompatActivity implements
         if(posted_books == null) {
             // get booksID posted by the user
             Query query = FirebaseDatabase.getInstance().getReference()
-                    .child("users")
+                    .child(FIREBASE_DATABASE_LOCATION_USERS)
                     .child(FirebaseAuth.getInstance().getUid())
-                    .child("books")
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                     .orderByKey();
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -463,7 +463,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
                                             DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
 
-                                            Task initTask = myDatabase.child("users").child(userAuth.getUid())
+                                            Task initTask = myDatabase.child(FIREBASE_DATABASE_LOCATION_USERS).child(userAuth.getUid())
                                                     .setValue(new UserMail(userAuth.getEmail(), newName, newCity, idSelectedCity, newPhone,
                                                             newBio, newSelectedGenres, books, lat, lon) );
 

@@ -27,6 +27,10 @@ import mad24.polito.it.registrationmail.LoginActivity;
 
 public class BooksActivity  extends AppCompatActivity
 {
+    public static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
+    public static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = "locationBooks";
+    public static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
+
     private BottomNavigationView mMainNav;
     private FrameLayout mMainFrame;
 
