@@ -59,6 +59,7 @@ import mad24.polito.it.registrationmail.SignupMailActivity;
 public class ManualInsertActivity extends AppCompatActivity {
 
     private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
+    private static final String FIREBASE_DATABASE_LOCATION_LOCATION = "locationBooks";
 
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
@@ -480,7 +481,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 date,
                 selectedGenres));
 
-        GeoFire geoFire = new GeoFire(mDatabase.child("locationBooks"));
+        GeoFire geoFire = new GeoFire(mDatabase.child(FIREBASE_DATABASE_LOCATION_LOCATION));
 
         SharedPreferences prefs = getSharedPreferences("location", MODE_PRIVATE);
         geoFire.setLocation(bookKey, new GeoLocation(lat, lon), new GeoFire.CompletionListener() {

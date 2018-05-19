@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MAD18_24_lab1.iml" filepath="$PROJECT_DIR$/MAD18_24_lab1.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/MAD18_24_lab8.iml" filepath="$PROJECT_DIR$/.idea/MAD18_24_lab8.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/MAD18_24_lab9.iml" filepath="$PROJECT_DIR$/.idea/MAD18_24_lab9.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/facebook.iml" filepath="$PROJECT_DIR$/facebook/facebook.iml" />
     </modules>
