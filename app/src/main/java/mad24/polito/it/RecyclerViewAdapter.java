@@ -119,6 +119,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         //  Set item touch listener
         //--------------------------------------
 
+        if(holder.itemView.hasOnClickListeners()) return;
+
         holder.itemView.setOnClickListener(new View.OnClickListener()
         {
             @Override
