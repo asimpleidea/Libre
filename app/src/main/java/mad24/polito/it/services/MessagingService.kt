@@ -67,7 +67,7 @@ class MessagingService : FirebaseMessagingService()
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 intent.putExtra("partner_id", data.getValue("partner_id"))
 
-                var pendingIntent : PendingIntent? = null
+                var pendingIntent : PendingIntent?
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
                 {
                     val stackBuilder = TaskStackBuilder.create(this)

@@ -20,6 +20,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -42,6 +44,11 @@ public class ChatFragment extends Fragment
     private DatabaseReference ChatsReference = null;
     private String MyID = null;
 
+    private FirebaseFirestore Firestore = null;
+    private CollectionReference ChatsCollection = null;
+
+    private View RootView = null;
+
     public ChatFragment()
     {
         // Required empty public constructor
@@ -51,13 +58,19 @@ public class ChatFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat, container, false);
+        RootView = inflater.inflate(R.layout.fragment_chat, container, false);
+
+        return RootView;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        //---------------------------------------------
+        //  Is user logged?
+        //---------------------------------------------
 
         if(FirebaseAuth.getInstance().getCurrentUser() == null)
         {
@@ -69,8 +82,18 @@ public class ChatFragment extends Fragment
         //  My id
         MyID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+        //---------------------------------------------
+        //  Inits
+        //---------------------------------------------
+
+        //  Init firestore
+        Firestore = FirebaseFirestore.getInstance();
+
+        //  The chats collection
+        ChatsCollection = Firestore.collection("chats/" + MyID + "/conversations");
+
         //  Set up MainReference
-        MainReference = FirebaseDatabase.getInstance().getReference();
+       /* MainReference = FirebaseDatabase.getInstance().getReference();
 
         //  Get Data
         MainReference.child("users").child(MyID).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -89,7 +112,7 @@ public class ChatFragment extends Fragment
             {
                 Log.d("CHAT", "Error while trying to get user");
             }
-        });
+        });*/
     }
 }
 
