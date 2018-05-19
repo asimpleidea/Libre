@@ -4,7 +4,7 @@ import com.google.firebase.firestore.Exclude
 import java.util.*
 
 
-class ChatMessage constructor(_content: String = "", _by : String = "", _sent: String = "")
+class ChatMessage constructor(_content: String = "", _by : String = "", _sent: String = "", _firstOfTheDay : Boolean = false)
 {
     var content = _content
     var by = _by
@@ -22,7 +22,7 @@ class ChatMessage constructor(_content: String = "", _by : String = "", _sent: S
     var day : String = ""
         @Exclude get
 
-    var firstOfTheDay : Boolean = false
+    var firstOfTheDay : Boolean = _firstOfTheDay
 
     //@Exclude
     //var dateTime : Date = ""

@@ -33,6 +33,10 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
     private var LastDate : String? = null
     private var PreviousHolder : ViewHolder? = null
 
+    private val hourFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("dd MMMM", Locale.getDefault())
+    private val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+
     private val MY_MESSAGE = 0
     private val PARTNER_MESSAGE = 1
 
@@ -80,30 +84,19 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
     fun bulkPush(messages : List<ChatMessage>, queue: Boolean = true)
     {
         val count : Int = Messages.size
-
         var pushed = 0
 
-        val hourFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val dateFormat = SimpleDateFormat("dd MMMM", Locale.getDefault())
         for(m in messages)
         {
-            val date = (fun() : Date
-            {
-                val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+            val date = df.parse(m.sent)
 
-                return df.parse(m.sent)
-            }())
+            m.time = hourFormat.format(date)
+            m.date = dateFormat.format(date)
 
-            val c = ChatMessage(m.content, m.by, m.sent)
-
-            c.time = hourFormat.format(date)
-            c.date = dateFormat.format(date)
-            c.day = c.sent.split('T')[0]
-
-            if(queue) Messages.add(c)
+            if(queue) Messages.add(m)
             else
             {
-                Messages.add(0, c)
+                Messages.add(0, m)
                 ++pushed
             }
         }
@@ -119,14 +112,7 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
 
     fun push(message : ChatMessage, onTop : Boolean = false)
     {
-        val hourFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val dateFormat = SimpleDateFormat("dd MMMM", Locale.getDefault())
-        val date = (fun() : Date
-        {
-            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
-
-            return df.parse(message.sent)
-        }())
+        val date =  df.parse(message.sent)
 
         message.time = hourFormat.format(date)
         message.date = dateFormat.format(date)
@@ -170,7 +156,7 @@ class MessagesRecyclerAdapter constructor(_context : Context, _lastAccess : Stri
         if(Messages.size == 1 || Messages[position].firstOfTheDay)
         {
             holder.DateDivider.text = Messages[position].date
-            holder.DateDivider.visibility = View.VISIBLE
+            (holder.DateDivider.parent as FrameLayout).visibility = View.VISIBLE
         }
 
         //  Set the content
