@@ -10,6 +10,8 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
+
     }
     buildTypes {
         release {
@@ -68,6 +70,9 @@ dependencies {
     implementation "com.android.support:support-compat:26.0.2"
     //  relative time
     implementation 'com.github.curioustechizen.android-ago:library:1.4.0'
+
+    //  THIS NEEDS TO BE HERE!!!!
+    implementation 'com.android.support:multidex:1.0.1'
 
 }
 
