@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,6 +54,8 @@ public class ChatFragment extends Fragment
     private final Boolean AdapterLock = true;
 
     private View RootView = null;
+    private TextView NoChatsText = null;
+    private ProgressBar Loading = null;
 
     public ChatFragment()
     {
@@ -67,6 +72,9 @@ public class ChatFragment extends Fragment
         RV.setHasFixedSize(true);
         RV.setAdapter(Adapter);
         RV.setLayoutManager(ViewManager);
+
+        NoChatsText = RootView.findViewById(R.id.noChatsText);
+        Loading = RootView.findViewById(R.id.loadingScreen);
 
         return RootView;
     }
@@ -150,6 +158,8 @@ public class ChatFragment extends Fragment
                     {
                         if(queryDocumentSnapshots == null) return;
 
+                        boolean firstTime = false;
+
                         if(queryDocumentSnapshots.isEmpty()) return;
 
                         for(DocumentChange d : queryDocumentSnapshots.getDocumentChanges())
@@ -170,8 +180,23 @@ public class ChatFragment extends Fragment
                                         Log.d("CHAT", "default case");
                                         break;*/
                                 }
-                            }
 
+                                if(Adapter.getItemCount() == 0)
+                                {
+                                    NoChatsText.setVisibility(View.VISIBLE);
+                                }
+                                else
+                                {
+                                    if(RV.getVisibility() != View.VISIBLE)
+                                    {
+                                        NoChatsText.setVisibility(View.GONE);
+                                        RV.setVisibility(View.VISIBLE);
+                                    }
+                                }
+
+                                //  Anyway, hide the progress bar
+                                if(Loading.getVisibility() == View.VISIBLE) Loading.setVisibility(View.GONE);
+                            }
                         }
                     }
                 });

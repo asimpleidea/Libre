@@ -194,6 +194,8 @@
     <string name="partner_is_typing">%1$s sta scrivendo…</string>
     <string name="message_read">Letto</string>
     <string name="last_online">Ultimo accesso: </string>
+    <string name="my_chats_toolbar">Chats</string>
+    <string name="no_chats">Non ci sono chat :( Quando guardi un libro, tocca il pulsante chat sotto la tab del proprietario per iniziare una chat</string>
     <!-- /Chat -->
 
 </resources>

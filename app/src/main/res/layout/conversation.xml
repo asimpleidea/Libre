@@ -4,7 +4,8 @@
     android:layout_height="80dp"
     android:padding="5dp"
     android:layout_marginLeft="7dp"
-    android:layout_marginRight="7dp">
+    android:layout_marginRight="7dp"
+    android:background="@drawable/single_conversation">
 
     <LinearLayout
         android:layout_width="match_parent"

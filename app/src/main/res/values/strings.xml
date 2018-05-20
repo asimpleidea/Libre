@@ -228,6 +228,8 @@
     <string name="last_online">Last seen: </string>
     <string name="message_read">Read</string>
     <string name="middot">\u2022</string>
+    <string name="my_chats_toolbar">Chats</string>
+    <string name="no_chats">No chats to display :( \n When looking at a book, tap on the Chat button under the owner's tab to start chatting!</string>
     <!-- /Chat -->
 
 </resources>
