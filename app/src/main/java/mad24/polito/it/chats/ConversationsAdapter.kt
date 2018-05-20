@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v7.widget.RecyclerView
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.github.curioustechizen.ago.RelativeTimeTextView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -17,6 +19,7 @@ import com.google.firebase.storage.FirebaseStorage
 import de.hdodenhof.circleimageview.CircleImageView
 import mad24.polito.it.R
 import mad24.polito.it.models.Chat
+import java.text.SimpleDateFormat
 import java.util.*
 
 class ConversationsAdapter constructor(_context : Context, _me : String): RecyclerView.Adapter<ConversationsAdapter.ViewHolder>()
@@ -28,6 +31,7 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
     private var UsersToLoad : Int = 0
     private val UserReference = FirebaseDatabase.getInstance().reference.child("users")
     private val Me = _me
+    private val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
 
     private val UserNames = HashMap<String, String>()
     private val UserPictures = HashMap<String, Uri>()
@@ -99,6 +103,9 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
             loadPicture(Conversations[position].partner_id, holder)
         }
 
+        //  Set the time
+        holder.MessageTime.setReferenceTime(df.parse(Conversations[position].last_message_time).time)
+
         //  Set the touch event
         if(holder.itemView.hasOnClickListeners()) return
         holder.itemView.setOnClickListener {_ ->
@@ -147,5 +154,6 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
         val PartnerName = itemView.findViewById<TextView>(R.id.partnerName)
         val Preview = itemView.findViewById<TextView>(R.id.contentPreview)
         val PartnerImage = itemView.findViewById<CircleImageView>(R.id.partnerImage)
+        val MessageTime = itemView.findViewById<RelativeTimeTextView>(R.id.messageTime)
     }
 }

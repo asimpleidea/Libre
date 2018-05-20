@@ -44,7 +44,7 @@
                     <RelativeLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.8"
+                        android:layout_weight="0.75"
                         android:layout_marginBottom="3dp">
 
                         <TextView
@@ -65,14 +65,15 @@
                     <RelativeLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.2">
+                        android:layout_weight="0.25">
 
                         <com.github.curioustechizen.ago.RelativeTimeTextView
-                            android:id="@+id/lastMessageTime"
+                            android:id="@+id/messageTime"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
-                            android:text="TIME"/>
+                            android:textSize="12sp"
+                            />
 
                     </RelativeLayout>
 
