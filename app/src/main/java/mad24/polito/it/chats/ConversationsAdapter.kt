@@ -66,7 +66,10 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
         if(oldIndex != newIndex)
         {
             Collections.swap(Conversations, oldIndex, newIndex)
-            Conversations[newIndex].preview = "swapped"
+            Conversations[newIndex].preview = change.preview
+            Conversations[newIndex].last_message_by = change.last_message_by
+            Conversations[newIndex].last_message_id = change.last_message_id
+            Conversations[newIndex].last_message_time = change.last_message_time
 
             notifyItemMoved(oldIndex, newIndex)
         }
