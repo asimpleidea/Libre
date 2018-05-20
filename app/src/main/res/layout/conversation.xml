@@ -54,6 +54,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:singleLine="true"
+                            android:ellipsize="marquee"
                             android:shadowColor="@color/black"
                             android:shadowDx="1"
                             android:shadowDy="1"
@@ -73,6 +74,8 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
                             android:textSize="12sp"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             />
 
                     </RelativeLayout>
