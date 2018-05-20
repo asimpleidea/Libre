@@ -41,7 +41,7 @@ import mad24.polito.it.models.Book;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
     private StorageReference mStorageRef;
 
     Context mContext;

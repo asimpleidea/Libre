@@ -58,8 +58,8 @@ import mad24.polito.it.registrationmail.SignupMailActivity;
 
 public class ManualInsertActivity extends AppCompatActivity {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
-    private static final String FIREBASE_DATABASE_LOCATION_LOCATION = "locationBooks";
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
+    private static final String FIREBASE_DATABASE_LOCATION_LOCATION = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION;
 
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;

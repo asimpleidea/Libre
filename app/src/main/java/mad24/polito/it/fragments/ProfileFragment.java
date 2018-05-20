@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import mad24.polito.it.BooksActivity;
 import mad24.polito.it.EditProfileActivity;
 import mad24.polito.it.R;
 import mad24.polito.it.RecyclerViewAdapter;
@@ -64,8 +65,8 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class ProfileFragment extends Fragment {
 
-    private static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
 
     private int SHOW_PROFILE = 1;
 

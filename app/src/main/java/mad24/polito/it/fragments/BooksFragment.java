@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  */
 public class BooksFragment extends Fragment {
 
-    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
+    private static final String FIREBASE_DATABASE_LOCATION_BOOKS = BooksActivity.FIREBASE_DATABASE_LOCATION_BOOKS;
 
     /**
      * Distance threshold.
