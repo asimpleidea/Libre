@@ -193,6 +193,7 @@
     <string name="type_something">Scrivi qui…</string>
     <string name="partner_is_typing">%1$s sta scrivendo…</string>
     <string name="message_read">Letto</string>
+    <string name="last_online">Ultimo accesso: </string>
     <!-- /Chat -->
 
 </resources>

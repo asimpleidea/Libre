@@ -87,7 +87,7 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
         holder.Preview.text = Conversations[position].preview
         if(Conversations[position].last_message_by == Me) holder.Preview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_icon_forward, 0, 0, 0)
 
-        if(payloads != null && !payloads.isEmpty())
+        if(payloads == null || payloads.isEmpty())
         {
             //  Load the user
             loadUser(Conversations[position].partner_id, holder)
