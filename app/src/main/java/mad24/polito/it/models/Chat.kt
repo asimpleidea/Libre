@@ -8,9 +8,9 @@ class Chat constructor(_chat : String = "",
                        _partner_id : String = "")
 {
     val chat_id = _chat
-    val last_message_time = _last_message_time
-    val last_message_id = _last_message_id
-    val last_message_by = _last_message_by
+    var last_message_time = _last_message_time
+    var last_message_id = _last_message_id
+    var last_message_by = _last_message_by
     val partner_id = _partner_id
-    val preview = _preview
+    var preview = _preview
 }

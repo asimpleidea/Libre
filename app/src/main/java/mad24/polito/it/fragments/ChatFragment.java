@@ -18,7 +18,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -44,7 +48,7 @@ public class ChatFragment extends Fragment
     private ConversationsAdapter Adapter = null;
     private LinearLayoutManager ViewManager = null;
     private RecyclerView RV = null;
-    private final Boolean AdapterLock = null;
+    private final Boolean AdapterLock = true;
 
     private View RootView = null;
 
@@ -100,34 +104,13 @@ public class ChatFragment extends Fragment
         //  Recycler view related stuff
         //---------------------------------------------
 
-        Adapter = new ConversationsAdapter(getContext());
+        Adapter = new ConversationsAdapter(getContext(), MyID);
         ViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
 
         load();
-        //  Set up MainReference
-       /* MainReference = FirebaseDatabase.getInstance().getReference();
-
-        //  Get Data
-        MainReference.child("users").child(MyID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                //  TODO: check for errors here
-                if(dataSnapshot != null)
-                {
-                    Me = dataSnapshot.getValue(UserMail.class);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError)
-            {
-                Log.d("CHAT", "Error while trying to get user");
-            }
-        });*/
     }
 
-    private void load()
+    /*private void load()
     {
         //  Load
         ChatsCollection.orderBy("last_message_time", Query.Direction.DESCENDING).get()
@@ -141,6 +124,9 @@ public class ChatFragment extends Fragment
                         {
                             Adapter.bulkPush(queryDocumentSnapshots.toObjects(Chat.class));
                         }
+
+                        //  Listen for updates
+                        listenForUpdates();
                     }
                 })
 
@@ -152,6 +138,43 @@ public class ChatFragment extends Fragment
                     Log.d("CHAT", "Could not load chats");
                 }
             });
+    }*/
+
+    private void load()
+    {
+        ChatsCollection.orderBy("last_message_time", Query.Direction.DESCENDING)
+                .addSnapshotListener(new EventListener<QuerySnapshot>()
+                {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e)
+                    {
+                        if(queryDocumentSnapshots == null) return;
+
+                        if(queryDocumentSnapshots.isEmpty()) return;
+
+                        for(DocumentChange d : queryDocumentSnapshots.getDocumentChanges())
+                        {
+                            synchronized (AdapterLock)
+                            {
+                                switch(d.getType())
+                                {
+                                    case ADDED:
+                                        Adapter.push(d.getDocument().toObject(Chat.class));
+                                        break;
+
+                                    case MODIFIED:
+                                        Adapter.swap(d.getOldIndex(), d.getNewIndex(), d.getDocument().toObject(Chat.class));
+                                        break;
+
+                                    /*default:
+                                        Log.d("CHAT", "default case");
+                                        break;*/
+                                }
+                            }
+
+                        }
+                    }
+                });
     }
 }
 
