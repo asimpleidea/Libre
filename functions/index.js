@@ -44,6 +44,21 @@ exports.debugCreateChat = functions.https.onRequest((req, res) =>
 
 });
 
+exports.debugUpdateStatus = functions.https.onRequest((req, res) => 
+{
+    const chat_id = "6GlvXy7stFPDYzheZ7It5Nob0tf1&P1f7ozEcOQNgHvuMXL4tSDxapgF3",
+            date = new Date(),
+            me = "6GlvXy7stFPDYzheZ7It5Nob0tf1",
+            them = "P1f7ozEcOQNgHvuMXL4tSDxapgF3";
+    
+    return admin.firestore().doc("chat_messages/" + chat_id + "/partecipants/" + me).update({last_here: (date.toISOString().split('.')[0]+'Z')})
+    .then(s => 
+        {
+            return res.sendStatus(200);
+        });
+});
+
+
 exports.createChat = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onCreate((snap, context) => 
 {
     //  Original value
@@ -56,6 +71,25 @@ exports.createChat = functions.firestore.document('/chat_messages/{chatId}/parte
     const otherUser = user === users[0] ? users[1] : users[0];
 
     return admin.firestore().doc("chats/" + user + "/conversations/" + otherUser).set({chat_id : chatId, partner_id: otherUser});
+});
+
+exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
+{
+    // Get an object representing the document
+    const newValue = change.after.data();
+
+    // ...or the previous value before this update
+    const previousValue = change.before.data();
+
+    // if not changed don't do anything
+    if(previousValue.last_here === newValue.last_here) return;
+
+    const user_id = context.params.userId,
+            users = context.params.chatId.split('&'),
+            otherUser = user_id === users[0] ? users[1] : users[0],
+            my_last_here = newValue.last_here;
+
+    return admin.firestore().doc("chats/" + user_id + "/conversations/" + otherUser).update({my_last_here : my_last_here});
 });
 
 exports.debugPostMessage = functions.https.onRequest((req, res) => 
