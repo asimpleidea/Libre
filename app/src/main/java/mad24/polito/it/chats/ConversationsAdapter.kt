@@ -75,6 +75,9 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
             Conversations[newIndex].last_message_id = change.last_message_id
             Conversations[newIndex].last_message_time = change.last_message_time
 
+            //  useless
+            Conversations[newIndex].my_last_here = change.my_last_here
+
             notifyItemMoved(oldIndex, newIndex)
         }
 
@@ -105,6 +108,11 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
 
         //  Set the time
         holder.MessageTime.setReferenceTime(df.parse(Conversations[position].last_message_time).time)
+
+        if(!Conversations[position].my_last_here.isBlank() && Conversations[position].my_last_here < Conversations[position].last_message_time)
+        {
+            holder.Preview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_unread, 0, 0, 0)
+        }
 
         //  Set the touch event
         if(holder.itemView.hasOnClickListeners()) return
