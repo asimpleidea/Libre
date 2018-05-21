@@ -22,6 +22,8 @@ public class LocatorSearch implements ActivityCompat.OnRequestPermissionsResultC
     private LocationManager locationManager = null;
     private Criteria criteria = null;
     private LocatorEventsListener Listener = null;
+    String provider;
+    MyLocationListener listener;
 
     public LocatorSearch(Activity a, Context c, LocatorEventsListener locationListener)
     {
@@ -59,6 +61,8 @@ public class LocatorSearch implements ActivityCompat.OnRequestPermissionsResultC
 
         //  TODO: is it good to define it here? check with battery.
         locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+
+        provider = locationManager.getBestProvider(criteria, false);
 
         Listener = locationListener;
         //Log.d("debug", "Calling once()");
@@ -135,40 +139,18 @@ public class LocatorSearch implements ActivityCompat.OnRequestPermissionsResultC
 
         try
         {
-            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, new LocationListener()
-            {
-                @Override
-                public void onLocationChanged(Location location)
-                {
-                    //Log.d("debug", "onLocationChanged");
-                    //if(Listener != null) {
-                    if(location != null ) Listener.onSuccess(location.getLatitude(), location.getLongitude());
-                    else Listener.onFailure();
-                    //}
-                }
+            Location lastLocation = locationManager.getLastKnownLocation(provider);
+            listener = new MyLocationListener();
 
-                @Override
-                public void onStatusChanged(String s, int i, Bundle bundle) {
-                    //Log.d("debug", "onStatusChanged");
-                }
-
-                @Override
-                public void onProviderEnabled(String s) {
-                    //Log.d("debug", "onProviderEnabled");
-                }
-
-                @Override
-                public void onProviderDisabled(String s) {
-                    //Log.d("debug", "onProviderDisabled");
-                }
-
-            }, null);
+            locationManager.requestSingleUpdate(criteria, listener, null);
         }
         catch (SecurityException s)
         {
             if(Listener != null) Listener.onPermissionDenied();
         }
     }
+
+
 
 
     public LocatorSearch addListener(LocatorEventsListener locationListener)
@@ -178,6 +160,35 @@ public class LocatorSearch implements ActivityCompat.OnRequestPermissionsResultC
     }
 
     public void removeListener() {
+        locationManager.removeUpdates(listener);
         locationManager = null;
+    }
+
+    public class MyLocationListener implements LocationListener {
+
+        @Override
+        public void onLocationChanged(Location location) {
+            //Log.d("debug", "onLocationChanged");
+            if(Listener != null) {
+                if(location != null ) Listener.onSuccess(location.getLatitude(), location.getLongitude());
+                else Listener.onFailure();
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            //Log.d("debug", "onStatusChanged");
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            //Log.d("debug", "onProviderEnabled");
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            //Log.d("debug", "onProviderDisabled");
+            Listener.onFailure();
+        }
     }
 }

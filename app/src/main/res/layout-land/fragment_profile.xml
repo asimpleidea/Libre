@@ -29,7 +29,7 @@
                 />
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/photoButton"
+                android:id="@+id/frag_profile_photoButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
@@ -42,13 +42,52 @@
                 />
         </RelativeLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/posted_book_list"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="35dp">
+            android:orientation="vertical">
 
-        </android.support.v7.widget.RecyclerView>
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="10dp"
+                android:layout_gravity="center_horizontal"
+                android:textSize="25sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:text="@string/myBooks"
+                android:textSize="18sp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/no_books_msg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="45dp"
+                    android:layout_marginLeft="45dp"
+                    android:visibility="visible"
+                    android:textSize="15sp"
+                    android:gravity="center_horizontal"
+                    android:text="@string/noBooks"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/posted_book_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="35dp"
+                    />
+
+            </RelativeLayout>
+        </LinearLayout>
     </LinearLayout>
 
 </FrameLayout>

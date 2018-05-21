@@ -34,6 +34,8 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import mad24.polito.it.fragments.viewbook.ViewBookFragment;
@@ -48,12 +50,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     Context mContext;
     List<Book> mData;
+    HashSet<String> mDataId;
 
     View v;
 
     public RecyclerViewAdapter(Context mContext, List<Book> mData) {
         this.mContext = mContext;
-        this.mData = mData;
+        this.mData = new LinkedList<>();
+        this.mDataId = new HashSet<>();
+
+        for(Book newBook : mData) {
+            if (!mDataId.contains(newBook.getBook_id())) {
+                this.mDataId.add(newBook.getBook_id());
+                this.mData.add(newBook);
+            }
+        }
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
     }
@@ -162,6 +173,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Query query;
 
         for(String b : books_id){
+            if(mDataId.contains(b))
+                continue;
+            else
+                mDataId.add(b);
 
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_BOOKS)
@@ -218,18 +233,34 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public void addAll(List<Book> newBooks) {
         int initialSize = mData.size();
-        mData.addAll(newBooks);
-        notifyItemRangeInserted(initialSize, newBooks.size());
+
+        int count = 0;
+        for(Book newBook : newBooks) {
+            if(!mDataId.contains(newBook.getBook_id()) ) {
+                mDataId.add(newBook.getBook_id());
+                mData.add(newBook);
+                count++;
+            }
+        }
+
+        if(count == 0)
+            return;
+
+        notifyItemRangeInserted(initialSize, count);
     }
 
     public void add(Book book) {
         int initialSize = mData.size();
+        if(mDataId.contains(book.getBook_id()))
+            return;
+
         mData.add(book);
+        mDataId.add(book.getBook_id());
         notifyItemRangeInserted(initialSize, 1);
     }
 
     public boolean contains(Book book) {
-        return mData.contains(book);
+       return mDataId.contains(book.getBook_id());
     }
 
 }

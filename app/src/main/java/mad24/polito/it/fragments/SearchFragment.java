@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -50,10 +51,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.Semaphore;
 
 import mad24.polito.it.BooksActivity;
 import mad24.polito.it.PlaceArrayAdapter;
@@ -121,20 +122,21 @@ public class SearchFragment extends Fragment implements
     private double lon;
     private Double latGPS = null;
     private Double lonGPS = null;
+    private UserMail myselfUser = null;
 
-    private Semaphore semaphoreGps = new Semaphore(1);
     private boolean isGps;
     LocatorSearch locator;
 
     private RecyclerViewAdapterGenre myAdapter;
+
+    private boolean boolSavedInstanceState = false;
 
     public SearchFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         v = inflater.inflate(mad24.polito.it.R.layout.fragment_search, container, false);
 
@@ -194,94 +196,7 @@ public class SearchFragment extends Fragment implements
                 new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES).build());
         city.setAdapter(mPlaceArrayAdapter);
 
-        //set genre buttons
-        RecyclerView myrv = (RecyclerView) v.findViewById(R.id.search_genres);
-        myAdapter = new RecyclerViewAdapterGenre(getContext(), new ArrayList<Integer>(), this);
-        myrv.setLayoutManager(new GridLayoutManager(getContext(),3));
-        myrv.setAdapter(myAdapter);
 
-        //  Get user's current location
-
-        /*try{
-            semaphoreGps.acquire();
-        } catch (Exception e) {
-
-        }*/
-
-        //getLocationGPS();
-
-        //set event GPS location button
-        ((ImageButton) v.findViewById(R.id.search_buttonLocation)).setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                getLocationGPS();
-            }
-        });
-
-        //get user auth
-        FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
-
-        //get data from Firebase Database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference(FIREBASE_DATABASE_LOCATION_USERS);
-
-        usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                //get User object
-                UserMail user = snapshot.getValue(UserMail.class);
-
-                //set genre buttons
-                ArrayList<Integer> listGenres = new ArrayList<>();
-                ArrayList<Integer> favouriteGenres = user.getGenres();
-
-                if(favouriteGenres != null) {
-                    for(int genre : favouriteGenres)
-                    listGenres.add(genre);
-                }
-
-                for(int i=0; i < 17; i++) {
-                    if(favouriteGenres == null || !favouriteGenres.contains(i))
-                        listGenres.add(i);
-                }
-
-                myAdapter.addAll(listGenres);
-
-                try {
-                    //semaphoreGps.acquire();
-
-                    //if(!isGps) {
-                        //get coordinates
-                        lat = user.getLat();
-                        lon = user.getLon();
-
-                        city.setText(user.getCity());
-                    //}
-                } catch (Exception e) {
-
-                }
-
-                //get nearby books
-                getKeys(lat, lon, RADIUS);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                if(getContext() == null)
-                    return;
-
-                new AlertDialog.Builder(getContext())
-                        .setTitle(getResources().getString(R.string.coordinates_error))
-                        .setMessage(getResources().getString(R.string.coordinates_errorGettingInfo))
-                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .show();
-            }
-        });
 
         //zero books for now
         itemCount = 0;
@@ -297,10 +212,73 @@ public class SearchFragment extends Fragment implements
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        //don't ask for GPS coordinates when rotate the device
+        if(savedInstanceState != null) {
+            lat = savedInstanceState.getDouble("lat", 0.0);
+            lon = savedInstanceState.getDouble("lon", 0.0);
+
+            latGPS = savedInstanceState.getDouble("latGPS", 1000);
+            lonGPS = savedInstanceState.getDouble("lonGPS", 1000);
+
+
+            if (latGPS == 1000)
+                latGPS = null;
+
+            if (lonGPS == 1000)
+                lonGPS = null;
+
+            Log.d("debug", "LATGPS: "+latGPS+ " LONGPS: "+lonGPS);
+
+            String selectedLocation = savedInstanceState.getString("selectedLocation", null);
+            if(selectedLocation != null)
+                city.setText(selectedLocation);
+
+            //get User object
+            String userJson = savedInstanceState.getString("user", null);
+            if(userJson != null) {
+                Gson gson = new Gson();
+                myselfUser = gson.fromJson(userJson, UserMail.class);
+            }
+
+            String searchBySavedInstance = savedInstanceState.getString("searchBy", null);
+            if(searchBySavedInstance != null) {
+                searchBy = searchBySavedInstance;
+
+                if(searchBy.equals(getResources().getString(R.string.search_searchBy_all) ) )
+                    mSetDurationPresetRadioGroup.check(((PresetValueButton) v.findViewById(R.id.search_searchBy_all)).getId());
+                else if(searchBy.equals(getResources().getString(R.string.search_searchBy_title) ) )
+                    mSetDurationPresetRadioGroup.check(((PresetValueButton) v.findViewById(R.id.search_searchBy_title)).getId());
+                else if(searchBy.equals(getResources().getString(R.string.search_searchBy_author) ) )
+                    mSetDurationPresetRadioGroup.check(((PresetValueButton) v.findViewById(R.id.search_searchBy_author)).getId());
+            }
+
+            boolSavedInstanceState = true;
+            getLocationGPS();
+        } else {
+            //get location GPS
+            getLocationGPS();
+        }
+
+        //set event GPS location button
+        ((ImageButton) v.findViewById(R.id.search_buttonLocation)).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                getLocationGPS();
+            }
+        });
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         rv = (RecyclerView) v.findViewById(R.id.search_bookList);
         mLayoutManager = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(mLayoutManager);
+
+        int options = searchView.getImeOptions();
+        searchView.setImeOptions(options | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
         searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
             String oldQuery = new String("");
@@ -314,6 +292,11 @@ public class SearchFragment extends Fragment implements
 
                 rv.setVisibility(View.VISIBLE);
                 searchOptions.setVisibility(View.GONE);
+
+                if(keyBooks.isEmpty()) {
+                    emptyView.setVisibility(View.VISIBLE);
+                    return true;
+                }
 
                 synchronized (currentQuery) {
                     itemCount = 0;
@@ -330,6 +313,12 @@ public class SearchFragment extends Fragment implements
 
                     synchronized(itemCount) {
                         getBooks(query, mPostsPerPage);
+
+                        if(recyclerViewAdapter.getItemCount() < 1) {
+                            emptyView.setVisibility(View.VISIBLE);
+                        } else {
+                            emptyView.setVisibility(View.GONE);
+                        }
                     }
 
                     rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -361,12 +350,18 @@ public class SearchFragment extends Fragment implements
                     if(query.length() < 1) {
                         searchOptions.setVisibility(View.VISIBLE);
                         rv.setVisibility(View.GONE);
+                        emptyView.setVisibility(View.GONE);
                     }
                     return false;
                 }
 
                 searchOptions.setVisibility(View.GONE);
                 rv.setVisibility(View.VISIBLE);
+
+                if(keyBooks.isEmpty()) {
+                    emptyView.setVisibility(View.VISIBLE);
+                    return true;
+                }
 
                 synchronized (semaphoreKeyPrepared) {
                     if(!semaphoreKeyPrepared)
@@ -382,6 +377,12 @@ public class SearchFragment extends Fragment implements
                     rv.setAdapter(recyclerViewAdapter);
 
                     getBooks(query, mPostsPerPage);
+
+                    if(recyclerViewAdapter.getItemCount() < 1) {
+                        emptyView.setVisibility(View.VISIBLE);
+                    } else {
+                        emptyView.setVisibility(View.GONE);
+                    }
 
                     rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
                         @Override
@@ -416,6 +417,10 @@ public class SearchFragment extends Fragment implements
 
     private void getBooks(final String keyword, final int remainedQuantity) {
         final Query query;
+
+        if(keyBooks.isEmpty()) {
+            return;
+        }
 
         if (remainedQuantity < 1)
             return;
@@ -465,11 +470,12 @@ public class SearchFragment extends Fragment implements
                         recyclerViewAdapter.add(book);
                         remained--;
                     } else if(searchBy.equals(getResources().getString(R.string.search_searchBy_all)) &&
-                            (book.getPublisher() != null && !book.getPublisher().isEmpty() ) ) {
-                        if(book.getPublisher().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getPublisher().toLowerCase()) ) {
+                            book.getPublisher() != null && !book.getPublisher().isEmpty() &&
+                            (book.getPublisher().toLowerCase().contains(keywordLowerCase) || keywordLowerCase.contains(book.getPublisher().toLowerCase() ) ) ) {
+
                             recyclerViewAdapter.add(book);
                             remained--;
-                        }
+
                     } else if(searchBy.equals(getResources().getString(R.string.search_searchBy_all)) ) {
                         if(book.getGenres() != null) {
                             int indexGenre = -1;
@@ -500,11 +506,11 @@ public class SearchFragment extends Fragment implements
 
                 //if not much books are found
                 getBooks(keyword, remained);
-                if(mLayoutManager.getItemCount() < 1) {
+                /*if(mLayoutManager.getItemCount() < 1) {
                     emptyView.setVisibility(View.VISIBLE);
                 } else {
                     emptyView.setVisibility(View.GONE);
-                }
+                }*/
 
                 mIsLoading = false;
             }
@@ -545,13 +551,6 @@ public class SearchFragment extends Fragment implements
 
             @Override
             public void onGeoQueryReady() {
-                //Log.d("debug", "OnGeoQueryReady - all keys are loaded");
-                if(keyBooks.isEmpty()) {
-                    emptyView.setVisibility(View.VISIBLE);
-                } else {
-                    emptyView.setVisibility(View.GONE);
-                }
-
                 //reverse array to have on top the nearest and most recent
                 Collections.reverse(keyBooks);
                 semaphoreKeyPrepared = true;
@@ -673,11 +672,15 @@ public class SearchFragment extends Fragment implements
 
     public final void selectGenre(int genre) {
         mSetDurationPresetRadioGroup.check( ((PresetValueButton) v.findViewById(R.id.search_searchBy_all)).getId() );
-        //searchBy = getResources().getString(R.string.search_searchBy_all);
         searchView.setQuery(genresList[genre], true);
     }
 
     public void getLocationGPS() {
+        if(boolSavedInstanceState) {
+            isGps = false;
+            getUserInfo();
+        }
+
         if(latGPS != null && lonGPS != null) {
             lat = latGPS;
             lon = lonGPS;
@@ -701,39 +704,137 @@ public class SearchFragment extends Fragment implements
                 city.setText(getResources().getString(R.string.search_yourPosition));
 
                 isGps = true;
-                semaphoreGps.release();
-                Log.d("debug", "OnSuccess");
-                locator.removeListener();
+                //Log.d("debug", "OnSuccess Lat: " +lat+ " Lon: "+lon);
+                getUserInfo();
             }
 
             @Override
             public void onFailure() {
                 isGps = false;
-                semaphoreGps.release();
-                Log.d("debug", "OnFailure");
-                locator.removeListener();
+                //Log.d("debug", "OnFailure");
+                getUserInfo();
             }
 
             @Override
             public void onPermissionDenied() {
                 isGps = false;
-                semaphoreGps.release();
-                Log.d("debug", "OnPermissionDenied");
-                locator.removeListener();
+                //Log.d("debug", "OnPermissionDenied");
+                getUserInfo();
             }
         });
 
     }
 
-    /*@Override
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putDouble("Lat", lat);
-        outState.putDouble("Lon", lat);
-        outState.putDouble("LatGPS", latGPS);
-        outState.putDouble("LonGPS", lonGPS);
-    }*/
+        //save coordinates to not ask coordinates again in the future
+        outState.putDouble("lat", lat);
+        outState.putDouble("lon", lat);
+
+        if(latGPS != null)
+            outState.putDouble("latGPS", latGPS);
+
+        if(lonGPS != null)
+            outState.putDouble("lonGPS", lonGPS);
+
+        //save user data to not ask it again in the future
+        if(myselfUser != null) {
+            //convert in JSON the User object
+            Gson gson = new Gson();
+            String userJson = gson.toJson(myselfUser);
+            outState.putString("user", userJson);
+        }
+
+        if(city != null) {
+            outState.putString("selectedLocation",city.getText().toString());
+        }
+
+        if(searchBy != null) {
+            outState.putString("searchBy", searchBy);
+        }
+
+    }
+
+    public void getUserInfo() {
+        if(myselfUser != null) {
+            setLocationGenres();
+            return;
+        }
+
+        //get user auth
+        FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
+
+        //get data from Firebase Database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference(FIREBASE_DATABASE_LOCATION_USERS);
+
+        usersRef.child(userAuth.getUid() ).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                //get User object
+                myselfUser = snapshot.getValue(UserMail.class);
+                setLocationGenres();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                if(getContext() == null)
+                    return;
+
+                new AlertDialog.Builder(getContext())
+                        .setTitle(getResources().getString(R.string.coordinates_error))
+                        .setMessage(getResources().getString(R.string.coordinates_errorGettingInfo))
+                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
+    }
+
+    public void setLocationGenres() {
+        //set genre buttons
+        ArrayList<Integer> listGenres = new ArrayList<>();
+        ArrayList<Integer> favouriteGenres = myselfUser.getGenres();
+
+        //set genre buttons
+        RecyclerView myrv = (RecyclerView) v.findViewById(R.id.search_genres);
+        myAdapter = new RecyclerViewAdapterGenre(getContext(), new ArrayList<Integer>(), this);
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+            myrv.setLayoutManager(new GridLayoutManager(getContext(),4));   //4 genres per row
+        else
+            myrv.setLayoutManager(new GridLayoutManager(getContext(),3));   //3 genres per row
+        myrv.setAdapter(myAdapter);
+
+        if(favouriteGenres != null) {
+            for(int genre : favouriteGenres)
+                listGenres.add(genre);
+        }
+
+        for(int i=0; i < 17; i++) {
+            if(favouriteGenres == null || !favouriteGenres.contains(i))
+                listGenres.add(i);
+        }
+
+        myAdapter.addAll(listGenres);
+
+        if(!isGps) {
+            //get coordinates
+            lat = myselfUser.getLat();
+            lon = myselfUser.getLon();
+
+            city.setText(myselfUser.getCity());
+        }
+
+        //get nearby books
+        getKeys(lat, lon, RADIUS);
+    }
 
 }
 
