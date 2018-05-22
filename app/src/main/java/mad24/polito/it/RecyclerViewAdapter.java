@@ -263,4 +263,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
        return mDataId.contains(book.getBook_id());
     }
 
+    public void clearAll() {
+        int initialSize = mData.size();
+
+        if(initialSize == 0)
+            return;
+
+        mDataId.clear();
+        mData.clear();
+
+        notifyItemRangeRemoved(0, initialSize);
+    }
+
 }

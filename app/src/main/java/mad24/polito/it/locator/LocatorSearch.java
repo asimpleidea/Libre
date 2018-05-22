@@ -147,6 +147,8 @@ public class LocatorSearch implements ActivityCompat.OnRequestPermissionsResultC
         catch (SecurityException s)
         {
             if(Listener != null) Listener.onPermissionDenied();
+        } catch (Exception s) {
+            if(Listener != null) Listener.onPermissionDenied();
         }
     }
 

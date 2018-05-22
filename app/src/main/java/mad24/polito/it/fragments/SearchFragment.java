@@ -247,12 +247,12 @@ public class SearchFragment extends Fragment implements
             if(searchBySavedInstance != null) {
                 searchBy = searchBySavedInstance;
 
-                if(searchBy.equals(getResources().getString(R.string.search_searchBy_all) ) )
-                    mSetDurationPresetRadioGroup.check(((PresetValueButton) v.findViewById(R.id.search_searchBy_all)).getId());
-                else if(searchBy.equals(getResources().getString(R.string.search_searchBy_title) ) )
-                    mSetDurationPresetRadioGroup.check(((PresetValueButton) v.findViewById(R.id.search_searchBy_title)).getId());
-                else if(searchBy.equals(getResources().getString(R.string.search_searchBy_author) ) )
-                    mSetDurationPresetRadioGroup.check(((PresetValueButton) v.findViewById(R.id.search_searchBy_author)).getId());
+                if (searchBy.equals(getResources().getString(R.string.search_searchBy_all)))
+                    ((PresetValueButton) v.findViewById(R.id.search_searchBy_all)).setChecked(true);
+                else if (searchBy.equals(getResources().getString(R.string.search_searchBy_title)))
+                    ((PresetValueButton) v.findViewById(R.id.search_searchBy_title)).setChecked(true);
+                else if (searchBy.equals(getResources().getString(R.string.search_searchBy_author)))
+                    ((PresetValueButton) v.findViewById(R.id.search_searchBy_author)).setChecked(true);
             }
 
             boolSavedInstanceState = true;
@@ -526,6 +526,8 @@ public class SearchFragment extends Fragment implements
         semaphoreKeyPrepared = false;
 
         keyBooks = new ArrayList<>();
+        if(recyclerViewAdapter != null)
+            recyclerViewAdapter.clearAll();
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION);
         GeoFire geoFire = new GeoFire(ref);
@@ -679,6 +681,7 @@ public class SearchFragment extends Fragment implements
         if(boolSavedInstanceState) {
             isGps = false;
             getUserInfo();
+            return;
         }
 
         if(latGPS != null && lonGPS != null) {
@@ -688,7 +691,7 @@ public class SearchFragment extends Fragment implements
             isGps = true;
 
             //get coordinates and nearby books
-            getKeys(lat, lon, RADIUS);
+            getUserInfo();
             return;
         }
 
