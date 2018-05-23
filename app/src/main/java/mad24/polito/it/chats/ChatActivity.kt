@@ -639,11 +639,11 @@ class ChatActivity : AppCompatActivity()
             {
                 if(Typer.text.trim(' ', '\n').isBlank())
                 {
-                    SubmitButton.visibility = View.GONE
+                    SubmitButton.setImageResource(R.drawable.ic_icon_send_disabled)
                     return@OnKeyListener false
                 }
 
-                SubmitButton.visibility = View.VISIBLE
+                SubmitButton.setImageResource(R.drawable.ic_icon_send)
             }
 
             return@OnKeyListener false
