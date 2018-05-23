@@ -1,15 +1,20 @@
 package mad24.polito.it.chats
 
+import android.animation.Animator
+import android.animation.ValueAnimator
 import android.content.Intent
+import android.media.Image
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.design.widget.BottomNavigationView
+import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.*
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -24,19 +29,20 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import com.github.curioustechizen.ago.RelativeTimeTextView
+import kotlinx.android.synthetic.main.activity_chat.*
 
 
 class ChatActivity : AppCompatActivity()
 {
-    lateinit var MainReference : DatabaseReference
-    lateinit var PartnerReference : DatabaseReference
+    private lateinit var MainReference : DatabaseReference
+    private lateinit var PartnerReference : DatabaseReference
 
-    val FireStore : FirebaseFirestore = FirebaseFirestore.getInstance()
-    lateinit var ChatMessagesDocument : DocumentReference
-    lateinit var MessagesCollection : CollectionReference
-    lateinit var IAmTyping : DocumentReference
-    lateinit var PartnerIsTyping : DocumentReference
-    lateinit var NewMessagesListener : ListenerRegistration
+    private val FireStore : FirebaseFirestore = FirebaseFirestore.getInstance()
+    private lateinit var ChatMessagesDocument : DocumentReference
+    private lateinit var MessagesCollection : CollectionReference
+    private lateinit var IAmTyping : DocumentReference
+    private lateinit var PartnerIsTyping : DocumentReference
+    private lateinit var NewMessagesListener : ListenerRegistration
 
     private lateinit var RV: RecyclerView
     private lateinit var Adapter: MessagesRecyclerAdapter
@@ -58,15 +64,18 @@ class ChatActivity : AppCompatActivity()
     private lateinit var User : UserMail
 
     //  TODO: Change this type: it won't be a textview on production, of course
-    lateinit var TypingNotifier : TextView
-    lateinit var Typer : AppCompatEditText
-    lateinit var SubmitButton : ImageButton
-    lateinit var ChatToolbar : Toolbar
-    lateinit var PartnerStatus : RelativeTimeTextView //TextView
+    private lateinit var TypingNotifier : TextView
+    private lateinit var Typer : AppCompatEditText
+    private lateinit var SubmitButton : ImageButton
+    private lateinit var ChatToolbar : Toolbar
+    private lateinit var BorrowButton : ImageButton
+    private lateinit var PartnerStatus : RelativeTimeTextView //TextView
+    private lateinit var BookInfo : LinearLayout
+    private lateinit var ShowInfo : ImageButton
 
     lateinit var StopTyping : CountDownTimer
-    var CountDownRunning : Boolean = false
-    val Seconds : Long = 3 *1000
+    private var CountDownRunning : Boolean = false
+    private val Seconds : Long = 3 *1000
     private var StuffLoaded : Int = 0
     private var StuffToLoad : Int = 4
 
@@ -139,6 +148,19 @@ class ChatActivity : AppCompatActivity()
         //  The submitter
         SubmitButton = findViewById(R.id.submitButton)
 
+        //  Borrow Button
+        BorrowButton = findViewById(R.id.borrowButton)
+
+        //  The about "the book"
+        BookInfo = findViewById(R.id.aboutTheBook)
+
+        //  The show info button
+        ShowInfo = findViewById(R.id.showInfo)
+        ShowInfo.setOnClickListener { _ ->
+            ShowInfo.setOnClickListener(null)
+            animateBookInfo(BookInfo.visibility == View.VISIBLE)
+        }
+
         //  Put a back button
         ChatToolbar = findViewById(R.id.chatToolbar)
         ChatToolbar.setNavigationIcon(R.drawable.ic_white_back_arrow)
@@ -146,6 +168,16 @@ class ChatActivity : AppCompatActivity()
         {
             finish()
         })
+
+        //  Put the book cover
+        FirebaseStorage.getInstance().getReference("bookCovers")
+                .child("thumb_$BookID.jpg")
+                .downloadUrl
+                .addOnSuccessListener {url ->
+                    Glide.with(applicationContext).load(url).into(BookInfo.findViewById(R.id.aboutBookImage))
+                }.addOnFailureListener {
+                    Glide.with(applicationContext).load(R.drawable.generic_book).into(BookInfo.findViewById(R.id.aboutBookImage))
+                }
 
         //------------------------------------
         //  The recycler adapter
@@ -204,11 +236,11 @@ class ChatActivity : AppCompatActivity()
                 if(p0 == null) return
 
                 //  Got user data
-
-                TypingNotifier.text = String.format(getString(R.string.partner_is_typing), p0.child("name").value)
+                val name = p0.child("name").value as String
+                TypingNotifier.text = String.format(getString(R.string.partner_is_typing), name)
 
                 //  Set my partner's name
-                findViewById<TextView>(R.id.theirName).text = p0.child("name").value as String
+                findViewById<TextView>(R.id.theirName).text = name
 
                 //  Put user's image
                 var prefix = (fun() : String?
@@ -231,6 +263,7 @@ class ChatActivity : AppCompatActivity()
                             }
                 }
 
+                BookInfo.findViewById<TextView>(R.id.youAndPartner).text = String.format(getString(R.string.you_and_x_are_talking), name)
                 progressiveLoad("loadPartnerData")
             }
         })
@@ -253,8 +286,19 @@ class ChatActivity : AppCompatActivity()
 
                 //  Get the book
                 val t = p0.getValue(Book::class.java)
-                if(t != null) Topic = t
-                
+                if(t == null) return
+
+                Topic = t
+                if(Topic.user_id == Me) BorrowButton.visibility = View.VISIBLE
+                else
+                {
+                    //  Else remove the button at all
+                    val b = BorrowButton.parent as RelativeLayout
+                    (BorrowButton.parent.parent as ViewGroup).removeView(b)
+                }
+
+                BookInfo.findViewById<TextView>(R.id.infoBookTitle).text = Topic.title
+
                 progressiveLoad("loadBookData")
             }
         })
@@ -267,6 +311,68 @@ class ChatActivity : AppCompatActivity()
         ChatToolbar.visibility = View.VISIBLE
         findViewById<RecyclerView>(R.id.messagesContainer).visibility = View.VISIBLE
         findViewById<BottomNavigationView>(R.id.navigation).visibility = View.VISIBLE
+            }
+
+    private fun animateBookInfo(hide : Boolean = false)
+    {
+        //---------------------------------------
+        //  Init
+        //---------------------------------------
+
+        val start = if(!hide) -70 else 0
+        val end = if(!hide) 0 else -70
+
+        //  Set up the animation
+        val anim = ValueAnimator.ofInt(start, end)
+        anim.duration = 200
+        anim.addUpdateListener { a ->
+            val lp = BookInfo.layoutParams as FrameLayout.LayoutParams
+            lp.topMargin =  a.animatedValue as Int
+            BookInfo.layoutParams = lp
+        }
+
+        //  The listener
+        anim.addListener(object : Animator.AnimatorListener
+        {
+            override fun onAnimationRepeat(p0: Animator?) { }
+
+            override fun onAnimationEnd(p0: Animator?)
+            {
+                Log.d("CHAT", "animation ended")
+                //  Showing or hiding?
+                when(hide)
+                {
+                    //  Showing
+                    false ->
+                    {
+
+                    }
+
+                    //  Hiding
+                    true ->
+                    {
+                        ShowInfo.setOnClickListener { _ ->
+                            ShowInfo.setOnClickListener(null)
+                            animateBookInfo(BookInfo.visibility == View.VISIBLE)
+                        }
+
+                        BookInfo.visibility = View.GONE
+                    }
+                }
+            }
+
+            override fun onAnimationCancel(p0: Animator?) { }
+
+            override fun onAnimationStart(p0: Animator?)
+            {
+                Log.d("CHAT", "animation started")
+            }
+
+        })
+
+        //  Before starting the animation...
+        if(!hide) BookInfo.visibility = View.VISIBLE
+        anim.start()
     }
 
     private fun load()
