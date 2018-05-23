@@ -1,8 +1,6 @@
 package mad24.polito.it.chats
 
 import android.content.Intent
-import android.media.Image
-import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.design.widget.BottomNavigationView
@@ -25,10 +23,7 @@ import mad24.polito.it.registrationmail.LoginActivity
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import android.view.animation.AnimationUtils
-import android.view.animation.Animation
 import com.github.curioustechizen.ago.RelativeTimeTextView
-import org.w3c.dom.Text
 
 
 class ChatActivity : AppCompatActivity()
@@ -52,14 +47,15 @@ class ChatActivity : AppCompatActivity()
     private lateinit var OldestMessage : String
     private lateinit var NewestMessage : String
     private lateinit var BookID : String
+    private lateinit var Topic : Book
 
     private val Take : Long = 10
-    lateinit var Me : String
-    lateinit var PartnerID : String
+    private lateinit var Me : String
+    private lateinit var PartnerID : String
     private val KeysSeparator = '&'
     private val BookSeparator = ':'
 
-    lateinit var User : UserMail
+    private lateinit var User : UserMail
 
     //  TODO: Change this type: it won't be a textview on production, of course
     lateinit var TypingNotifier : TextView
@@ -72,7 +68,7 @@ class ChatActivity : AppCompatActivity()
     var CountDownRunning : Boolean = false
     val Seconds : Long = 3 *1000
     private var StuffLoaded : Int = 0
-    private var StuffToLoad : Int = 3
+    private var StuffToLoad : Int = 4
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -179,6 +175,8 @@ class ChatActivity : AppCompatActivity()
 
         loadPartnerData()
 
+        loadBookData()
+
         //  The chat ID
         //  We create a chat id as a concatenation between the two users IDs, starting from the lowest one
         when(Me < PartnerID)
@@ -234,6 +232,30 @@ class ChatActivity : AppCompatActivity()
                 }
 
                 progressiveLoad("loadPartnerData")
+            }
+        })
+    }
+
+    private fun loadBookData()
+    {
+        MainReference.parent.child("books").child(BookID).addListenerForSingleValueEvent(object : ValueEventListener
+        {
+            override fun onCancelled(p0: DatabaseError?) { }
+
+            override fun onDataChange(p0: DataSnapshot?)
+            {
+                //  p0 null?? well, this is weird
+                if(p0 == null) return
+
+                //  These are weird as well, but it is pretty impossible at this point
+                if(!p0.exists()) return
+                if(p0.value == null) return
+
+                //  Get the book
+                val t = p0.getValue(Book::class.java)
+                if(t != null) Topic = t
+                
+                progressiveLoad("loadBookData")
             }
         })
     }
