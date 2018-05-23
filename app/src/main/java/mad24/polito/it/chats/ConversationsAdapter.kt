@@ -30,6 +30,7 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
     private val context = _context
     private var UsersToLoad : Int = 0
     private val UserReference = FirebaseDatabase.getInstance().reference.child("users")
+    private val BooksReference = FirebaseDatabase.getInstance().reference.child("books")
     private val Me = _me
     private val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
 
@@ -103,7 +104,10 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
             loadUser(Conversations[position].partner_id, holder)
 
             //  Load the picture
-            loadPicture(Conversations[position].partner_id, holder)
+            loadPicture(Conversations[position].book_id, holder)
+
+            //  Load the title
+            loadTitle(Conversations[position].book_id, holder)
         }
 
         //  Set the time
@@ -118,15 +122,32 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
         if(holder.itemView.hasOnClickListeners()) return
         holder.itemView.setOnClickListener {_ ->
 
-            val book_id = Conversations[position].chat_id.split(':')[0]
             //  Init the intent
             val intent = Intent(context, ChatActivity::class.java)
             intent.putExtra("partner_id", Conversations[position].partner_id)
-            intent.putExtra("book_id", book_id)
+            intent.putExtra("book_id", Conversations[position].book_id)
 
             //  Start the activity
             context.startActivity(intent)
         }
+    }
+
+    private fun loadTitle(id: String, holder : ViewHolder)
+    {
+        BooksReference.child(id).addListenerForSingleValueEvent(object : ValueEventListener
+        {
+            override fun onCancelled(p0: DatabaseError?) { }
+
+            override fun onDataChange(p0: DataSnapshot?)
+            {
+                if(p0 == null) return
+                if(p0.exists())
+                {
+                    val title = p0.child("title").value as String
+                    holder.BookTitle.text = title
+                }
+            }
+        })
     }
 
     private fun loadUser(id : String, holder : ViewHolder)
@@ -149,7 +170,7 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
 
     private fun loadPicture(id : String, holder : ViewHolder)
     {
-        FirebaseStorage.getInstance().reference.child("profile_pictures/thumb_$id.jpg")
+        FirebaseStorage.getInstance().reference.child("bookCovers/thumb_$id.jpg")
                 .downloadUrl.
                 addOnCompleteListener { task ->
 
@@ -166,5 +187,6 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
         val Preview = itemView.findViewById<TextView>(R.id.contentPreview)
         val PartnerImage = itemView.findViewById<CircleImageView>(R.id.partnerImage)
         val MessageTime = itemView.findViewById<RelativeTimeTextView>(R.id.messageTime)
+        val BookTitle = itemView.findViewById<TextView>(R.id.conversationBookTitle)
     }
 }

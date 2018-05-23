@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="100dp"
     android:padding="5dp"
     android:layout_marginLeft="7dp"
     android:layout_marginRight="7dp"
@@ -10,93 +10,110 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.2"
-            android:layout_marginRight="7dp">
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/partnerImage"
+        android:orientation="vertical">
+            <TextView
+                android:id="@+id/conversationBookTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/unknown_user"/>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:paddingTop="2dp"
-            android:layout_width="0dp"
+                android:fontFamily="@font/opensans_regular"
+                android:textSize="22sp"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:shadowColor="@color/black"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"/>
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.8">
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <RelativeLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_weight="0.2"
+                android:layout_marginRight="7dp">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/partnerImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/generic_book"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:paddingTop="2dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.8">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
-                    <RelativeLayout
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.75"
-                        android:layout_marginBottom="3dp">
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/partnerName"
-                            android:fontFamily="@font/opensans_regular"
-                            android:textSize="20sp"
-                            android:layout_width="match_parent"
+                        <RelativeLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:ellipsize="marquee"
-                            android:shadowColor="@color/black"
-                            android:shadowDx="1"
-                            android:shadowDy="1"
-                            android:shadowRadius="1"
-                            />
+                            android:layout_weight="0.75"
+                            android:layout_marginBottom="3dp">
 
-                    </RelativeLayout>
+                            <TextView
+                                android:id="@+id/partnerName"
+                                android:fontFamily="@font/opensans_regular"
+                                android:textSize="16sp"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:singleLine="true"
+                                android:ellipsize="marquee"
+                                android:shadowColor="@color/black"
+                                android:shadowDx="1"
+                                android:shadowDy="1"
+                                android:shadowRadius="1"
+                                />
 
-                    <RelativeLayout
-                        android:layout_width="0dp"
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.25">
+
+                            <com.github.curioustechizen.ago.RelativeTimeTextView
+                                android:id="@+id/messageTime"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:textSize="12sp"
+                                android:singleLine="true"
+                                android:ellipsize="end"
+                                />
+
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/contentPreview"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.25">
-
-                        <com.github.curioustechizen.ago.RelativeTimeTextView
-                            android:id="@+id/messageTime"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:textSize="12sp"
-                            android:singleLine="true"
-                            android:ellipsize="end"
-                            />
-
-                    </RelativeLayout>
+                        android:maxLines="2"
+                        android:drawablePadding="4dp"
+                        android:ellipsize="end"
+                        android:textSize="16sp"
+                        />
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/contentPreview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:maxLines="2"
-                    android:drawablePadding="4dp"
-                    android:ellipsize="end"
-                    android:textSize="16sp"
-                    />
+            </RelativeLayout>
 
-            </LinearLayout>
-
-        </RelativeLayout>
-
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>
