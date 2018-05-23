@@ -311,12 +311,13 @@ public class BooksFragment extends Fragment {
                 .child(FIREBASE_DATABASE_LOCATION_BOOKS)
                 .orderByKey()
                 .equalTo(nodeId);
-
+        Log.d("debug", "I'm in getBooks");
         final long timestamp = timestampKey;
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("debug", "I'm in onDataChange");
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     Book book = bookSnapshot.getValue(Book.class);
 
@@ -347,7 +348,6 @@ public class BooksFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-
     }
 
     @Override

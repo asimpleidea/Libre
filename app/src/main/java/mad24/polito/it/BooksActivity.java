@@ -27,8 +27,8 @@ import mad24.polito.it.registrationmail.LoginActivity;
 
 public class BooksActivity  extends AppCompatActivity
 {
-    public static final String FIREBASE_DATABASE_LOCATION_BOOKS = "booksTest";
-    public static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = "locationBooksTest";
+    public static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
+    public static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = "locationBooks";
     public static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
 
     private BottomNavigationView mMainNav;
@@ -41,6 +41,7 @@ public class BooksActivity  extends AppCompatActivity
     private ViewBookFragment ViewBook;
 
     private enum CurrentFragment{BooksFragment, SearchFragment, ChatFragment, ProfileFragment, ViewBookFragment};
+
     private CurrentFragment currentFragment;
 
     private TextView mTextMessage;
@@ -107,6 +108,12 @@ public class BooksActivity  extends AppCompatActivity
         }
 
        setFragment(booksFragment);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
     }
 
     public void setFragment(Fragment fragment) {
@@ -198,4 +205,18 @@ public class BooksActivity  extends AppCompatActivity
         }
     }
 
+    public String getCurrentFragment() {
+        return currentFragment.toString();
+    }
+
+    public void setCurrentFragment(int fragment) {
+        switch(fragment){
+            case 1:
+                currentFragment = CurrentFragment.ProfileFragment;
+                break;
+            default:
+                currentFragment = CurrentFragment.BooksFragment;
+                break;
+        }
+    }
 }

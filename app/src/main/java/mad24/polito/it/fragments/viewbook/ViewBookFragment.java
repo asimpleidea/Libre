@@ -1,7 +1,6 @@
 package mad24.polito.it.fragments.viewbook;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 
@@ -44,26 +42,32 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private BookViewPagerAdapter ViewPageAdapter = null;
     private ViewPager viewPager = null;
     private View view = null;
-    private BookDetailsFragment Details = null;
-    private BookOwnerFragment Owner = null;
-    private BookMapFragment Map = null;
-    private TabLayout Tabs = null;
+    private BookDetailsFragment details = null;
+    private BookOwnerFragment owner = null;
+    private BookBorrowerFragment borrower = null;
+    private BookMapFragment map = null;
+    private TabLayout tabs = null;
     private boolean AlreadyVisible = false;
 
     private final int BOOK_DETAILS = 0;
     private final int BOOK_OWNER = 1;
     private final int BOOK_MAP = 2;
 
-    private final String BOOK_DETAILS_TITLE = "Details";
-    private final String BOOK_OWNER_TITLE = "Owner";
-    private final String BOOK_MAP_TITLE = "Map";
+    private final int BOOK_BORROWER = 1;
+
+    private final String BOOK_DETAILS_TITLE = "details";
+    private final String BOOK_OWNER_TITLE = "owner";
+    private final String BOOK_MAP_TITLE = "map";
+    private final String BOOK_BORROWER_TITLE = "borrower";
     private final String BUNDLE_KEY = "book";
+    private final String BUNDLE_FRAGMENT = "fragment";
     StorageReference Storage = null;
 
     private FragmentLoadingListener LoadingListener = null;
 
     private Book TheBook = null;
     private String JSONBook = null;
+    private int fragment; // 0: bookFragment; 1: profileFragment
 
     private OnFragmentInteractionListener mListener;
 
@@ -99,7 +103,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     public void onDestroy()
     {
         super.onDestroy();
-
+        ((BooksActivity) getActivity()).setCurrentFragment(fragment);
     }
 
     @Override
@@ -110,6 +114,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         //  Get the arguments
         if (getArguments() != null)
         {
+            fragment = getArguments().getInt(BUNDLE_FRAGMENT);
             JSONBook = getArguments().getString(BUNDLE_KEY);
             TheBook = new Gson().fromJson(getArguments().getString(BUNDLE_KEY), Book.class);
             //Storage = FirebaseStorage.getInstance().getReference().child("bookCovers");
@@ -121,23 +126,30 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                              Bundle savedInstanceState)
     {
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_view_book, container, false);
+        switch(fragment) {
+            case 1:
+                view = inflater.inflate(R.layout.fragment_view_book_owner, container, false);
+                setUpDetails();
+                setUpBorrower();
+                break;
+            default:
+                view = inflater.inflate(R.layout.fragment_view_book, container, false);
+                setUpDetails();
+
+                setUpOwner();
+
+                setUpMap();
+        }
+
+        setUpViewPager();
+
+        setUpTabs();
 
         //  Load the book cover
         /*if(TheBook.getBookImageLink() != null && !TheBook.getBookImageLink().isEmpty())
         {
             Glide.with(getActivity().getApplicationContext()).load(TheBook.getBookImageLink()).into((ImageView) view.findViewById(R.id.bookCover));
         }*/
-
-        setUpDetails();
-
-        setUpOwner();
-
-        setUpMap();
-
-        setUpViewPager();
-
-        setUpTabs();
 
         //  Done! We finished the loading!
         if(LoadingListener != null)
@@ -154,54 +166,92 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         //------------------------------------
         //  Init
         //------------------------------------
-
-        Tabs = view.findViewById(R.id.tabLayout);
+        switch(fragment){
+            case 1:
+                tabs = view.findViewById(R.id.tabLayoutOwner);
+                break;
+            default:
+                tabs = view.findViewById(R.id.tabLayout);
+        }
 
         //------------------------------------
         //  Set tabs behaviour
         //------------------------------------
 
-        Tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
         {
             @Override
             public void onTabSelected(TabLayout.Tab tab)
             {
                 viewPager.setCurrentItem(tab.getPosition(), true);
 
-                switch (tab.getPosition()) {
-                    case BOOK_DETAILS:
-                        Log.d("VIEWBOOK", "Show book's details");
-                        Tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
+                switch(fragment){
+                    case 1:
+                        switch (tab.getPosition()) {
+                            case BOOK_DETAILS:
+                                Log.d("VIEWBOOK", "Show book's details");
+                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
+                            break;
+                            case BOOK_BORROWER:
+                                Log.d("VIEWBOOK", "Show book's borrowers");
+                                tabs.getTabAt(BOOK_BORROWER).setIcon(R.drawable.ic_owner_selected); // TODO: change drawable
+                                break;
+                        }
                         break;
-                    case BOOK_OWNER:
-                        Log.d("VIEWBOOK", "Show book's owners");
-                        Tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_selected);
-                        break;
-                    case BOOK_MAP:
-                        Log.d("VIEWBOOK", "Show book's map");
-                        Tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_selected);
-                        break;
+                    default:
+                        switch (tab.getPosition()) {
+                            case BOOK_DETAILS:
+                                Log.d("VIEWBOOK", "Show book's details");
+                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
+                                break;
+                            case BOOK_OWNER:
+                                Log.d("VIEWBOOK", "Show book's owners");
+                                tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_selected);
+                                break;
+                            case BOOK_MAP:
+                                Log.d("VIEWBOOK", "Show book's map");
+                                tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_selected);
+                                break;
+                        }
                 }
+
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab)
             {
-                switch (tab.getPosition())
-                {
-                    case BOOK_DETAILS:
-                        Log.d("VIEWBOOK", "Show book's details");
-                        Tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected);
+                switch(fragment){
+                    case 1:
+                        switch (tab.getPosition())
+                        {
+                            case BOOK_DETAILS:
+                                Log.d("VIEWBOOK", "Show book's details");
+                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected);
+                                break;
+                            case BOOK_BORROWER:
+                                Log.d("VIEWBOOK", "Show book's borrower");
+                                tabs.getTabAt(BOOK_BORROWER).setIcon(R.drawable.ic_owner_unselected);
+                                break;
+                        }
                         break;
-                    case BOOK_OWNER:
-                        Log.d("VIEWBOOK", "Show book's owners");
-                        Tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected);
-                        break;
-                    case BOOK_MAP:
-                        Log.d("VIEWBOOK", "Show book's map");
-                        Tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected);
-                        break;
+                    default:
+                        switch (tab.getPosition())
+                        {
+                            case BOOK_DETAILS:
+                                Log.d("VIEWBOOK", "Show book's details");
+                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected);
+                                break;
+                            case BOOK_OWNER:
+                                Log.d("VIEWBOOK", "Show book's owners");
+                                tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected);
+                                break;
+                            case BOOK_MAP:
+                                Log.d("VIEWBOOK", "Show book's map");
+                                tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected);
+                                break;
+                        }
                 }
+
             }
 
             @Override
@@ -216,17 +266,30 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         //------------------------------------
         //  Init
         //------------------------------------
+        switch(fragment){
+            case 1:
+                viewPager = view.findViewById(R.id.viewPagerOwner);
+                break;
+            default:
+                viewPager = view.findViewById(R.id.viewPager);
+        }
 
-        viewPager = view.findViewById(R.id.viewPager);
         ViewPageAdapter = new BookViewPagerAdapter(getChildFragmentManager());
 
         //------------------------------------
         //  Add other fragments
         //------------------------------------
 
-        ViewPageAdapter.addFragment(Details, BOOK_DETAILS_TITLE);
-        ViewPageAdapter.addFragment(Owner, BOOK_OWNER_TITLE);
-        ViewPageAdapter.addFragment(Map, BOOK_MAP_TITLE);
+        switch(fragment){
+            case 1:
+                ViewPageAdapter.addFragment(borrower, BOOK_BORROWER_TITLE);
+                ViewPageAdapter.addFragment(details, BOOK_DETAILS_TITLE);
+                break;
+            default:
+                ViewPageAdapter.addFragment(details, BOOK_DETAILS_TITLE);
+                ViewPageAdapter.addFragment(owner, BOOK_OWNER_TITLE);
+                ViewPageAdapter.addFragment(map, BOOK_MAP_TITLE);
+        }
 
         //------------------------------------
         //  Set adapter and current item
@@ -234,6 +297,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
 
         viewPager.setAdapter(ViewPageAdapter);
         viewPager.setCurrentItem(BOOK_DETAILS, true);
+
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {
             @Override
@@ -245,7 +309,7 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
             @Override
             public void onPageSelected(int position)
             {
-                Tabs.getTabAt(position).select();
+                tabs.getTabAt(position).select();
             }
 
             @Override
@@ -262,9 +326,9 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         Bundle b = new Bundle();
         b.putString(BUNDLE_KEY, JSONBook);
 
-        Details = new BookDetailsFragment();
-        Details.setArguments(b);
-        Details.setLoadingListener(new FragmentLoadingListener() {
+        details = new BookDetailsFragment();
+        details.setArguments(b);
+        details.setLoadingListener(new FragmentLoadingListener() {
             @Override
             public void onFragmentLoaded()
             {
@@ -331,7 +395,13 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         }
 
         appBar.setVisibility(View.VISIBLE);
-        ((ViewPager)view.findViewById(R.id.viewPager)).setVisibility(View.VISIBLE);
+        switch(fragment){
+            case 1:
+                ((ViewPager)view.findViewById(R.id.viewPagerOwner)).setVisibility(View.VISIBLE);
+                break;
+            default:
+                ((ViewPager)view.findViewById(R.id.viewPager)).setVisibility(View.VISIBLE);
+        }
         AlreadyVisible = true;
     }
 
@@ -341,8 +411,17 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         b.putString("owner", TheBook.getUser_id());
         b.putString("book", JSONBook);
 
-        Owner = new BookOwnerFragment();
-        Owner.setArguments(b);
+        owner = new BookOwnerFragment();
+        owner.setArguments(b);
+    }
+
+    private void setUpBorrower(){
+        Bundle b = new Bundle();
+        b.putString("borrower", "MarcoSchiuma"); // TODO: set useful data to the borrower fragment constructor
+        b.putString("book", JSONBook);
+
+        borrower = new BookBorrowerFragment();
+        borrower.setArguments(b);
     }
 
     private void setUpMap()
@@ -350,8 +429,8 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
         Bundle b = new Bundle();
         b.putString("book", JSONBook);
 
-        Map = new BookMapFragment();
-        Map.setArguments(b);
+        map = new BookMapFragment();
+        map.setArguments(b);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

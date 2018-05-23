@@ -1,7 +1,6 @@
 package mad24.polito.it.fragments.viewbook;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,25 +24,20 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 
-import java.security.acl.Owner;
-
 import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;
-import mad24.polito.it.fragments.FragmentLoadingListener;
-import mad24.polito.it.fragments.FragmentWithLoadingListener;
 import mad24.polito.it.models.Book;
 import mad24.polito.it.models.UserMail;
-import mad24.polito.it.registrationmail.User;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link BookOwnerFragment.OnFragmentInteractionListener} interface
+ * {@link BookBorrowerFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link BookOwnerFragment#newInstance} factory method to
+ * Use the {@link BookBorrowerFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BookOwnerFragment extends Fragment
+public class BookBorrowerFragment extends Fragment
 {
     private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
 
@@ -57,7 +51,7 @@ public class BookOwnerFragment extends Fragment
 
     //private OnFragmentInteractionListener mListener;
 
-    public BookOwnerFragment()
+    public BookBorrowerFragment()
     {
         // Required empty public constructor
     }
@@ -69,8 +63,8 @@ public class BookOwnerFragment extends Fragment
      * @return A new instance of fragment BookOwnerFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static BookOwnerFragment newInstance() {
-        BookOwnerFragment fragment = new BookOwnerFragment();
+    public static BookBorrowerFragment newInstance() {
+        BookBorrowerFragment fragment = new BookBorrowerFragment();
         //Bundle args = new Bundle();
         return fragment;
     }
@@ -79,7 +73,7 @@ public class BookOwnerFragment extends Fragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
+/*
         if (getArguments() != null)
         {
             UID = getArguments().getString("owner");
@@ -88,6 +82,7 @@ public class BookOwnerFragment extends Fragment
             TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
             Storage = FirebaseStorage.getInstance().getReference("profile_pictures").child(UID + ".jpg");
         }
+        */
     }
 
     private void loadAndInjectUser()
@@ -141,7 +136,6 @@ public class BookOwnerFragment extends Fragment
 
         //  The Conditions
         ((TextView) RootView.findViewById(R.id.bookConditions)).setText(String.format(getResources().getString(R.string.book_conditions_user), TheBook.getCondition()));
-
     }
 
     @Override
@@ -149,11 +143,11 @@ public class BookOwnerFragment extends Fragment
                              Bundle savedInstanceState)
     {
         // Inflate the layout for this fragment
-        RootView = inflater.inflate(R.layout.fragment_book_owner, container, false);
-
+        RootView = inflater.inflate(R.layout.fragment_book_borrower, container, false);
+/*
         if(User == null) loadAndInjectUser();
         else injectUser();
-
+*/
         return RootView;
     }
 

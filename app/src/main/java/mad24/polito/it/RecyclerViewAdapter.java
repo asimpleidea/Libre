@@ -1,5 +1,7 @@
 package mad24.polito.it;
 
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -119,6 +121,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //  Init
                 //----------------------------------
 
+                BooksActivity myActivity =  (BooksActivity) v.getContext();
                 //  TODO: check if passing object as JSON makes sense: what if the object is too large?
                 //  Pass the book's data here, so we won't have to download everything again
                 //  Doing as JSON, so I won't have to write too many .putString etc :D
@@ -129,6 +132,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //  Start the fragment
                 //----------------------------------
 
+                if(myActivity.getCurrentFragment().equals("BooksFragment")) {
+                    Log.d("check_adapter", "BooksFragment");
+                    args.putInt("fragment", 0);
+                }
+                else
+                    if (myActivity.getCurrentFragment().equals("ProfileFragment")) {
+                        Log.d("check_adapter", "ProfileFragment");
+                        args.putInt("fragment", 1);
+                    }else Log.d("check_adapter", "nothing: "+myActivity.getCurrentFragment());
+
                 final ViewBookFragment b = new ViewBookFragment();
                 b.setArguments(args);
 
@@ -136,7 +149,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //  Show me the book
                 //----------------------------------
 
-                BooksActivity myActivity =  (BooksActivity) v.getContext();
                 myActivity.setViewBookFragment(b);
                 myActivity.setFragment(b, "ViewBook");
                 /*booksActivity.setViewBookFragment(b);
