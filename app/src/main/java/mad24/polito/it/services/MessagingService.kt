@@ -66,6 +66,7 @@ class MessagingService : FirebaseMessagingService()
                 val intent = Intent(this, ChatActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 intent.putExtra("partner_id", data.getValue("partner_id"))
+                intent.putExtra("book_id", data.getValue("book_id"))
 
                 var pendingIntent : PendingIntent?
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)

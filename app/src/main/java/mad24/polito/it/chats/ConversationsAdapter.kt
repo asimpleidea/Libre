@@ -117,9 +117,12 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
         //  Set the touch event
         if(holder.itemView.hasOnClickListeners()) return
         holder.itemView.setOnClickListener {_ ->
+
+            val book_id = Conversations[position].chat_id.split(':')[0]
             //  Init the intent
             val intent = Intent(context, ChatActivity::class.java)
             intent.putExtra("partner_id", Conversations[position].partner_id)
+            intent.putExtra("book_id", book_id)
 
             //  Start the activity
             context.startActivity(intent)
