@@ -68,8 +68,8 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
 
     fun swap(oldIndex : Int, newIndex : Int, change : Chat )
     {
-        if(oldIndex != newIndex)
-        {
+        /*if(oldIndex != newIndex)
+        {*/
             Collections.swap(Conversations, oldIndex, newIndex)
             Conversations[newIndex].preview = change.preview
             Conversations[newIndex].last_message_by = change.last_message_by
@@ -80,9 +80,9 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
             Conversations[newIndex].my_last_here = change.my_last_here
 
             notifyItemMoved(oldIndex, newIndex)
-        }
-
-        notifyItemChanged(newIndex)
+            notifyItemChanged(newIndex)
+            notifyItemChanged(oldIndex)
+        //}
     }
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int)
