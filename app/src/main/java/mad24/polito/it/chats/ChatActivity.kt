@@ -63,7 +63,6 @@ class ChatActivity : AppCompatActivity()
 
     private lateinit var User : UserMail
 
-    //  TODO: Change this type: it won't be a textview on production, of course
     private lateinit var TypingNotifier : TextView
     private lateinit var Typer : AppCompatEditText
     private lateinit var SubmitButton : ImageButton
@@ -72,6 +71,7 @@ class ChatActivity : AppCompatActivity()
     private lateinit var PartnerStatus : RelativeTimeTextView //TextView
     private lateinit var BookInfo : LinearLayout
     private lateinit var ShowInfo : ImageButton
+    private lateinit var DismissReminder : Button
 
     lateinit var StopTyping : CountDownTimer
     private var CountDownRunning : Boolean = false
@@ -158,7 +158,14 @@ class ChatActivity : AppCompatActivity()
         ShowInfo = findViewById(R.id.showInfo)
         ShowInfo.setOnClickListener { _ ->
             ShowInfo.setOnClickListener(null)
-            animateBookInfo(BookInfo.visibility == View.VISIBLE)
+            animateBookInfo(false)
+        }
+
+        //  The dismiss button
+        DismissReminder = findViewById(R.id.dismissReminder)
+        DismissReminder.setOnClickListener { _ ->
+            DismissReminder.setOnClickListener(null)
+            animateBookInfo(true)
         }
 
         //  Put a back button
@@ -319,8 +326,8 @@ class ChatActivity : AppCompatActivity()
         //  Init
         //---------------------------------------
 
-        val start = if(!hide) -70 else 0
-        val end = if(!hide) 0 else -70
+        val start = if(!hide) -95 else 0
+        val end = if(!hide) 0 else -95
 
         //  Set up the animation
         val anim = ValueAnimator.ofInt(start, end)
@@ -345,7 +352,10 @@ class ChatActivity : AppCompatActivity()
                     //  Showing
                     false ->
                     {
-
+                        DismissReminder.setOnClickListener { _ ->
+                            DismissReminder.setOnClickListener(null)
+                            animateBookInfo(true)
+                        }
                     }
 
                     //  Hiding
