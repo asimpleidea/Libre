@@ -196,6 +196,7 @@
     <string name="last_online">Ultimo accesso: </string>
     <string name="my_chats_toolbar">Chats</string>
     <string name="no_chats">Non ci sono chat :( Quando guardi un libro, tocca il pulsante chat sotto la tab del proprietario per iniziare una chat</string>
+    <string name="contact_the_user">Chat</string>
     <!-- /Chat -->
 
 </resources>

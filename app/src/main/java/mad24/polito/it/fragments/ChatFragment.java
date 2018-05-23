@@ -118,36 +118,6 @@ public class ChatFragment extends Fragment
         load();
     }
 
-    /*private void load()
-    {
-        //  Load
-        ChatsCollection.orderBy("last_message_time", Query.Direction.DESCENDING).get()
-
-                //  Everything ok?
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots)
-                    {
-                        if(!queryDocumentSnapshots.isEmpty())
-                        {
-                            Adapter.bulkPush(queryDocumentSnapshots.toObjects(Chat.class));
-                        }
-
-                        //  Listen for updates
-                        listenForUpdates();
-                    }
-                })
-
-                //  Not ok?
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e)
-                {
-                    Log.d("CHAT", "Could not load chats");
-                }
-            });
-    }*/
-
     private void load()
     {
         ChatsCollection.orderBy("last_message_time", Query.Direction.DESCENDING)

@@ -189,7 +189,6 @@ class ChatActivity : AppCompatActivity()
 
             override fun onDataChange(p0: DataSnapshot?)
             {
-                Log.d("CHAT", "line 191")
                 //  p0 null?? well, this is weird
                 if(p0 == null) return
 
@@ -229,7 +228,6 @@ class ChatActivity : AppCompatActivity()
     private fun show()
     {
         //  Show the chat
-        Log.d("CHAT", "OK, you can show")
         (findViewById<ProgressBar>(R.id.loadingScreen).parent as RelativeLayout).visibility = View.GONE
         ChatToolbar.visibility = View.VISIBLE
         findViewById<RecyclerView>(R.id.messagesContainer).visibility = View.VISIBLE
