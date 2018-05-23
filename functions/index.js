@@ -64,13 +64,14 @@ exports.createChat = functions.firestore.document('/chat_messages/{chatId}/parte
     //  Original value
     const   chatId = context.params.chatId,
             user = context.params.userId,
+            book_id = chatId.split(':')[0],
             users = chatId.split(':')[1].split('&');
 
     if(users.length !== 2) return console.log("error: id is not correct");
 
     const otherUser = user === users[0] ? users[1] : users[0];
 
-    return admin.firestore().doc("chats/" + user + "/conversations/" + chatId).set({chat_id : chatId, partner_id: otherUser});
+    return admin.firestore().doc("chats/" + user + "/conversations/" + chatId).set({chat_id : chatId, partner_id: otherUser, book_id : book_id});
 });
 
 exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
