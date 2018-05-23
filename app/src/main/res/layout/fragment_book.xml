@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Books"
+            android:text="@string/books"
             android:textSize="25sp"
             android:textColor="@color/colorWhite"
             android:layout_marginLeft="10dp"

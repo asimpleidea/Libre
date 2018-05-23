@@ -91,7 +91,6 @@
     <string name="nav_chat">Chat</string>
     <string name="nav_profile">Profile</string>
 
-    <!-- TODO: Change this text -->
     <string name="dialog_scan">ISBN scan</string>
     <string name="dialog_manualIns">Manual Insert</string>
     <string name="manual_insert_error">Error getting info about book</string>
@@ -205,11 +204,6 @@
     <string name="myBooks">My books:</string>
     <string name="noBooks">Nothing to show, add a new book in the home page</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
-    <!-- /Facebook -->
-
     <!-- View Book -->
     <string name="read_more">More…</string>
     <string name="book_by">By %1$s</string>
@@ -226,6 +220,10 @@
     <string name="title_activity_view_book">ViewBookActivity</string>
     <string name="action_settings">Settings</string>
     <string name="books_noResults">There are no books available</string>
+
+    <!-- Fragments toolbar -->
+    <string name="chat">Chat</string>
+    <string name="books">Books</string>
     <!-- /View Book -->
 
 </resources>

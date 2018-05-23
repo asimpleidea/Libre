@@ -14,11 +14,11 @@
         android:minHeight="?attr/actionBarSize"
         app:contentInsetStart="0dp"
         >
-        <!-- TODO: string value -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Chat"
+            android:text="@string/chat"
             android:textSize="25sp"
             android:textColor="@color/colorWhite"
             android:layout_marginLeft="10dp"

@@ -197,6 +197,11 @@
     <string name="published_in">Pubblicato nel %1$s</string>
     <string name="published_by">Pubblicato da %1$s</string>
     <string name="books_noResults">Non ci sono libri disponibili</string>
-    <!-- /View Book -->
+
+    <string name="action_settings">Impostazioni</string>
+
+    <!-- Fragments toolbar -->
+    <string name="books">Libri</string>
+    <string name="chat">Messaggi</string>
 
 </resources>

@@ -34,7 +34,7 @@
                 android:paddingRight="20dp"
                 android:paddingBottom="20dp">
 
-                <!-- TODO: modify this -->
+                <!-- TODO: modify this image -->
                 <android.support.v7.widget.AppCompatImageView
                     android:id="@+id/manual_ins_newImage"
                     android:layout_width="100dp"
