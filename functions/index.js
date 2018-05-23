@@ -187,6 +187,7 @@ exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}
             message_id = context.params.messageId,
             message = snap.data(),
             users = chat_id.split(':')[1].split('&'),
+            book_id = chat_id.split(':')[0],
             sender = message.by,
             receiver = sender === users[0] ? users[1] : users[0];
 
@@ -233,7 +234,8 @@ exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}
                         last_message_id: message_id,
                         last_message_time: message.sent,
                         partner_id : sender,
-                        partner_image : picType
+                        partner_image : picType,
+                        book_id : book_id
                     }
                 };
 
