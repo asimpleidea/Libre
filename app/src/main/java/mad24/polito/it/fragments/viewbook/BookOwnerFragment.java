@@ -153,8 +153,11 @@ public class BookOwnerFragment extends Fragment
 
         if(User == null) loadAndInjectUser();
         else injectUser();
+        if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(TheBook.getUser_id())) return RootView;
 
-        ((Button) RootView.findViewById(R.id.startChat)).setOnClickListener(new View.OnClickListener()
+        Button b = RootView.findViewById(R.id.startChat);
+        b.setVisibility(View.VISIBLE);
+        b.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
@@ -170,9 +173,6 @@ public class BookOwnerFragment extends Fragment
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot)
                             {
-                                //  The chat id
-                                String chat = null;
-
                                 //  Init the intent
                                 Intent intent = new Intent(getActivity(), ChatActivity.class);
                                 intent.putExtra("partner_id", TheBook.getUser_id());
@@ -191,6 +191,7 @@ public class BookOwnerFragment extends Fragment
                         });
             }
         });
+
         return RootView;
     }
 
