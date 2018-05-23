@@ -19,7 +19,7 @@ exports.debugCreateChat = functions.https.onRequest((req, res) =>
 {
     const first = "first_user",
           second = "second_user",
-          chat_id = first + "&" + second;
+          chat_id = "book_id:" + first + "&" + second;
 
     const partecipants = 
     {
@@ -46,10 +46,10 @@ exports.debugCreateChat = functions.https.onRequest((req, res) =>
 
 exports.debugUpdateStatus = functions.https.onRequest((req, res) => 
 {
-    const chat_id = "6GlvXy7stFPDYzheZ7It5Nob0tf1&P1f7ozEcOQNgHvuMXL4tSDxapgF3",
+    const chat_id = "book_id:first_user&second_user",
             date = new Date(),
-            me = "6GlvXy7stFPDYzheZ7It5Nob0tf1",
-            them = "P1f7ozEcOQNgHvuMXL4tSDxapgF3";
+            me = "first_user",
+            them = "second_user";
     
     return admin.firestore().doc("chat_messages/" + chat_id + "/partecipants/" + me).update({last_here: (date.toISOString().split('.')[0]+'Z')})
     .then(s => 
@@ -64,13 +64,13 @@ exports.createChat = functions.firestore.document('/chat_messages/{chatId}/parte
     //  Original value
     const   chatId = context.params.chatId,
             user = context.params.userId,
-            users = chatId.split('&');
+            users = chatId.split(':')[1].split('&');
 
     if(users.length !== 2) return console.log("error: id is not correct");
 
     const otherUser = user === users[0] ? users[1] : users[0];
 
-    return admin.firestore().doc("chats/" + user + "/conversations/" + otherUser).set({chat_id : chatId, partner_id: otherUser});
+    return admin.firestore().doc("chats/" + user + "/conversations/" + chatId).set({chat_id : chatId, partner_id: otherUser});
 });
 
 exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
@@ -85,11 +85,12 @@ exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/
     if(previousValue.last_here === newValue.last_here) return;
 
     const user_id = context.params.userId,
-            users = context.params.chatId.split('&'),
+            chat_id = context.params.chatId
+            users = chat_id.split(':')[1].split('&'),
             otherUser = user_id === users[0] ? users[1] : users[0],
             my_last_here = newValue.last_here;
 
-    return admin.firestore().doc("chats/" + user_id + "/conversations/" + otherUser).update({my_last_here : my_last_here});
+    return admin.firestore().doc("chats/" + user_id + "/conversations/" + chat_id).update({my_last_here : my_last_here});
 });
 
 exports.debugPostMessage = functions.https.onRequest((req, res) => 
@@ -114,7 +115,7 @@ exports.debugPostMessage = functions.https.onRequest((req, res) =>
 
 exports.debugPostTestMessage = functions.https.onRequest((req, res) => 
 {
-    const chat_id = "first_user&second_user";
+    const chat_id = "book_id:first_user&second_user";
     var date = new Date();
     
     const message = 
@@ -137,7 +138,7 @@ exports.updateChat = functions.firestore.document('/chat_messages/{chatId}/messa
     const chat_id = context.params.chatId,
             message_id = context.params.messageId,
             message = snap.data()
-            users = chat_id.split('&');
+            users = chat_id.split(':')[1].split('&');
 
     //  Build the object
     const data = 
@@ -149,9 +150,9 @@ exports.updateChat = functions.firestore.document('/chat_messages/{chatId}/messa
     };
 
     //  Create them
-    return Promise.all([    admin.firestore().doc("chats/" + users[0] + "/conversations/" + users[1]).get(),
-                            admin.firestore().doc("chats/" + users[0] + "/conversations/" + users[1]).update(data),
-                            admin.firestore().doc("chats/" + users[1] + "/conversations/" + users[0]).update(data)] )
+    return Promise.all([    admin.firestore().doc("chats/" + users[0] + "/conversations/" + chat_id).get(),
+                            admin.firestore().doc("chats/" + users[0] + "/conversations/" + chat_id).update(data),
+                            admin.firestore().doc("chats/" + users[1] + "/conversations/" + chat_id).update(data)] )
             .then(results =>
                 {
                     const r = results[0],
@@ -185,7 +186,7 @@ exports.sendNotification = functions.firestore.document('/chat_messages/{chatId}
     const chat_id = context.params.chatId,
             message_id = context.params.messageId,
             message = snap.data(),
-            users = chat_id.split('&'),
+            users = chat_id.split(':')[1].split('&'),
             sender = message.by,
             receiver = sender === users[0] ? users[1] : users[0];
 
