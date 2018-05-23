@@ -162,7 +162,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return mData.size();
     }
 
-    public void retreiveBooks(List<String> books_id) {
+    public void retrieveBooks(List<String> books_id) {
 
         Query query;
 

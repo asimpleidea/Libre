@@ -9,11 +9,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompatSideChannelService;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,11 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -34,14 +26,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -50,13 +40,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mad24.polito.it.BooksActivity;
-import mad24.polito.it.EditProfileActivity;
 import mad24.polito.it.R;
 import mad24.polito.it.RecyclerViewAdapter;
 import mad24.polito.it.ShowProfileActivity;
 import mad24.polito.it.models.Book;
-import mad24.polito.it.registrationmail.LoginActivity;
-import mad24.polito.it.models.UserMail;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -269,7 +256,7 @@ public class ProfileFragment extends Fragment {
                     tv.setVisibility(View.INVISIBLE);
                     rv.setVisibility(View.VISIBLE);
                 }
-                recyclerViewAdapter.retreiveBooks(books);
+                recyclerViewAdapter.retrieveBooks(books);
             }
 
             @Override

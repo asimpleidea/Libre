@@ -29,7 +29,7 @@
             android:orientation="horizontal">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/ownerPic"
+                android:id="@+id/borrowerPic"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_weight="1"
@@ -37,7 +37,7 @@
                 android:src="@drawable/com_facebook_profile_picture_blank_square" />
 
             <TextView
-                android:id="@+id/borrowName"
+                android:id="@+id/borrowerName"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

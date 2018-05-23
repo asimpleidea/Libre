@@ -49,7 +49,7 @@ public class BookBorrowerFragment extends Fragment
     private Book TheBook = null;
     private String OwnerImage = null;
 
-    //private OnFragmentInteractionListener mListener;
+    private OnFragmentInteractionListener mListener;
 
     public BookBorrowerFragment()
     {
@@ -73,16 +73,16 @@ public class BookBorrowerFragment extends Fragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-/*
+
         if (getArguments() != null)
-        {
+        {/*
             UID = getArguments().getString("owner");
             DB = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_USERS +"/" + UID);
             TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
-            Storage = FirebaseStorage.getInstance().getReference("profile_pictures").child(UID + ".jpg");
+            Storage = FirebaseStorage.getInstance().getReference("profile_pictures").child(UID + ".jpg");*/
         }
-        */
+
     }
 
     private void loadAndInjectUser()
@@ -105,7 +105,7 @@ public class BookBorrowerFragment extends Fragment
     }
 
     private void injectUser()
-    {
+    {/*
         if(User == null) return;
 
         //  Put the owner's pic
@@ -129,13 +129,10 @@ public class BookBorrowerFragment extends Fragment
                 }
             });
         }
-        else Glide.with(getContext()).load(OwnerImage).into((ImageView) RootView.findViewById(R.id.ownerPic));
+        else Glide.with(getContext()).load(OwnerImage).into((ImageView) RootView.findViewById(R.id.borrowerPic));
 
         //  The name
-        ((TextView) RootView.findViewById(R.id.ownerName)).setText(User.getName());
-
-        //  The Conditions
-        ((TextView) RootView.findViewById(R.id.bookConditions)).setText(String.format(getResources().getString(R.string.book_conditions_user), TheBook.getCondition()));
+        ((TextView) RootView.findViewById(R.id.borrowerName)).setText(User.getName());*/
     }
 
     @Override
@@ -154,7 +151,7 @@ public class BookBorrowerFragment extends Fragment
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        /*if (context instanceof OnFragmentInteractionListener) {
+       /* if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()

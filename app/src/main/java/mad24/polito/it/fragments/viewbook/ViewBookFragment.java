@@ -50,10 +50,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     private boolean AlreadyVisible = false;
 
     private final int BOOK_DETAILS = 0;
+    private final int BOOK_DETAILS_2 = 1;
     private final int BOOK_OWNER = 1;
     private final int BOOK_MAP = 2;
 
-    private final int BOOK_BORROWER = 1;
+    private final int BOOK_BORROWER = 0;
 
     private final String BOOK_DETAILS_TITLE = "details";
     private final String BOOK_OWNER_TITLE = "owner";
@@ -188,13 +189,13 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                 switch(fragment){
                     case 1:
                         switch (tab.getPosition()) {
-                            case BOOK_DETAILS:
-                                Log.d("VIEWBOOK", "Show book's details");
-                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
-                            break;
                             case BOOK_BORROWER:
                                 Log.d("VIEWBOOK", "Show book's borrowers");
                                 tabs.getTabAt(BOOK_BORROWER).setIcon(R.drawable.ic_owner_selected); // TODO: change drawable
+                                break;
+                            case BOOK_DETAILS_2:
+                                Log.d("VIEWBOOK", "Show book's owner");
+                                tabs.getTabAt(BOOK_DETAILS_2).setIcon(R.drawable.ic_book_selected);
                                 break;
                         }
                         break;
@@ -224,13 +225,13 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                     case 1:
                         switch (tab.getPosition())
                         {
-                            case BOOK_DETAILS:
-                                Log.d("VIEWBOOK", "Show book's details");
-                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected);
-                                break;
                             case BOOK_BORROWER:
                                 Log.d("VIEWBOOK", "Show book's borrower");
                                 tabs.getTabAt(BOOK_BORROWER).setIcon(R.drawable.ic_owner_unselected);
+                                break;
+                            case BOOK_DETAILS_2:
+                                Log.d("VIEWBOOK", "Show book's details");
+                                tabs.getTabAt(BOOK_DETAILS_2).setIcon(R.drawable.ic_book_unselected);
                                 break;
                         }
                         break;
