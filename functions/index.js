@@ -96,12 +96,12 @@ exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/
 
 exports.debugPostMessage = functions.https.onRequest((req, res) => 
 {
-    const chat_id = "6GlvXy7stFPDYzheZ7It5Nob0tf1&P1f7ozEcOQNgHvuMXL4tSDxapgF3";
+    const chat_id = "-LCiMkny1kg--dDZiN4e:6GlvXy7stFPDYzheZ7It5Nob0tf1&qc8wMfGLKfPgwqcF7ls0wQXjYkv2";
     var date = new Date();
     
     const message = 
     {
-        by: (('by' in req.query) ? "6GlvXy7stFPDYzheZ7It5Nob0tf1" : "P1f7ozEcOQNgHvuMXL4tSDxapgF3"),
+        by: (('by' in req.query) ? "6GlvXy7stFPDYzheZ7It5Nob0tf1" : "qc8wMfGLKfPgwqcF7ls0wQXjYkv2"),
         content: (!('content' in req.query) ? "new content" : req.query.content),
         sent: (date.toISOString().split('.')[0]+'Z'),
         received: '0'
