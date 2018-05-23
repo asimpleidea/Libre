@@ -176,6 +176,7 @@ public class BookOwnerFragment extends Fragment
                                 //  Init the intent
                                 Intent intent = new Intent(getActivity(), ChatActivity.class);
                                 intent.putExtra("partner_id", TheBook.getUser_id());
+                                intent.putExtra("book_id", TheBook.getBook_id());
 
                                 //  Start the activity
                                 startActivity(intent);

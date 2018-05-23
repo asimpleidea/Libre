@@ -48,14 +48,16 @@ class ChatActivity : AppCompatActivity()
     private lateinit var ViewManager: RecyclerView.LayoutManager
     private var ScrollListener : Boolean = true
 
-    lateinit var ChatID : String
-    lateinit var OldestMessage : String
-    lateinit var NewestMessage : String
+    private lateinit var ChatID : String
+    private lateinit var OldestMessage : String
+    private lateinit var NewestMessage : String
+    private lateinit var BookID : String
 
-    val Take : Long = 10
+    private val Take : Long = 10
     lateinit var Me : String
     lateinit var PartnerID : String
     private val KeysSeparator = '&'
+    private val BookSeparator = ':'
 
     lateinit var User : UserMail
 
@@ -111,9 +113,19 @@ class ChatActivity : AppCompatActivity()
             //  We finish, because what's the point of having chat if I have no data about my partner?
             //  TODO: show a dialog: "sorry there was a problem loading this chat...". For now, we just finish
             finish()
+            return
+        }
+
+        //  Do I have any information about the book we're going to chat about?
+        if(!intent.hasExtra("book_id") || (intent.hasExtra("book_id") && intent.getStringExtra("book_id").isBlank()))
+        {
+            //  As above
+            finish()
+            return
         }
 
         PartnerID = intent.getStringExtra("partner_id")
+        BookID = intent.getStringExtra("book_id")
 
         //------------------------------------
         //  Views
@@ -159,6 +171,7 @@ class ChatActivity : AppCompatActivity()
         //------------------------------------
 
         //  Initialize the main DB reference
+        //  TODO: this is useless now, but I don't want to rewrite everything again...
         MainReference = FirebaseDatabase.getInstance().getReference("chat_messages")
 
         //  Put the receiver Reference
@@ -170,8 +183,8 @@ class ChatActivity : AppCompatActivity()
         //  We create a chat id as a concatenation between the two users IDs, starting from the lowest one
         when(Me < PartnerID)
         {
-            true -> ChatID = "$Me$KeysSeparator$PartnerID"
-            false -> ChatID = "$PartnerID$KeysSeparator$Me"
+            true -> ChatID = "$BookID$BookSeparator$Me$KeysSeparator$PartnerID"
+            false -> ChatID = "$BookID$BookSeparator$PartnerID$KeysSeparator$Me"
         }
 
         //------------------------------------
