@@ -44,7 +44,7 @@
     <string name="deny_permission_camera">Camera permission is necessary</string>
 
     //string for savings
-    <string name="saving">Saving...</string>
+    <string name="saving">Saving…</string>
     <string name="saved">Saved!</string>
 
     //string for email error
@@ -152,7 +152,7 @@
     <string name="isbn_not_valid">ISBN code is not valid!</string>
 
     <!-- search strings -->
-    <string name="search_search">Search...</string>
+    <string name="search_search">Search…</string>
     <string name="search_noResults">No results in your area</string>
     <string name="search_searchBy">Search by</string>
     <string name="search_searchBy_all">All fields</string>
@@ -169,7 +169,7 @@
     <!--upload strings -->
     <string name="manualInsert_uploadSuccessful">Upload successful</string>
     <string name="manualInsert_uploadError">Error in uploading!</string>
-    <string name="manualInsert_uploading">Uploading...</string>
+    <string name="manualInsert_uploading">Uploading…</string>
 
     <!--error getting coordinates-->
     <string name="coordinates_error">Error</string>
@@ -193,9 +193,9 @@
     <string name="login_with_fb">Access with Facebook</string>
     <string name="signup_with_fb">Sign up with Facebook</string>
     <string name="logout_from_fb">Log out</string>
-    <string name="fb_wait">Loading data...</string>
-    <string name="fb_wait_message">Please wait while we fetch your data...</string>
-    <string name="fb_error">Whoops...</string>
+    <string name="fb_wait">Loading data…</string>
+    <string name="fb_wait_message">Please wait while we fetch your data…</string>
+    <string name="fb_error">Whoops…</string>
 
     <!-- Error Strings -->
     <string name="fb_error_get_me">Whoops! An error occurred while trying to fetch your user data!</string>
@@ -210,7 +210,7 @@
     <!-- /Facebook -->
 
     <!-- View Book -->
-    <string name="read_more">More...</string>
+    <string name="read_more">More…</string>
     <string name="book_by">By %1$s</string>
     <string name="book_language">Language</string>
     <string name="book_pages">%1$d Pages</string>
@@ -224,6 +224,26 @@
     <string name="published_in">Published in %1$s</string>
     <string name="title_activity_view_book">ViewBookActivity</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_chat">ChatActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
     <!-- /View Book -->
+
+    <!-- Chat -->
+    <string name="chat_status_online">Online</string>
+    <string name="chat_last_seen">Last seen: %1$s</string>
+    <string name="channel_name">MAD24</string>
+    <string name="channel_description">Get notified about new books and conversations</string>
+    <string name="type_something">Type something…</string>
+    <string name="partner_is_typing">%1$s is typing…</string>
+    <string name="last_online">Last seen: </string>
+    <string name="message_read">Read</string>
+    <string name="middot">\u2022</string>
+    <string name="my_chats_toolbar">Chats</string>
+    <string name="no_chats">No chats to display :( \n When looking at a book, tap on the Chat button under the owner's tab to start chatting!</string>
+    <string name="contact_the_user">Chat</string>
+    <string name="you_and_x_are_talking">You and %1$s are talking about…</string>
+    <!-- /Chat -->
 
 </resources>

@@ -15,4 +15,8 @@
     <color name="colorWhiteTransparent">#80ffffff</color>
 
     <color name="red">@android:color/holo_red_dark</color>
+
+    <color name="my_message">#46bfb0</color>
+    <color name="partner_message">#dfdfdf</color>
+    <color name="transparent">#00ffffff</color>
 </resources>
