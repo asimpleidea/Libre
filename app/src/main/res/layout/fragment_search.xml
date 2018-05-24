@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusableInTouchMode="true"
     tools:context="mad24.polito.it.fragments.SearchFragment">
 
     <android.support.v7.widget.Toolbar
@@ -12,7 +14,7 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
-        app:theme="@style/AppTheme.SearchFragment"
+        android:theme="@style/AppTheme.SearchFragment"
         app:contentInsetStart="0dp"
         >
 
@@ -23,6 +25,7 @@
             android:iconifiedByDefault="false"
             app:showAsAction="ifRoom|collapseActionView"
             app:iconifiedByDefault="false"
+            app:actionViewClass="android.support.v7.widget.SearchView"
             />
 
     </android.support.v7.widget.Toolbar>
@@ -34,20 +37,177 @@
         android:layout_below="@id/search_toolbar"
         tools:context=".MainActivity">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/search_bookList"
+        <!--books list-->
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/search_bookList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <!--Text "No result in your area"-->
+        <TextView
+            android:id="@+id/search_emptyView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/search_noResults"
+            android:textSize="20dp"
+            android:visibility="gone" />
+
+        <!--Search options-->
+        <LinearLayout
+            android:id="@+id/search_searchOptions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingTop="6dp"
+            android:visibility="visible">
+
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:fillViewport="true"
+                >
 
-            <TextView
-                android:id="@+id/search_emptyView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/search_noResults"
-                android:textSize="20dp"
-                android:visibility="gone" />
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="1"
+                    android:clickable="true"
+                    android:focusableInTouchMode="true">
 
+                    <!--search in a certain city-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        >
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/search_searchInArea"
+                            android:gravity="center_horizontal"
+                            android:textSize="@dimen/font_size"
+                            />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <AutoCompleteTextView
+                                android:id="@+id/search_autoCompleteCity"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:dropDownHeight="150dp"
+                                android:hint="@string/search_searchPlaceholderCity"
+                                android:textSize="20dp"
+                                android:imeOptions="flagNoExtractUi"
+                                android:inputType="textCapSentences|textAutoCorrect"
+                                android:maxLength="100"
+                                android:layout_weight="8"
+                                />
+
+                            <ImageButton
+                                android:id="@+id/search_buttonLocation"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:gravity="center_horizontal"
+                                android:src="@drawable/baseline_location_on_black_24" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!--Search by: keyword, title or author-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="10dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/search_searchBy"
+                            android:gravity="center_horizontal"
+                            android:textSize="@dimen/font_size"
+                            android:paddingBottom="6dp"
+                            />
+
+                        <mad24.polito.it.radiobutton.PresetRadioGroup
+                            android:id="@+id/preset_time_radio_group"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentTop="true"
+                            android:layout_margin="3dp"
+                            android:layout_marginLeft="6dp"
+                            android:layout_marginRight="6dp"
+                            android:layout_marginBottom="13dp"
+                            android:orientation="horizontal"
+                            android:weightSum="3"
+                            app:presetRadioCheckedId="@+id/search_radioGroup">
+
+                            <mad24.polito.it.radiobutton.PresetValueButton
+                                android:id="@+id/search_searchBy_all"
+                                style="@style/PresetLayoutButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:presetButtonValueText="@string/search_searchBy_all" />
+
+                            <mad24.polito.it.radiobutton.PresetValueButton
+                                android:id="@+id/search_searchBy_title"
+                                style="@style/PresetLayoutButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:presetButtonValueText="@string/search_searchBy_title" />
+
+                            <mad24.polito.it.radiobutton.PresetValueButton
+                                android:id="@+id/search_searchBy_author"
+                                style="@style/PresetLayoutButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:presetButtonValueText="@string/search_searchBy_author" />
+
+                        </mad24.polito.it.radiobutton.PresetRadioGroup>
+                    </LinearLayout>
+
+                    <!--Search by genre-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="10dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/search_searchGenre"
+                                android:gravity="center_horizontal"
+                                android:textSize="@dimen/font_size"
+                                android:paddingBottom="6dp"
+                                />
+
+                            <android.support.v7.widget.RecyclerView
+                                android:id="@+id/search_genres"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                />
+                    </LinearLayout>
+                </TableLayout>
+            </ScrollView>
+        </LinearLayout>
     </RelativeLayout>
-
 </FrameLayout>

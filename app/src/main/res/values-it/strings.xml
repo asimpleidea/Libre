@@ -144,10 +144,22 @@
     <string name="ISBN_explain">L\'ISBN è un codice di 13 cifre!</string>
     <string name="edition_year">Anno pubblicazione</string>
     <string name="book_conditions">Condizioni del libro</string>
+    <string name="isbn_not_valid">Il codice ISBN non è valido</string>
 
     <!-- search strings -->
     <string name="search_search">Cerca...</string>
     <string name="search_noResults">Nessun risultato nella tua zona</string>
+    <string name="search_searchBy">Cerca per</string>
+    <string name="search_searchBy_all">Tutti i campi</string>
+    <string name="search_searchBy_title">Titolo</string>
+    <string name="search_searchBy_author">Autore</string>
+    <string name="search_searchInArea">Cerca nella zona di</string>
+    <string name="search_searchPlaceholderCity">Inserisci una città</string>
+    <string name="search_searchGenre">Generi</string>
+    <string name="search_yourPosition">La tua posizione</string>
+
+    <!-- homepage strings -->
+    <string name="homepage_noBooks">Nessun libro nella tua zona. Sii il primo!</string>
 
     <!--upload strings -->
     <string name="manualInsert_uploadSuccessful">Caricato con successo</string>

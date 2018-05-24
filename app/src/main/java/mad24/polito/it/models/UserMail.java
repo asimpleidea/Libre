@@ -120,6 +120,14 @@ public class UserMail {
         this.lon = lon;
     }
 
+    public HashMap<String, Boolean> getBooks() {
+        return books;
+    }
+
+    public void setBooks(HashMap<String, Boolean> books) {
+        this.books = books;
+    }
+
     public UserStatus getStatus() { return status; }
 
     public void setStatus(UserStatus status) { this.status = status; }

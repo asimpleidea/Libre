@@ -9,6 +9,7 @@
     <color name="colorToolbar">@android:color/holo_blue_dark</color>
 
     <color name="black">@android:color/black</color>
+    <color name="gray">#808080</color>
 
     <color name="colorWhite">#ffffff</color>
     <color name="colorWhiteTransparent">#80ffffff</color>

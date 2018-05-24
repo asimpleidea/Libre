@@ -72,6 +72,8 @@ import java.util.ArrayList;
 public class SignupMailActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks {
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+
     private int REQUEST_CAMERA = 1;
     private int PICK_IMAGE_REQUEST = 2;
 
@@ -861,7 +863,7 @@ public class SignupMailActivity extends AppCompatActivity implements
                             }
 
                             DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
-                            myDatabase.child("users").child(user.getUid())
+                            myDatabase.child(FIREBASE_DATABASE_LOCATION_USERS).child(user.getUid())
                                     .setValue(new UserMail(mailString, nameString, cityString, idSelectedCity,
                                             phoneString, bioString, selectedGenres, new ArrayList<String>(), lat, lon) );
 

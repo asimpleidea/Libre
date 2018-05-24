@@ -8,12 +8,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -21,7 +19,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -39,11 +36,13 @@ import mad24.polito.it.fragments.SearchFragment;
 import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 import mad24.polito.it.models.UserStatus;
 import mad24.polito.it.registrationmail.LoginActivity;
-import mad24.polito.it.services.MessagingService;
 
 public class BooksActivity  extends AppCompatActivity
 {
     private DatabaseReference MeReference = null;
+    public static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
+    public static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = "locationBooks";
+    public static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
 
     private BottomNavigationView mMainNav;
     private FrameLayout mMainFrame;
@@ -102,10 +101,33 @@ public class BooksActivity  extends AppCompatActivity
         mMainFrame = (FrameLayout) findViewById(mad24.polito.it.R.id.main_frame);
         mMainNav = (BottomNavigationView) findViewById(mad24.polito.it.R.id.main_nav);
 
-        booksFragment = new BooksFragment();
-        searchFragment = new SearchFragment();
-        chatFragment = new ChatFragment();
-        profileFragment = new ProfileFragment();
+        if(savedInstanceState == null) {
+            booksFragment = new BooksFragment();
+            searchFragment = new SearchFragment();
+            chatFragment = new ChatFragment();
+            profileFragment = new ProfileFragment();
+        } else {
+            //Restore the fragment's instance
+            if(getSupportFragmentManager().getFragment(savedInstanceState, "booksFragment") != null)
+                booksFragment = (BooksFragment) getSupportFragmentManager().getFragment(savedInstanceState, "booksFragment");
+            else
+                booksFragment = new BooksFragment();
+
+            if(getSupportFragmentManager().getFragment(savedInstanceState, "searchFragment") != null)
+                searchFragment = (SearchFragment) getSupportFragmentManager().getFragment(savedInstanceState, "searchFragment");
+            else
+                searchFragment = new SearchFragment();
+
+            if(getSupportFragmentManager().getFragment(savedInstanceState, "chatFragment") != null)
+                chatFragment = (ChatFragment) getSupportFragmentManager().getFragment(savedInstanceState, "chatFragment");
+            else
+                chatFragment = new ChatFragment();
+
+            if(getSupportFragmentManager().getFragment(savedInstanceState, "profileFragment") != null)
+                profileFragment = (ProfileFragment) getSupportFragmentManager().getFragment(savedInstanceState, "profileFragment");
+            else
+                profileFragment = new ProfileFragment();
+        }
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(mad24.polito.it.R.id.main_nav);
         BottomNavigationViewHelper.disableShiftMode(navigation);
@@ -178,6 +200,19 @@ public class BooksActivity  extends AppCompatActivity
         {
             outState.putString("viewbook", ViewBook.getArguments().getString("book"));
         }
+
+        //Save the fragment's instance
+        if(getSupportFragmentManager().getFragments().contains(booksFragment))
+            getSupportFragmentManager().putFragment(outState, "booksFragment", booksFragment);
+
+        if(getSupportFragmentManager().getFragments().contains(searchFragment))
+            getSupportFragmentManager().putFragment(outState, "searchFragment", searchFragment);
+
+        if(getSupportFragmentManager().getFragments().contains(chatFragment))
+            getSupportFragmentManager().putFragment(outState, "chatFragment", chatFragment);
+
+        if(getSupportFragmentManager().getFragments().contains(profileFragment))
+            getSupportFragmentManager().putFragment(outState, "profileFragment", profileFragment);
 
     }
 

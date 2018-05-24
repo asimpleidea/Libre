@@ -1,0 +1,115 @@
+{
+  "project_info": {
+    "project_number": "194990875631",
+    "firebase_url": "https://mad24-ac626.firebaseio.com",
+    "project_id": "mad24-ac626",
+    "storage_bucket": "mad24-ac626.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194990875631:android:145186ada29b958b",
+        "android_client_info": {
+          "package_name": "com.example.elisl.mylab1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "194990875631-nmg0b8vb8hod0k7ltmo0q9la2oo0mbe3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.elisl.mylab1",
+            "certificate_hash": "9bbf22c29120c866e9758067960e1f63702e2368"
+          }
+        },
+        {
+          "client_id": "194990875631-3f5rtms1k3ufr1brhme843c5mu6occoo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.elisl.mylab1",
+            "certificate_hash": "54ea96484bf71058aeadd7531b38d2831aa87296"
+          }
+        },
+        {
+          "client_id": "194990875631-47kqioejm6fci89fpfh2uai7q7nl7bk9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3uPDCLtfcBD9C3sBVDY2n4WufsJEivh4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "194990875631-47kqioejm6fci89fpfh2uai7q7nl7bk9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194990875631:android:bb6963c75f4ac155",
+        "android_client_info": {
+          "package_name": "mad24.polito.it"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "194990875631-g93v7vkmukpfrb0gm5uoi7amab08uvl9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mad24.polito.it",
+            "certificate_hash": "54ea96484bf71058aeadd7531b38d2831aa87296"
+          }
+        },
+        {
+          "client_id": "194990875631-qquvh7sqe6nd7veb09umui561i7tlceb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mad24.polito.it",
+            "certificate_hash": "f8a84ec83dfa7e90b257000d282f7987e95c9d86"
+          }
+        },
+        {
+          "client_id": "194990875631-47kqioejm6fci89fpfh2uai7q7nl7bk9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3uPDCLtfcBD9C3sBVDY2n4WufsJEivh4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "194990875631-47kqioejm6fci89fpfh2uai7q7nl7bk9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
