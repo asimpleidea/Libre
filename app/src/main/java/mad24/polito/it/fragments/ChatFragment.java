@@ -132,7 +132,13 @@ public class ChatFragment extends Fragment
 
                         boolean firstTime = false;
 
-                        if(queryDocumentSnapshots.isEmpty()) return;
+                        if(queryDocumentSnapshots.isEmpty()) {
+                            //is isEmpty() == true --> no chats
+                            Loading.setVisibility(View.GONE);
+                            NoChatsText.setVisibility(View.VISIBLE);
+
+                            return;
+                        }
                         //Log.d("CHAT", "called");
                         for(DocumentChange d : queryDocumentSnapshots.getDocumentChanges())
                         {

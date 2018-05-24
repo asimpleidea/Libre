@@ -807,6 +807,10 @@ public class SearchFragment extends Fragment implements
 
         //set genre buttons
         RecyclerView myrv = (RecyclerView) v.findViewById(R.id.search_genres);
+
+        if(getContext() == null)
+            return;
+
         myAdapter = new RecyclerViewAdapterGenre(getContext(), new ArrayList<Integer>(), this);
 
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)

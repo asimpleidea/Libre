@@ -108,9 +108,9 @@ public class BooksActivity  extends AppCompatActivity
             profileFragment = new ProfileFragment();
         } else {
             //Restore the fragment's instance
-            if(getSupportFragmentManager().getFragment(savedInstanceState, "booksFragment") != null)
+            /*if(getSupportFragmentManager().getFragment(savedInstanceState, "booksFragment") != null)
                 booksFragment = (BooksFragment) getSupportFragmentManager().getFragment(savedInstanceState, "booksFragment");
-            else
+            else*/
                 booksFragment = new BooksFragment();
 
             if(getSupportFragmentManager().getFragment(savedInstanceState, "searchFragment") != null)
@@ -118,14 +118,14 @@ public class BooksActivity  extends AppCompatActivity
             else
                 searchFragment = new SearchFragment();
 
-            if(getSupportFragmentManager().getFragment(savedInstanceState, "chatFragment") != null)
+            /*if(getSupportFragmentManager().getFragment(savedInstanceState, "chatFragment") != null)
                 chatFragment = (ChatFragment) getSupportFragmentManager().getFragment(savedInstanceState, "chatFragment");
-            else
+            else*/
                 chatFragment = new ChatFragment();
 
-            if(getSupportFragmentManager().getFragment(savedInstanceState, "profileFragment") != null)
+            /*if(getSupportFragmentManager().getFragment(savedInstanceState, "profileFragment") != null)
                 profileFragment = (ProfileFragment) getSupportFragmentManager().getFragment(savedInstanceState, "profileFragment");
-            else
+            else*/
                 profileFragment = new ProfileFragment();
         }
 
