@@ -122,7 +122,8 @@ public class ChatFragment extends Fragment
 
     private void load()
     {
-        ChatsCollection.orderBy("last_message_time", Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>()
+        ChatsListener = ChatsCollection.orderBy("last_message_time", Query.Direction.DESCENDING)
+                    .addSnapshotListener(new EventListener<QuerySnapshot>()
                 {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e)
@@ -132,7 +133,7 @@ public class ChatFragment extends Fragment
                         boolean firstTime = false;
 
                         if(queryDocumentSnapshots.isEmpty()) return;
-
+                        //Log.d("CHAT", "called");
                         for(DocumentChange d : queryDocumentSnapshots.getDocumentChanges())
                         {
                             synchronized (AdapterLock)
@@ -173,18 +174,18 @@ public class ChatFragment extends Fragment
                 });
     }
 
-    /*@Override
+    @Override
     public void onPause()
     {
         super.onPause();
 
-        ChatsListener.remove();
+        //ChatsListener.remove();
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
-    }*/
+    }
 }
 

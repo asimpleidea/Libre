@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ import com.google.firebase.storage.FirebaseStorage
 import de.hdodenhof.circleimageview.CircleImageView
 import mad24.polito.it.R
 import mad24.polito.it.models.Chat
+import mad24.polito.it.registrationmail.User
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -71,13 +73,16 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
         /*if(oldIndex != newIndex)
         {*/
             Collections.swap(Conversations, oldIndex, newIndex)
-            Conversations[newIndex].preview = change.preview
+            Conversations[newIndex] = change
+            /*Conversations[newIndex].preview = change.preview
             Conversations[newIndex].last_message_by = change.last_message_by
             Conversations[newIndex].last_message_id = change.last_message_id
             Conversations[newIndex].last_message_time = change.last_message_time
+            Conversations[newIndex].book_id = change.book_id
+            Conversations[newIndex].book_id = change.book_id
 
             //  useless
-            Conversations[newIndex].my_last_here = change.my_last_here
+            Conversations[newIndex].my_last_here = change.my_last_here*/
 
             notifyItemMoved(oldIndex, newIndex)
             notifyItemChanged(newIndex)
@@ -97,9 +102,10 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
 
         holder.Preview.text = Conversations[position].preview
         if(Conversations[position].last_message_by == Me) holder.Preview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_icon_forward, 0, 0, 0)
-
+        Log.d("CHAT", "bindviewholder")
         if(payloads == null || payloads.isEmpty())
         {
+            Log.d("CHAT", "bindviewholder: payload")
             //  Load the user
             loadUser(Conversations[position].partner_id, holder)
 
@@ -119,7 +125,8 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
         }
 
         //  Set the touch event
-        if(holder.itemView.hasOnClickListeners()) return
+        //if(holder.itemView.hasOnClickListeners()) return
+
         holder.itemView.setOnClickListener {_ ->
 
             //  Init the intent
@@ -152,6 +159,12 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
 
     private fun loadUser(id : String, holder : ViewHolder)
     {
+        if(UserNames.containsKey(id))
+        {
+            holder.PartnerName.text = UserNames[id]
+            return
+        }
+
         UserReference.child(id).addListenerForSingleValueEvent(object : ValueEventListener
         {
             override fun onCancelled(p0: DatabaseError?) { }
@@ -162,6 +175,7 @@ class ConversationsAdapter constructor(_context : Context, _me : String): Recycl
                 if(p0.exists())
                 {
                     val name = p0.child("name").value as String
+                    UserNames[id] = name
                     holder.PartnerName.text = name
                 }
             }

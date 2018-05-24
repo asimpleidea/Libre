@@ -949,7 +949,7 @@ class ChatActivity : AppCompatActivity()
         synchronized(StuffLoaded)
         {
             ++StuffLoaded
-            if(!from.isBlank()) Log.d("CHAT", "loaded from $from: $StuffLoaded")
+            //if(!from.isBlank()) Log.d("CHAT", "loaded from $from: $StuffLoaded")
             if(StuffLoaded == StuffToLoad) show()
         }
     }
