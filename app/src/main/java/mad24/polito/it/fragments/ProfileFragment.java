@@ -249,7 +249,7 @@ public class ProfileFragment extends Fragment {
                 }
 
                 Log.d("books", "adding "+books.size()+" books");
-                if(books.size() == 0){
+                if(books.size() == 0 && recyclerViewAdapter.getItemCount() == 0){
                     tv.setVisibility(View.VISIBLE);
                     rv.setVisibility(View.INVISIBLE);
                 }else{

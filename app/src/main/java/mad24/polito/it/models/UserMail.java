@@ -21,8 +21,8 @@ public class UserMail {
 
     UserStatus status = null;
 
-    public UserMail() {
-
+    public UserMail()
+    {
     }
 
     public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres, ArrayList<String> books, double lat, double lon) {

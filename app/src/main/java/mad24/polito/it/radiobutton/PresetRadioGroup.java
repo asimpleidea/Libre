@@ -6,6 +6,7 @@ import android.os.Build;
 import android.support.annotation.IdRes;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -118,6 +119,7 @@ public class PresetRadioGroup extends LinearLayout {
 
     private void setCheckedId(@IdRes int id, boolean isChecked) {
         mCheckedId = id;
+        Log.d("debug", "ID "+id);
         if (mOnCheckedChangeListener != null) {
             mOnCheckedChangeListener.onCheckedChanged(this, mChildViewsMap.get(id), isChecked, mCheckedId);
         }
