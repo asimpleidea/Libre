@@ -150,12 +150,6 @@ public class BooksActivity  extends AppCompatActivity
        setFragment(booksFragment);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
     public void setFragment(Fragment fragment) {
 
         currentFragment = CurrentFragment.valueOf(fragment.getClass().getSimpleName());

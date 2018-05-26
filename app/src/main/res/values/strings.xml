@@ -224,6 +224,9 @@
     <!-- Fragments toolbar -->
     <string name="chat">Chat</string>
     <string name="books">Books</string>
+
+    <!-- Book Borrower -->
+    <string name="book_on_loan">Book currently on-loan:</string>
     <string name="title_activity_chat">ChatActivity</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>

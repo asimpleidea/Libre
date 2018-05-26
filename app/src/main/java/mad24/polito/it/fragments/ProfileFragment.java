@@ -131,7 +131,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void getUserName() {
-        // TODO: get user name and set proper TextView
         Query query;
 
         query = FirebaseDatabase.getInstance().getReference()

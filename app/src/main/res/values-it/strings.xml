@@ -219,4 +219,8 @@
     <string name="you_and_x_are_talking">Tu e %1$s state chattando riguardo…</string>
     <!-- /Chat -->
 
+    <!-- Book Borrower -->
+    <string name="book_on_loan">Questo libro è attualmente in prestito a:</string>
+
+
 </resources>
