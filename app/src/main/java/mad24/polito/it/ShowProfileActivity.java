@@ -40,6 +40,7 @@ public class ShowProfileActivity extends AppCompatActivity {
     private int EDIT_PROFILE = 1;
 
     ImageView editImage;
+    ImageButton backButton;
 
     de.hdodenhof.circleimageview.CircleImageView imageProfile;
 
@@ -82,6 +83,9 @@ public class ShowProfileActivity extends AppCompatActivity {
         //button to edit profile
         editImage = (ImageButton) findViewById(mad24.polito.it.R.id.showprofile_imageEdit);
 
+        //back button
+        backButton = (ImageButton) findViewById(R.id.showprofile_imageBack);
+
         //image profile
         imageProfile = (de.hdodenhof.circleimageview.CircleImageView) findViewById(mad24.polito.it.R.id.showImageProfile);
 
@@ -94,6 +98,14 @@ public class ShowProfileActivity extends AppCompatActivity {
 
         genres = (LinearLayout) findViewById(mad24.polito.it.R.id.show_favourite_genres_list);
         genresList = getResources().getStringArray(mad24.polito.it.R.array.genres);
+
+        //event clicking back button
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         //get data from Firebase Database
         database = FirebaseDatabase.getInstance();

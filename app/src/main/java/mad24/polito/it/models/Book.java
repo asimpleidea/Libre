@@ -25,11 +25,12 @@ public class Book {
     public Book() {
     }
 
-    public Book(String title, String author, String isbn, String publisher, String editionYear,
+    public Book(String title, String author, String isbn, String location, String publisher, String editionYear,
                 String condition, String bookImageLink, String book_id, String uid, Date date, ArrayList<Integer> genres) {
         this.title = title;
         this.author = author;
         this.isbn = isbn;
+        this.location = location;
         this.publisher = publisher;
         this.editionYear = editionYear;
         this.condition = condition;

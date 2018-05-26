@@ -90,6 +90,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
     private Double lat = null;
     private Double lon = null;
+    private String location;
 
     private Button btnGenre;
     private String[] genresList;                                    //all genres list
@@ -177,6 +178,8 @@ public class ManualInsertActivity extends AppCompatActivity {
                 //get coordinates
                 lat = user.getLat();
                 lon = user.getLon();
+
+                location = user.getCity();
             }
 
             @Override
@@ -472,6 +475,7 @@ public class ManualInsertActivity extends AppCompatActivity {
                 mTitleField.getText().toString(),
                 mAuthorField.getText().toString(),
                 mISBNField.getText().toString(),
+                location,
                 mPublisherField.getText().toString(),
                 mEditionYearField.getText().toString(),
                 mBookConditionField.getText().toString(),
@@ -483,7 +487,7 @@ public class ManualInsertActivity extends AppCompatActivity {
 
         GeoFire geoFire = new GeoFire(mDatabase.child(FIREBASE_DATABASE_LOCATION_LOCATION));
 
-        SharedPreferences prefs = getSharedPreferences("location", MODE_PRIVATE);
+        //SharedPreferences prefs = getSharedPreferences("location", MODE_PRIVATE);
         geoFire.setLocation(bookKey, new GeoLocation(lat, lon), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {

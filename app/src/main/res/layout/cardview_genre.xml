@@ -28,13 +28,13 @@
 
         <TextView
             android:id="@+id/genre_genre"
-            android:textColor="#2d2d2d"
+            android:textColor="@color/dark_gray"
             android:textSize="22dp"
             android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="2dp"
-            android:text="Genre"/>
+            android:text="Genre" />
         
     </LinearLayout>
 

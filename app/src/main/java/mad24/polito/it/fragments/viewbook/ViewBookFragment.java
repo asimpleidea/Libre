@@ -191,11 +191,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                         switch (tab.getPosition()) {
                             case BOOK_BORROWER:
                                 Log.d("VIEWBOOK", "Show book's borrowers");
-                                tabs.getTabAt(BOOK_BORROWER).setIcon(R.drawable.ic_owner_selected); // TODO: change drawable
+                                tabs.getTabAt(BOOK_BORROWER).setIcon(R.drawable.ic_owner_selected_new); // TODO: change drawable
                                 break;
                             case BOOK_DETAILS_2:
                                 Log.d("VIEWBOOK", "Show book's owner");
-                                tabs.getTabAt(BOOK_DETAILS_2).setIcon(R.drawable.ic_book_selected);
+                                tabs.getTabAt(BOOK_DETAILS_2).setIcon(R.drawable.ic_book_selected_new);
                                 break;
                         }
                         break;
@@ -203,15 +203,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                         switch (tab.getPosition()) {
                             case BOOK_DETAILS:
                                 Log.d("VIEWBOOK", "Show book's details");
-                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected);
+                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_selected_new);
                                 break;
                             case BOOK_OWNER:
                                 Log.d("VIEWBOOK", "Show book's owners");
-                                tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_selected);
+                                tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_selected_new);
                                 break;
                             case BOOK_MAP:
                                 Log.d("VIEWBOOK", "Show book's map");
-                                tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_selected);
+                                tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_selected_new);
                                 break;
                         }
                 }
@@ -227,11 +227,11 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                         {
                             case BOOK_BORROWER:
                                 Log.d("VIEWBOOK", "Show book's borrower");
-                                tabs.getTabAt(BOOK_BORROWER).setIcon(R.drawable.ic_owner_unselected);
+                                tabs.getTabAt(BOOK_BORROWER).setIcon(R.drawable.ic_owner_unselected_new);
                                 break;
                             case BOOK_DETAILS_2:
                                 Log.d("VIEWBOOK", "Show book's details");
-                                tabs.getTabAt(BOOK_DETAILS_2).setIcon(R.drawable.ic_book_unselected);
+                                tabs.getTabAt(BOOK_DETAILS_2).setIcon(R.drawable.ic_book_unselected_new);
                                 break;
                         }
                         break;
@@ -240,15 +240,15 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
                         {
                             case BOOK_DETAILS:
                                 Log.d("VIEWBOOK", "Show book's details");
-                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected);
+                                tabs.getTabAt(BOOK_DETAILS).setIcon(R.drawable.ic_book_unselected_new);
                                 break;
                             case BOOK_OWNER:
                                 Log.d("VIEWBOOK", "Show book's owners");
-                                tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected);
+                                tabs.getTabAt(BOOK_OWNER).setIcon(R.drawable.ic_owner_unselected_new);
                                 break;
                             case BOOK_MAP:
                                 Log.d("VIEWBOOK", "Show book's map");
-                                tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected);
+                                tabs.getTabAt(BOOK_MAP).setIcon(R.drawable.ic_marker_unselected_new);
                                 break;
                         }
                 }

@@ -39,6 +39,8 @@
             app:backgroundTint="@null"
             app:fabSize="mini"
             android:layout_alignParentRight="true"
+            app:elevation="0dp"
+            app:borderWidth="1dp"
             />
     </RelativeLayout>
 

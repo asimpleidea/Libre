@@ -8,6 +8,7 @@
     android:theme="@style/ToolbarTheme.NoActionBar"
     android:popupTheme="@style/PopupTheme"
     app:contentInsetStart="0dp"
+    android:elevation="5dp"
     >
 
     <RelativeLayout

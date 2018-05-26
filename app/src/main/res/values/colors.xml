@@ -10,6 +10,7 @@
 
     <color name="black">@android:color/black</color>
     <color name="gray">#808080</color>
+    <color name="dark_gray">#4F4F4F</color>
 
     <color name="colorWhite">#ffffff</color>
     <color name="colorWhiteTransparent">#80ffffff</color>

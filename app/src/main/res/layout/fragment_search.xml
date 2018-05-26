@@ -16,6 +16,7 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/AppTheme.SearchFragment"
         app:contentInsetStart="0dp"
+        android:elevation="5dp"
         >
 
         <android.support.v7.widget.SearchView
@@ -110,6 +111,7 @@
                                 android:inputType="textCapSentences|textAutoCorrect"
                                 android:maxLength="100"
                                 android:layout_weight="8"
+                                android:textColor="@color/dark_gray"
                                 />
 
                             <ImageButton

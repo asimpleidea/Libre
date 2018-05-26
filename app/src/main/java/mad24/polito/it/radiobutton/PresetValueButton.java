@@ -82,7 +82,7 @@ public class PresetValueButton extends RelativeLayout implements RadioCheckable 
         try {
             mValue = a.getString(R.styleable.PresetValueButton_presetButtonValueText);
             mUnit = a.getString(R.styleable.PresetValueButton_presetButtonUnitText);
-            mValueTextColor = a.getColor(R.styleable.PresetValueButton_presetButtonValueTextColor, resources.getColor(R.color.black));
+            mValueTextColor = a.getColor(R.styleable.PresetValueButton_presetButtonValueTextColor, resources.getColor(R.color.dark_gray));
             mPressedTextColor = a.getColor(R.styleable.PresetValueButton_presetButtonPressedTextColor, Color.WHITE);
             mUnitTextColor = a.getColor(R.styleable.PresetValueButton_presetButtonUnitTextColor, resources.getColor(R.color.gray));
         } finally {

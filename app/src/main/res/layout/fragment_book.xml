@@ -13,17 +13,28 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         app:contentInsetStart="0dp"
+        android:elevation="5dp"
         >
 
-        <TextView
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/books"
-            android:textSize="25sp"
-            android:textColor="@color/colorWhite"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"/>
+            app:theme="@style/ToolbarTheme.NoActionBar"
+            >
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="@string/books"
+            android:textColor="@color/colorWhite"
+            android:textSize="20dp"
+            />
+
+        </RelativeLayout>
     </android.support.v7.widget.Toolbar>
 
     <RelativeLayout
@@ -37,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/books_noResults"
-            android:textSize="15sp"
+            android:textSize="20sp"
             />
 
         <android.support.design.widget.FloatingActionButton
