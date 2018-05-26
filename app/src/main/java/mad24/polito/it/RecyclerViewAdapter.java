@@ -12,9 +12,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -125,6 +129,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         //  Set item touch listener
         //--------------------------------------
 
+        BooksActivity myActivity = (BooksActivity) v.getContext();
+        if(myActivity.getCurrentFragment().equals("ProfileFragment")) {
+            final int p = position;
+            holder.dots_menu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showPopupMenu(holder.dots_menu, p);
+                }
+            });
+        }
+
         if(holder.itemView.hasOnClickListeners()) return;
 
         holder.itemView.setOnClickListener(new View.OnClickListener()
@@ -216,24 +231,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder{
-
-        private TextView tv_title;
-        private TextView tv_author;
-        private TextView tv_location;
-        private ImageView book_img;
-
-
-        public MyViewHolder(View itemView){
-            super(itemView);
-
-            tv_title = (TextView) itemView.findViewById(R.id.book_title);
-            tv_author = (TextView) itemView.findViewById(R.id.book_author);
-            tv_location = (TextView) itemView.findViewById(R.id.book_location);
-            book_img = (ImageView) itemView.findViewById(R.id.book_img);
-        }
-    }
-
     public String getLastItemId() {
         Log.d("booksfragment", "I've found "+mData.size()+" items");
 
@@ -284,4 +281,71 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         notifyItemRangeRemoved(0, initialSize);
     }
 
+    private void showPopupMenu(View view, int position){
+        PopupMenu popup = new PopupMenu(view.getContext(), view);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.dots_menu, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(new MyMenuItemClickListener(position));
+        popup.show();
+    }
+
+    public class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener{
+        private int position;
+
+        public MyMenuItemClickListener(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch(item.getItemId()){
+                case R.id.remove_book:
+                    // TODO: actual code for book removing from DataBase
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    public static class MyViewHolder extends RecyclerView.ViewHolder{
+
+        private BooksActivity myActivity;
+        private int fragment;
+
+        private TextView tv_title;
+        private TextView tv_author;
+        private TextView tv_location;
+        private ImageView book_img;
+        private ImageButton dots_menu;
+
+        public MyViewHolder(View itemView){
+            super(itemView);
+
+            myActivity = (BooksActivity) itemView.getContext();
+            if(myActivity.getCurrentFragment().equals("ProfileFragment"))
+                fragment = 0;
+            else
+            if(myActivity.getCurrentFragment().equals("BooksFragment"))
+                fragment = 1;
+
+            tv_title = (TextView) itemView.findViewById(R.id.book_title);
+            tv_author = (TextView) itemView.findViewById(R.id.book_author);
+            tv_location = (TextView) itemView.findViewById(R.id.book_location);
+            book_img = (ImageView) itemView.findViewById(R.id.book_img);
+            dots_menu = (ImageButton) itemView.findViewById(R.id.dots_menu);
+
+            if(fragment == 0){
+                dots_menu.setVisibility(View.VISIBLE);
+            }
+            else dots_menu.setVisibility(View.GONE);
+        }
+    }
+
 }
+
+
+
+
+
+

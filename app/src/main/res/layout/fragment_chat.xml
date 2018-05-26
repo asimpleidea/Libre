@@ -29,8 +29,8 @@
         </android.support.v7.widget.Toolbar>
 
         <ProgressBar
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:indeterminate="true"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="35dp"
