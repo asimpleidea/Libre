@@ -38,6 +38,7 @@ class ChatActivity : AppCompatActivity()
 {
     private lateinit var MainReference : DatabaseReference
     private lateinit var PartnerReference : DatabaseReference
+    private lateinit var BorrowingRefernce : DatabaseReference
 
     private val FireStore : FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var ChatMessagesDocument : DocumentReference
@@ -301,6 +302,7 @@ class ChatActivity : AppCompatActivity()
                 Topic = t
                /* if(Topic.user_id == Me)
                 {*/
+                    BorrowingRefernce = MainReference.parent.child("borrowings")
                     BorrowButton.setOnClickListener {
                         startBorrow()
                     }
@@ -336,8 +338,31 @@ class ChatActivity : AppCompatActivity()
         alert.setNegativeButton(R.string.no, DialogInterface.OnClickListener { _, _ -> })
 
         //  Set positive button
-        alert.setPositiveButton(R.string.yes, DialogInterface.OnClickListener { dialogInterface, i ->
-            Log.d("CHAT", "click on yes")
+        alert.setPositiveButton(R.string.yes, DialogInterface.OnClickListener { _, _ ->
+
+            //  Create the id
+            val id = BorrowingRefernce.child(BookID).push().key
+
+            //  Create the sharing
+            val borrowing = Borrowing(BookID, Me, PartnerID, System.currentTimeMillis(), 0)
+
+            BorrowingRefernce.child(BookID).child(id).setValue(borrowing).addOnFailureListener {
+                Log.d("CHAT", "$it")
+            }
+            .addOnSuccessListener {
+                MainReference.parent.child("users")
+                                    .child(Me)
+                                    .child("books")
+                                    .child(BookID)
+                        .setValue(false)
+                        .addOnFailureListener {
+                            Log.d("CHAT", "not done: $it")
+                        }
+                        .addOnCompleteListener {
+                            Log.d("CHAT", "everything ok!")
+                        }
+            }
+
         })
 
         //  Create and show the the dialog

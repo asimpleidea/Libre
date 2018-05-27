@@ -7,7 +7,7 @@ public class Book {
 
     private String user_id;
     private String book_id;
-
+    private String currently_to = "";
     private String title;
     private String author;
     private String isbn;
@@ -136,5 +136,13 @@ public class Book {
 
     public void setGenres(ArrayList<Integer> genres) {
         this.genres = genres;
+    }
+
+    public String getCurrently_to() {
+        return currently_to;
+    }
+
+    public void setCurrently_to(String currently_to) {
+        this.currently_to = currently_to;
     }
 }
