@@ -7,7 +7,8 @@ public class Book {
 
     private String user_id;
     private String book_id;
-    private String currently_to = "";
+
+    private String borrowing_id = "";
     private String title;
     private String author;
     private String isbn;
@@ -138,11 +139,8 @@ public class Book {
         this.genres = genres;
     }
 
-    public String getCurrently_to() {
-        return currently_to;
-    }
+    public String getBorrowing_id() { return borrowing_id; }
 
-    public void setCurrently_to(String currently_to) {
-        this.currently_to = currently_to;
-    }
+    public void setBorrowing_id(String borrowing_id) { this.borrowing_id = borrowing_id; }
+
 }

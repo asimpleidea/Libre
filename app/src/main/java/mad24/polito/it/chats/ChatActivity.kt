@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.github.curioustechizen.ago.RelativeTimeTextView
 import kotlinx.android.synthetic.main.activity_chat.*
+import kotlin.collections.HashMap
 
 
 class ChatActivity : AppCompatActivity()
@@ -350,11 +351,13 @@ class ChatActivity : AppCompatActivity()
                 Log.d("CHAT", "$it")
             }
             .addOnSuccessListener {
-                MainReference.parent.child("users")
-                                    .child(Me)
-                                    .child("books")
+
+                val v = HashMap<String, Any>()
+                v["borrowing_id"] = "$BookID/$id"
+
+                MainReference.parent.child("books")
                                     .child(BookID)
-                        .setValue(false)
+                        .updateChildren(v.toMutableMap())
                         .addOnFailureListener {
                             Log.d("CHAT", "not done: $it")
                         }
