@@ -2,12 +2,14 @@ package mad24.polito.it.chats
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.content.DialogInterface
 import android.content.Intent
 import android.media.Image
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.view.animation.FastOutSlowInInterpolator
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.*
 import android.support.v7.widget.Toolbar
@@ -58,6 +60,7 @@ class ChatActivity : AppCompatActivity()
     private val Take : Long = 10
     private lateinit var Me : String
     private lateinit var PartnerID : String
+    private lateinit var PartnerName : String
     private val KeysSeparator = '&'
     private val BookSeparator = ':'
 
@@ -73,7 +76,7 @@ class ChatActivity : AppCompatActivity()
     private lateinit var ShowInfo : ImageButton
     private lateinit var DismissReminder : Button
 
-    lateinit var StopTyping : CountDownTimer
+    private lateinit var StopTyping : CountDownTimer
     private var CountDownRunning : Boolean = false
     private val Seconds : Long = 3 *1000
     private var StuffLoaded : Int = 0
@@ -243,11 +246,11 @@ class ChatActivity : AppCompatActivity()
                 if(p0 == null) return
 
                 //  Got user data
-                val name = p0.child("name").value as String
-                TypingNotifier.text = String.format(getString(R.string.partner_is_typing), name)
+                PartnerName = p0.child("name").value as String
+                TypingNotifier.text = String.format(getString(R.string.partner_is_typing), PartnerName)
 
                 //  Set my partner's name
-                findViewById<TextView>(R.id.theirName).text = name
+                findViewById<TextView>(R.id.theirName).text = PartnerName
 
                 //  Put user's image
                 var prefix = (fun() : String?
@@ -270,7 +273,7 @@ class ChatActivity : AppCompatActivity()
                             }
                 }
 
-                BookInfo.findViewById<TextView>(R.id.youAndPartner).text = String.format(getString(R.string.you_and_x_are_talking), name)
+                BookInfo.findViewById<TextView>(R.id.youAndPartner).text = String.format(getString(R.string.you_and_x_are_talking), PartnerName)
                 progressiveLoad("loadPartnerData")
             }
         })
@@ -296,19 +299,49 @@ class ChatActivity : AppCompatActivity()
                 if(t == null) return
 
                 Topic = t
-                if(Topic.user_id == Me) BorrowButton.visibility = View.VISIBLE
+               /* if(Topic.user_id == Me)
+                {*/
+                    BorrowButton.setOnClickListener {
+                        startBorrow()
+                    }
+                    BorrowButton.visibility = View.VISIBLE
+                /*}
                 else
                 {
                     //  Else remove the button at all
                     val b = BorrowButton.parent as RelativeLayout
                     (BorrowButton.parent.parent as ViewGroup).removeView(b)
-                }
+                }*/
 
                 BookInfo.findViewById<TextView>(R.id.infoBookTitle).text = Topic.title
 
                 progressiveLoad("loadBookData")
             }
         })
+    }
+
+    private fun startBorrow()
+    {
+        //---------------------------
+        //  Init
+        //---------------------------
+
+        val alert = AlertDialog.Builder(this)
+
+        //  Set title and message
+        alert.setMessage(String.format(getString(R.string.dialog_start_borrow_message), PartnerName))
+                .setTitle(R.string.dialog_start_borrow_title)
+
+        //  Set negative button
+        alert.setNegativeButton(R.string.no, DialogInterface.OnClickListener { _, _ -> })
+
+        //  Set positive button
+        alert.setPositiveButton(R.string.yes, DialogInterface.OnClickListener { dialogInterface, i ->
+            Log.d("CHAT", "click on yes")
+        })
+
+        //  Create and show the the dialog
+        alert.create().show()
     }
 
     private fun show()
