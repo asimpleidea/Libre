@@ -221,6 +221,10 @@
     <string name="dialog_start_borrow_title">Conferma</string>
     <string name="yes">Si</string>
     <string name="no">No</string>
+    <string name="whoops">Ops…</string>
+    <string name="dialog_error_borrowing">Si è verificato un errore mentre cercavamo di compiere questa azione. Riprova più tardi.</string>
+    <string name="dialog_ok_borrowing">Il libro è stato prestato!</string>
+    <string name="ok_confirmation">Ok!</string>
     <!-- /Chat -->
 
     <!-- Book Borrower -->

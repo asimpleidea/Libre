@@ -301,20 +301,21 @@ class ChatActivity : AppCompatActivity()
                 if(t == null) return
 
                 Topic = t
-               /* if(Topic.user_id == Me)
-                {*/
+                Log.d("CHAT", "borrowing id ${Topic.borrowing_id}")
+                if(Topic.user_id == Me && Topic.borrowing_id.isBlank())
+                {
                     BorrowingRefernce = MainReference.parent.child("borrowings")
                     BorrowButton.setOnClickListener {
                         startBorrow()
                     }
                     BorrowButton.visibility = View.VISIBLE
-                /*}
+                }
                 else
                 {
                     //  Else remove the button at all
                     val b = BorrowButton.parent as RelativeLayout
                     (BorrowButton.parent.parent as ViewGroup).removeView(b)
-                }*/
+                }
 
                 BookInfo.findViewById<TextView>(R.id.infoBookTitle).text = Topic.title
 
@@ -359,10 +360,31 @@ class ChatActivity : AppCompatActivity()
                                     .child(BookID)
                         .updateChildren(v.toMutableMap())
                         .addOnFailureListener {
-                            Log.d("CHAT", "not done: $it")
+
+                            //  Something bad happened, let's delete it
+                            Log.d("CHAT", "I'm going to remove it")
+                            BorrowingRefernce.child(BookID).child(id).removeValue()
+
+                            //  Show the dialog!
+                            val builder = AlertDialog.Builder(this)
+                            builder.setTitle(R.string.whoops).setMessage(R.string.whoops)
+                                    .setCancelable(false)
+                                    .setPositiveButton(R.string.ok) { _, _ ->
+                                        //do things
+                                    }.create().show()
                         }
-                        .addOnCompleteListener {
-                            Log.d("CHAT", "everything ok!")
+                        .addOnSuccessListener {
+                            //  Ok, let's remove the button
+                            val b = BorrowButton.parent as RelativeLayout
+                            (BorrowButton.parent.parent as ViewGroup).removeView(b)
+
+                            //  Show the dialog!
+                            val builder = AlertDialog.Builder(this)
+                            builder.setTitle(R.string.ok_confirmation).setMessage(R.string.dialog_ok_borrowing)
+                                    .setCancelable(false)
+                                    .setPositiveButton(R.string.ok) { _, _ ->
+                                        //do things
+                                    }.create().show()
                         }
             }
 
@@ -1010,7 +1032,7 @@ class ChatActivity : AppCompatActivity()
         synchronized(StuffLoaded)
         {
             ++StuffLoaded
-            //if(!from.isBlank()) Log.d("CHAT", "loaded from $from: $StuffLoaded")
+            if(!from.isBlank()) Log.d("CHAT", "loaded from $from: $StuffLoaded")
             if(StuffLoaded == StuffToLoad) show()
         }
     }

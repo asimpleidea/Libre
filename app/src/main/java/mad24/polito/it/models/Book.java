@@ -27,8 +27,28 @@ public class Book {
     }
 
     public Book(String title, String author, String isbn, String location, String publisher, String editionYear,
-                String condition, String bookImageLink, String book_id, String uid, Date date, ArrayList<Integer> genres) {
+                String condition, String bookImageLink, String book_id, String uid, Date date, ArrayList<Integer> genres,
+                String _borrowing_id) {
         this.title = title;
+        this.author = author;
+        this.isbn = isbn;
+        borrowing_id = _borrowing_id;
+        this.location = location;
+        this.publisher = publisher;
+        this.editionYear = editionYear;
+        this.condition = condition;
+        this.bookImageLink = bookImageLink;
+        this.book_id = book_id;
+        this.user_id = uid;
+        this.date = date;
+        this.genres = genres;
+    }
+
+    public Book(String title, String author, String isbn, String location, String publisher, String editionYear,
+                String condition, String bookImageLink, String book_id, String uid, Date date, ArrayList<Integer> genres) {
+        this(title, author, isbn, location, publisher, editionYear, condition, bookImageLink, book_id, uid, date, genres, "");
+
+        /*this.title = title;
         this.author = author;
         this.isbn = isbn;
         this.location = location;
@@ -40,7 +60,7 @@ public class Book {
         this.book_id = book_id;
         this.user_id = uid;
         this.date = date;
-        this.genres = genres;
+        this.genres = genres;*/
     }
 
     public String getIsbn() {
