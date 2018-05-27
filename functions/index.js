@@ -44,6 +44,32 @@ exports.debugCreateChat = functions.https.onRequest((req, res) =>
 
 });
 
+exports.debugCreateBorrowing = functions.https.onRequest((req, res) => 
+{
+    const book_id = "book_id",
+            borrowing_id = "borrowing_id";
+
+    return admin.database().ref("borrowings/" + book_id + "/" + borrowing_id).set({book_id: book_id, 
+                                                                                    from : "owner_id", 
+                                                                                    to: "borrower_id",
+                                                                                    started_at: (new Date).getTime(),
+                                                                                    returned_at: "0" }).then(result =>
+                                                                                        {
+                                                                                            return res.sendStatus(200);
+                                                                                        });
+});
+
+exports.debugChangeBorrowingID = functions.https.onRequest((req, res) => 
+{
+    const book_id = "-LCAV7NE3xYParkQc9Lt",
+            i = ('i' in req.query ? req.query.i : "id1/id2"); 
+
+    return admin.database().ref("books/" + book_id).update({borrowing_id: i}).then(result => 
+        {
+            return res.sendStatus(200);
+        });
+});
+
 exports.debugUpdateStatus = functions.https.onRequest((req, res) => 
 {
     const chat_id = "book_id:first_user&second_user",
@@ -58,7 +84,6 @@ exports.debugUpdateStatus = functions.https.onRequest((req, res) =>
         });
 });
 
-
 exports.createChat = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onCreate((snap, context) => 
 {
     //  Original value
@@ -72,6 +97,31 @@ exports.createChat = functions.firestore.document('/chat_messages/{chatId}/parte
     const otherUser = user === users[0] ? users[1] : users[0];
 
     return admin.firestore().doc("chats/" + user + "/conversations/" + chatId).set({chat_id : chatId, partner_id: otherUser, book_id : book_id});
+});
+
+exports.updateAvailability = functions.database.ref('/books/{book_id}/borrowing_id').onWrite((change, context) => 
+{
+    //  Deleted?
+    if (!change.after.exists()) return null;
+
+    //  Start
+    let available = true;
+    const original = change.after.val(),
+        book_id = context.params.book_id;
+
+    //  If now has an ID then it is not available
+    if(original.length > 0) available = false;
+
+    //  Get the user
+    return admin.database().ref("books/" + context.params.book_id).once("value").then(result => 
+    {
+        console.log("user", result);
+        //  Get the user
+        const user = result.val().user_id;
+
+        //  Update availability
+        return admin.database().ref("users/" + user + "/books/" + book_id).set(available);
+    });
 });
 
 exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
