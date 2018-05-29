@@ -105,23 +105,54 @@ exports.updateAvailability = functions.database.ref('/books/{book_id}/borrowing_
     if (!change.after.exists()) return null;
 
     //  Start
-    let available = true;
+    let available = true,
+        borrowing_id = "";
     const original = change.after.val(),
         book_id = context.params.book_id;
+    
 
     //  If now has an ID then it is not available
-    if(original.length > 0) available = false;
+    if(original.length > 0) 
+    {
+        available = false;
+        borrowing_id = original.split('/')[1];
+    }
+    else
+    {
+        //  The value before
+        const before = change.before.val();
+        if(before.length > 0) borrowing_id = before.split('/')[1];
+    }
+    
+    //  The promises
+    const promises = [];
 
     //  Get the user
-    return admin.database().ref("books/" + context.params.book_id).once("value").then(result => 
+    const update_available = admin.database().ref("books/" + context.params.book_id).once("value").then(result => 
     {
-        console.log("user", result);
         //  Get the user
         const user = result.val().user_id;
 
         //  Update availability
         return admin.database().ref("users/" + user + "/books/" + book_id).set(available);
     });
+    promises.push(update_available);
+
+    //  update borrowed books
+    if(borrowing_id.length > 0)
+    {
+        const update_borrowed =  admin.database().ref("borrowings/" + book_id + "/" + borrowing_id).once("value").then(result =>
+            {
+                const data = result.val(),
+                        update = {};
+                        update[book_id] = !available ? borrowing_id : null;                
+        
+                return admin.database().ref("users/" + data.to + "/borrowed_books").update(update);
+            });
+        promises.push(update_borrowed);    
+    }
+
+    return Promise.all(promises);
 });
 
 exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
