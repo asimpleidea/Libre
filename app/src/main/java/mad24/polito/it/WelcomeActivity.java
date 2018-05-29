@@ -24,7 +24,17 @@ public class WelcomeActivity extends AppCompatActivity {
     private MyViewPagerAdapter myViewPagerAdapter;
     private LinearLayout dotsLayout;
     private TextView[] dots;
-    private int[] layouts;
+
+
+    // layouts of all welcome sliders
+
+
+    // add few more layouts if you want
+    private int[] layouts = new int[]{
+            R.layout.welcome_side1,
+            R.layout.welcome_side2,
+            R.layout.welcome_side3,
+            R.layout.welcome_side4};
     private Button btnSkip, btnNext;
     private PrefManager prefManager;
 
@@ -51,14 +61,6 @@ public class WelcomeActivity extends AppCompatActivity {
         btnSkip = (Button) findViewById(R.id.btn_skip);
         btnNext = (Button) findViewById(R.id.btn_next);
 
-
-        // layouts of all welcome sliders
-        // add few more layouts if you want
-        layouts = new int[]{
-                R.layout.welcome_slide1,
-                R.layout.welcome_slide2,
-                R.layout.welcome_slide3,
-                R.layout.welcome_slide4};
 
         // adding bottom dots
         addBottomDots(0);
