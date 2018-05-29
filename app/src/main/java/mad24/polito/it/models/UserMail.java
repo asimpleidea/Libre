@@ -17,6 +17,7 @@ public class UserMail {
     private int rating = 0;
     ArrayList<Integer> genres;
     HashMap<String, Boolean> books;
+    HashMap<String, String> borrowed_books;
     double lat;
     double lon;
     boolean fb = false;
@@ -27,7 +28,7 @@ public class UserMail {
     {
     }
 
-    public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres, ArrayList<String> books, double lat, double lon) {
+    public UserMail(String email, String name, String city, String idCity, String phone, String bio, ArrayList<Integer> genres, ArrayList<String> books, HashMap<String, String> borrowed_books, double lat, double lon) {
         this.email = email;
         this.name = name;
         this.city = city;
@@ -42,6 +43,8 @@ public class UserMail {
         this.books = new HashMap<String, Boolean>();
         for(String b : books)
             this.books.put(b, true);
+
+        this.borrowed_books = borrowed_books;
 
         status = new UserStatus(false, "", "", "");
     }
@@ -128,6 +131,14 @@ public class UserMail {
 
     public void setBooks(HashMap<String, Boolean> books) {
         this.books = books;
+    }
+
+    public HashMap<String, String> getBorrowed_books() {
+        return borrowed_books;
+    }
+
+    public void setBorrowed_books(HashMap<String, String> borrowed_books) {
+        this.borrowed_books = borrowed_books;
     }
 
     public UserStatus getStatus() { return status; }

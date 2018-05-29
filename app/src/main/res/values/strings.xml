@@ -201,8 +201,10 @@
     <string name="fb_error_get_me">Whoops! An error occurred while trying to fetch your user data!</string>
     <string name="fb_error_authenticate">We could not authenticate you at this time. Try again later or choose another method.</string>
     <string name="title_activity_scan_isbn">ScanISBNActivity</string>
-    <string name="myBooks">My books:</string>
+    <string name="myBooks">My books</string>
     <string name="noBooks">Nothing to show, add a new book in the home page</string>
+    <string name="borrowedBooks">Borrowed books</string>
+    <string name="noBorrowedBooks">You don\'t have any borrowed book</string>
 
     <!-- View Book -->
     <string name="read_more">More…</string>

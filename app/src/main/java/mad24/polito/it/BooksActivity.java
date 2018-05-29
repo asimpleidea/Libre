@@ -22,7 +22,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.gson.Gson;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -31,7 +30,7 @@ import java.util.Locale;
 
 import mad24.polito.it.fragments.BooksFragment;
 import mad24.polito.it.fragments.ChatFragment;
-import mad24.polito.it.fragments.ProfileFragment;
+import mad24.polito.it.fragments.profile.ProfileFragment;
 import mad24.polito.it.fragments.SearchFragment;
 import mad24.polito.it.fragments.viewbook.ViewBookFragment;
 import mad24.polito.it.models.UserStatus;

@@ -61,6 +61,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import mad24.polito.it.registrationmail.LoginActivity;
 import mad24.polito.it.models.UserMail;
@@ -91,6 +92,7 @@ public class EditProfileActivity extends AppCompatActivity implements
     private String[] genresList;                                    //all genres list
     boolean[] checkedItems;                                         //checked genres
     private ArrayList<String> books;
+    private HashMap<String, String> borrowed_books;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -178,6 +180,7 @@ public class EditProfileActivity extends AppCompatActivity implements
             city.setText(user.getCity());
             selectedCity = user.getCity();
             idSelectedCity = user.getIdCity();
+            borrowed_books = user.getBorrowed_books();
 
             //get favourite genres
             if(user.getGenres() == null)
@@ -465,7 +468,7 @@ public class EditProfileActivity extends AppCompatActivity implements
 
                                             Task initTask = myDatabase.child(FIREBASE_DATABASE_LOCATION_USERS).child(userAuth.getUid())
                                                     .setValue(new UserMail(userAuth.getEmail(), newName, newCity, idSelectedCity, newPhone,
-                                                            newBio, newSelectedGenres, books, lat, lon) );
+                                                            newBio, newSelectedGenres, books, borrowed_books, lat, lon) );
 
                                             initTask.addOnSuccessListener(new OnSuccessListener() {
                                                 @Override

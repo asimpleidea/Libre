@@ -68,6 +68,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SignupMailActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -872,7 +873,7 @@ public class SignupMailActivity extends AppCompatActivity implements
                             DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
                             myDatabase.child(FIREBASE_DATABASE_LOCATION_USERS).child(user.getUid())
                                     .setValue(new UserMail(mailString, nameString, cityString, idSelectedCity,
-                                            phoneString, bioString, selectedGenres, new ArrayList<String>(), lat, lon) );
+                                            phoneString, bioString, selectedGenres, new ArrayList<String>(), new HashMap<String, String>(), lat, lon) );
 
                             progressBar.setVisibility(View.GONE);
 
