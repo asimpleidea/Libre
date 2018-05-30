@@ -42,6 +42,7 @@ public class BooksActivity  extends AppCompatActivity
     public static final String FIREBASE_DATABASE_LOCATION_BOOKS = "books";
     public static final String FIREBASE_DATABASE_LOCATION_BOOKS_LOCATION = "locationBooks";
     public static final String FIREBASE_DATABASE_LOCATION_USERS = "users";
+    public static final String FIREBASE_DATABASE_LOCATION_BORROWINGS = "borrowings";
 
     private BottomNavigationView mMainNav;
     private FrameLayout mMainFrame;

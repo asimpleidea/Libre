@@ -199,6 +199,10 @@
     <string name="published_in">Pubblicato nel %1$s</string>
     <string name="published_by">Pubblicato da %1$s</string>
     <string name="books_noResults">Non ci sono libri disponibili</string>
+    <string name="bookDetail_bookOnLoan">In prestito</string>
+    <string name="bookDetail_bookAvailable">Disponibile</string>
+    <string name="bookDetail_bookInYourPossession">Il libro è in tuo possesso</string>
+    <string name="bookDetail_bookInYourPossessionRemember">Il libro è in tuo possesso, ricorda di restituirlo a:</string>
 
     <string name="action_settings">Impostazioni</string>
 

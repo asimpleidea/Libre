@@ -37,6 +37,8 @@ import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,6 +91,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.tv_title.setText(mData.get(position).getTitle());
         holder.tv_author.setText(mData.get(position).getAuthor());
         holder.tv_location.setText(mData.get(position).getLocation());
+
+        //check if the book is on loan
+        if(mData.get(position).getBorrowing_id() != null && !mData.get(position).getBorrowing_id().isEmpty())
+            holder.tv_onloan.setText(R.string.bookDetail_bookOnLoan);
+        else
+            holder.tv_onloan.setText(R.string.bookDetail_bookAvailable);
 
         String bookID = mData.get(position).getBook_id();
         Log.d("bookid", "I'm trying to get this book img: "+bookID);
@@ -316,6 +324,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private TextView tv_title;
         private TextView tv_author;
         private TextView tv_location;
+        private TextView tv_onloan;
         private ImageView book_img;
         private ImageButton dots_menu;
 
@@ -332,6 +341,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             tv_title = (TextView) itemView.findViewById(R.id.book_title);
             tv_author = (TextView) itemView.findViewById(R.id.book_author);
             tv_location = (TextView) itemView.findViewById(R.id.book_location);
+            tv_onloan = (TextView) itemView.findViewById(R.id.book_onloan);
             book_img = (ImageView) itemView.findViewById(R.id.book_img);
             dots_menu = (ImageButton) itemView.findViewById(R.id.dots_menu);
 

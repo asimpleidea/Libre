@@ -222,6 +222,10 @@
     <string name="title_activity_view_book">ViewBookActivity</string>
     <string name="action_settings">Settings</string>
     <string name="books_noResults">There are no books available</string>
+    <string name="bookDetail_bookOnLoan">On loan</string>
+    <string name="bookDetail_bookAvailable">Available</string>
+    <string name="bookDetail_bookInYourPossession">The book is in your possession</string>
+    <string name="bookDetail_bookInYourPossessionRemember">The book is in your possession, remember to return it to:</string>
 
     <!-- Fragments toolbar -->
     <string name="chat">Chat</string>

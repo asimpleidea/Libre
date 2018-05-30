@@ -10,11 +10,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,6 +29,7 @@ import com.google.gson.Gson;
 import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;
 import mad24.polito.it.models.Book;
+import mad24.polito.it.models.Borrowing;
 import mad24.polito.it.models.UserMail;
 
 /**
@@ -40,14 +43,20 @@ import mad24.polito.it.models.UserMail;
 public class BookBorrowerFragment extends Fragment
 {
     private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
+    private static final String FIREBASE_DATABASE_LOCATION_BORROWINGS = BooksActivity.FIREBASE_DATABASE_LOCATION_BORROWINGS;
 
     private String UID = null;
+    private DatabaseReference DBBorrowing = null;
     private DatabaseReference DB = null;
     private View RootView = null;
+    private TextView textInYourPossession = null;
+    private TextView textLoan = null;
+    private LinearLayout borrowerLayout = null;
     private UserMail User = null;
     private StorageReference Storage = null;
     private Book TheBook = null;
-    private String OwnerImage = null;
+    private String BorrowerImage = null;
+    private Borrowing borrowing = null;
 
     private OnFragmentInteractionListener mListener;
 
@@ -75,18 +84,72 @@ public class BookBorrowerFragment extends Fragment
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null)
-        {/*
-            UID = getArguments().getString("owner");
-            DB = FirebaseDatabase.getInstance().getReference()
-                    .child(FIREBASE_DATABASE_LOCATION_USERS +"/" + UID);
+        {
             TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
-            Storage = FirebaseStorage.getInstance().getReference("profile_pictures").child(UID + ".jpg");*/
+
+            if(TheBook.getBorrowing_id() != null && !TheBook.getBorrowing_id().isEmpty()) {
+                DBBorrowing = FirebaseDatabase.getInstance().getReference()
+                        .child(FIREBASE_DATABASE_LOCATION_BORROWINGS + "/" + TheBook.getBorrowing_id());
+            }
         }
 
     }
 
+    private void loadAndInjectBorrowing()
+    {
+        if(TheBook.getBorrowing_id() != null && !TheBook.getBorrowing_id().isEmpty()) {
+            borrowerLayout.setVisibility(View.VISIBLE);
+            textInYourPossession.setVisibility(View.GONE);
+        } else {
+            borrowerLayout.setVisibility(View.GONE);
+            textInYourPossession.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        DBBorrowing.addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                borrowing = dataSnapshot.getValue(Borrowing.class);
+
+                //if you are the borrower --> set the owner id
+                //if you are the owner --> set the borrower id
+                if(borrowing.getTo().equals(FirebaseAuth.getInstance().getUid())) {
+                    textLoan.setText(R.string.bookDetail_bookInYourPossessionRemember);
+                    UID = borrowing.getFrom();
+                } else {
+                    textLoan.setText(R.string.book_on_loan);
+                    UID = borrowing.getTo();
+                }
+
+                DB = FirebaseDatabase.getInstance().getReference()
+                        .child(FIREBASE_DATABASE_LOCATION_USERS + "/" + UID);
+                TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
+                Storage = FirebaseStorage.getInstance().getReference("profile_pictures").child(UID + ".jpg");
+
+                loadAndInjectUser();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+                Log.d("VIEWBOOK", "can't load user");
+            }
+        });
+    }
+
     private void loadAndInjectUser()
     {
+        if(TheBook.getBorrowing_id() != null && !TheBook.getBorrowing_id().isEmpty()) {
+            borrowerLayout.setVisibility(View.VISIBLE);
+            textInYourPossession.setVisibility(View.GONE);
+        } else {
+            borrowerLayout.setVisibility(View.GONE);
+            textInYourPossession.setVisibility(View.VISIBLE);
+            return;
+        }
+
         DB.addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
@@ -104,12 +167,21 @@ public class BookBorrowerFragment extends Fragment
         });
     }
 
+    private void injectBorrowing() {
+        if(borrowing.getTo().equals(FirebaseAuth.getInstance().getUid()))
+            textLoan.setText(R.string.bookDetail_bookInYourPossessionRemember);
+        else
+            textLoan.setText(R.string.book_on_loan);
+
+        injectUser();
+    }
+
     private void injectUser()
-    {/*
+    {
         if(User == null) return;
 
         //  Put the owner's pic
-        if(OwnerImage == null)
+        if(BorrowerImage == null)
         {
             Storage.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
             {
@@ -117,8 +189,8 @@ public class BookBorrowerFragment extends Fragment
                 public void onSuccess(Uri uri)
                 {
                     //  TODO: check for caching options.
-                    Glide.with(getContext()).load(uri).into((ImageView) RootView.findViewById(R.id.ownerPic));
-                    OwnerImage = uri.toString();
+                    Glide.with(getContext()).load(uri).into((ImageView) RootView.findViewById(R.id.borrowerPic));
+                    BorrowerImage = uri.toString();
                 }
             }).addOnFailureListener(new OnFailureListener()
             {
@@ -129,10 +201,10 @@ public class BookBorrowerFragment extends Fragment
                 }
             });
         }
-        else Glide.with(getContext()).load(OwnerImage).into((ImageView) RootView.findViewById(R.id.borrowerPic));
+        else Glide.with(getContext()).load(BorrowerImage).into((ImageView) RootView.findViewById(R.id.borrowerPic));
 
         //  The name
-        ((TextView) RootView.findViewById(R.id.borrowerName)).setText(User.getName());*/
+        ((TextView) RootView.findViewById(R.id.borrowerName)).setText(User.getName());
     }
 
     @Override
@@ -141,10 +213,17 @@ public class BookBorrowerFragment extends Fragment
     {
         // Inflate the layout for this fragment
         RootView = inflater.inflate(R.layout.fragment_book_borrower, container, false);
-/*
-        if(User == null) loadAndInjectUser();
-        else injectUser();
-*/
+
+        textInYourPossession = RootView.findViewById(R.id.borrower_inyourpossession);
+        textLoan = RootView.findViewById(R.id.borrowerTextLoan);
+        borrowerLayout = RootView.findViewById(R.id.borrowerLayout);
+
+        if(User == null) {
+            loadAndInjectBorrowing();
+        } else {
+            injectBorrowing();
+        }
+
         return RootView;
     }
 

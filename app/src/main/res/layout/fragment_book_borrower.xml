@@ -9,108 +9,139 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     >
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="10dp"
-        android:paddingBottom="50dp">
+        android:layout_height="match_parent">
 
-        <!-- TODO: set a string -->
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/book_on_loan"
-            android:textSize="18sp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/borrowerPic"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_weight="1"
-                android:contentDescription='@string/owner_picture'
-                android:src="@drawable/com_facebook_profile_picture_blank_square" />
-
-            <TextView
-                android:id="@+id/borrowerName"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="fill_vertical"
-                android:padding="10dp"
-                android:textSize="25sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/userReviews"
+            android:id="@+id/borrower_inyourpossession"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="5dp"
-            android:orientation="horizontal">
+            android:text="@string/bookDetail_bookInYourPossession"
+            android:gravity="center"
+            android:textSize="20dp"
+            android:paddingTop="10dp"
+            />
 
+        <LinearLayout
+            android:id="@+id/borrowerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:paddingBottom="50dp"
+            android:visibility="visible"
+            >
+
+            <!-- TODO: set a string -->
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/borrowerTextLoan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="7dp"
-                android:fontFamily="@font/opensans_light"
-                android:shadowColor="@color/black"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="1"
-                android:text="3.4"
-                android:textColor="@color/cardview_dark_background"
-                android:textSize="30sp" />
+                android:text="@string/book_on_loan"
+                android:textSize="18sp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-                <me.zhanghai.android.materialratingbar.MaterialRatingBar
-                    style="@style/Widget.MaterialRatingBar.RatingBar.Indicator"
-                    android:layout_width="wrap_content"
-                    android:layout_height="18dp"
-                    android:layout_marginTop="2dp"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:rating="3.4"
-                    android:stepSize=".1"
-                    app:mrb_progressTint="#f7ec1d" />
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/borrowerPic"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:contentDescription='@string/owner_picture'
+                    android:src="@drawable/com_facebook_profile_picture_blank_square" />
 
                 <TextView
-                    android:id="@+id/textView5"
+                    android:id="@+id/borrowerName"
                     android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="fill_vertical"
+                    android:padding="10dp"
+                    android:textSize="25sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/userReviews"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="7dp"
                     android:fontFamily="@font/opensans_light"
                     android:shadowColor="@color/black"
                     android:shadowDx="1"
                     android:shadowDy="1"
                     android:shadowRadius="1"
-                    android:text="25 Ratings"
-                    android:textColor="@color/cardview_dark_background" />
+                    android:text="3.4"
+                    android:textColor="@color/cardview_dark_background"
+                    android:textSize="30sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <me.zhanghai.android.materialratingbar.MaterialRatingBar
+                        style="@style/Widget.MaterialRatingBar.RatingBar.Indicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="18dp"
+                        android:layout_marginTop="2dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:rating="3.4"
+                        android:stepSize=".1"
+                        app:mrb_progressTint="#f7ec1d" />
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/opensans_light"
+                        android:shadowColor="@color/black"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        android:text="25 Ratings"
+                        android:textColor="@color/cardview_dark_background" />
+                </LinearLayout>
+
             </LinearLayout>
 
-        </LinearLayout>
-        <!-- TODO: string for 'Fine Prestito' -->
-        <Button
-            android:layout_width="180dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
-            android:text="Fine prestito"
-            android:textSize="18sp"
-            android:textColor="@color/colorWhite"
-            android:background="@drawable/roundedbutton_red"
-            />
+            <!-- chat button-->
+            <Button
+                android:id="@+id/borrower_startChat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CHAT (FAKE BUTTON FOR NOW)"
+                android:drawableLeft="@drawable/ic_chat_icon"
+                android:background="@color/transparent"
+                android:fontFamily="@font/opensans_regular"
+                />
 
-    </LinearLayout>
+            <!-- TODO: string for 'Fine Prestito' -->
+            <Button
+                android:layout_width="180dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:text="Fine prestito"
+                android:textSize="18sp"
+                android:textColor="@color/colorWhite"
+                android:background="@drawable/roundedbutton_red"
+                />
+
+        </LinearLayout>
+    </RelativeLayout>
 
 </android.support.v4.widget.NestedScrollView>
