@@ -217,6 +217,14 @@
     <string name="no_chats">Non ci sono chat :( Quando guardi un libro, tocca il pulsante chat sotto la tab del proprietario per iniziare una chat</string>
     <string name="contact_the_user">Chat</string>
     <string name="you_and_x_are_talking">Tu e %1$s state chattando riguardo…</string>
+    <string name="dialog_start_borrow_message">Sei sicuro di voler prestare questo libro a %1$s?</string>
+    <string name="dialog_start_borrow_title">Conferma</string>
+    <string name="yes">Si</string>
+    <string name="no">No</string>
+    <string name="whoops">Ops…</string>
+    <string name="dialog_error_borrowing">Si è verificato un errore mentre cercavamo di compiere questa azione. Riprova più tardi.</string>
+    <string name="dialog_ok_borrowing">Il libro è stato prestato!</string>
+    <string name="ok_confirmation">Ok!</string>
     <!-- /Chat -->
 
     <!-- Book Borrower -->

@@ -247,6 +247,14 @@
     <string name="no_chats">No chats to display :( \n When looking at a book, tap on the Chat button under the owner's tab to start chatting!</string>
     <string name="contact_the_user">Chat</string>
     <string name="you_and_x_are_talking">You and %1$s are talking about…</string>
+    <string name="dialog_start_borrow_message">Are you really sure you want to borrow this book to %1$s?</string>
+    <string name="dialog_start_borrow_title">Please confirm</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="whoops">Whoops…</string>
+    <string name="error_borrowing">An error occurred while performing this action. Please try again later.</string>
+    <string name="dialog_ok_borrowing">Book has been borrowed!</string>
+    <string name="ok_confirmation">OK!</string>
     <!-- /Chat -->
 
     <!-- stirngs for slider intro -->

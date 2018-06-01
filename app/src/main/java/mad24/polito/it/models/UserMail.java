@@ -13,6 +13,8 @@ public class UserMail {
     String idCity;
     String phone;
     String bio;
+    private int raters = 0;
+    private int rating = 0;
     ArrayList<Integer> genres;
     HashMap<String, Boolean> books;
     double lat;
@@ -131,4 +133,12 @@ public class UserMail {
     public UserStatus getStatus() { return status; }
 
     public void setStatus(UserStatus status) { this.status = status; }
+
+    public int getRaters() { return raters; }
+
+    public void setRaters(int raters) { this.raters = raters; }
+
+    public int getRating() { return rating; }
+
+    public void setRating(int rating) { this.rating = rating; }
 }
