@@ -203,6 +203,10 @@
     <string name="bookDetail_bookAvailable">Disponibile</string>
     <string name="bookDetail_bookInYourPossession">Il libro è in tuo possesso</string>
     <string name="bookDetail_bookInYourPossessionRemember">Il libro è in tuo possesso, ricorda di restituirlo a:</string>
+    <string name="bookDetail_terminateLoan">Termina prestito</string>
+    <string name="bookDetail_terminateLoanDialogTitle">Sei sicuro di terminare il prestito?</string>
+    <string name="bookDetail_terminateLoanDialogMessage">Assicurati che il libro ti sia stato restituito</string>
+    <string name="bookDetail_errorTerminatingLoan">Si è verificato un errore durante la terminazione del prestito</string>
 
     <string name="action_settings">Impostazioni</string>
 
@@ -236,5 +240,15 @@
     <!-- Book Borrower -->
     <string name="book_on_loan">Questo libro è attualmente in prestito a:</string>
 
-
+    <!-- rating dialog-->
+    <string name="ratingDialog_title">Valuta l\'utente</string>
+    <string name="ratingDialog_comment">Inserisci un commento</string>
+    <string name="ratingDialog_negativeButton">Annulla</string>
+    <string name="ratingDialog_positiveButton">Invia valutazione</string>
+    <string name="ratingDialog_1star">Molto male</string>
+    <string name="ratingDialog_2stars">Male</string>
+    <string name="ratingDialog_3stars">Normale</string>
+    <string name="ratingDialog_4stars">Bene</string>
+    <string name="ratingDialog_5stars">Molto bene</string>
+    <string name="ratingDialog_thanks">Grazie per la tua valutazione</string>
 </resources>

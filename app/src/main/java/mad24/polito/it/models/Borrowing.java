@@ -31,23 +31,6 @@ public class Borrowing
         borrower_rating = _borrower;
     }
 
-    public class Rating
-    {
-        private int stars = 0;
-        private String comment = "";
-
-        Rating()
-        {
-            this(0, "");
-        }
-
-        Rating(int _stars, String _comment)
-        {
-            stars = _stars;
-            comment = _comment;
-        }
-    }
-
     public String getBook_id() {
         return book_id;
     }

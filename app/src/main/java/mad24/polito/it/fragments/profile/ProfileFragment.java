@@ -13,8 +13,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,16 +36,11 @@ import com.google.firebase.storage.StorageReference;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;
-import mad24.polito.it.RecyclerViewAdapter;
 import mad24.polito.it.ShowProfileActivity;
 import mad24.polito.it.fragments.viewbook.BookViewPagerAdapter;
-import mad24.polito.it.models.Book;
 
 import static android.content.Context.MODE_PRIVATE;
 

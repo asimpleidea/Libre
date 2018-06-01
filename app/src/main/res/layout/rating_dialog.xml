@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/ratingDialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="@string/ratingDialog_title"
+        android:textSize="30dp"
+        android:paddingBottom="10dp"
+        />
+
+    <RatingBar
+        android:id="@+id/ratingDialog_rating_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1"
+        />
+
+    <TextView
+        android:id="@+id/ratingDialog_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_horizontal"
+        android:textColor="?attr/colorAccent"
+        android:text="@string/ratingDialog_3stars"
+        android:textSize="20dp"
+        />
+
+    <EditText
+        android:id="@+id/ratingDialog_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:inputType="text|textMultiLine"
+        android:lines="7"
+        android:padding="12dp"
+        android:hint="@string/ratingDialog_comment"
+        />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/ratingDialog_negativeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ratingDialog_negativeButton"
+            android:background="@null"
+            android:layout_toLeftOf="@id/ratingDialog_positiveButton"
+            android:layout_alignParentBottom="true"
+            />
+
+        <Button
+            android:id="@+id/ratingDialog_positiveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ratingDialog_positiveButton"
+            android:background="@null"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            />
+    </RelativeLayout>
+
+</LinearLayout>

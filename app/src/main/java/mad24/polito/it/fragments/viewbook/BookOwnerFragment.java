@@ -30,6 +30,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 
 import java.security.acl.Owner;
+import java.util.Locale;
 
 import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;
@@ -60,6 +61,10 @@ public class BookOwnerFragment extends Fragment
     private StorageReference Storage = null;
     private Book TheBook = null;
     private String OwnerImage = null;
+
+    private TextView stars = null;
+    private me.zhanghai.android.materialratingbar.MaterialRatingBar ratingBar;
+    private TextView ratingNumber = null;
 
     //private OnFragmentInteractionListener mListener;
 
@@ -148,6 +153,24 @@ public class BookOwnerFragment extends Fragment
         //  The Conditions
         ((TextView) RootView.findViewById(R.id.bookConditions)).setText(String.format(getResources().getString(R.string.book_conditions_user), TheBook.getCondition()));
 
+        //User rating
+        String ratingStarsString = "0.0";
+        float ratingStars = 0;
+
+        //to avoid division by 0
+        if(User.getRaters() > 0) {
+            ratingStars = (float) User.getRating() / (float) User.getRaters();
+            ratingStarsString = String.format("%.1f", ratingStars);
+        }
+
+        stars.setText(ratingStarsString);
+        ratingBar.setRating(ratingStars);
+
+        if(Locale.getDefault().getLanguage().equals(Locale.ITALIAN.getLanguage()))
+            ratingNumber.setText(User.getRaters() +" valutazioni");
+        else
+            ratingNumber.setText(User.getRaters() +" ratings");
+
     }
 
     @Override
@@ -156,6 +179,9 @@ public class BookOwnerFragment extends Fragment
     {
         // Inflate the layout for this fragment
         RootView = inflater.inflate(R.layout.fragment_book_owner, container, false);
+        stars = (TextView) RootView.findViewById(R.id.bookOwner_stars);
+        ratingBar = (me.zhanghai.android.materialratingbar.MaterialRatingBar) RootView.findViewById(R.id.bookOwner_ratingBar);
+        ratingNumber = (TextView) RootView.findViewById(R.id.bookOwner_ratingNumber);
 
         if(User == null) loadAndInjectUser();
         else injectUser();
