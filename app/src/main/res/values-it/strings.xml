@@ -207,6 +207,7 @@
     <string name="bookDetail_terminateLoanDialogTitle">Sei sicuro di terminare il prestito?</string>
     <string name="bookDetail_terminateLoanDialogMessage">Assicurati che il libro ti sia stato restituito</string>
     <string name="bookDetail_errorTerminatingLoan">Si è verificato un errore durante la terminazione del prestito</string>
+    <string name="bookDetail_bookReturned">Libro restituito al proprietario!</string>
 
     <string name="action_settings">Impostazioni</string>
 

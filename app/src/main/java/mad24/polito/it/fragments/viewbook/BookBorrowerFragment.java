@@ -229,6 +229,10 @@ public class BookBorrowerFragment extends Fragment
 
 
                                         borrowerLayout.setVisibility(View.GONE);
+
+                                        if(borrowerOrOwner.equals("owner"))
+                                            textInYourPossession.setText(getResources().getString(R.string.bookDetail_bookReturned));
+
                                         textInYourPossession.setVisibility(View.VISIBLE);
                                         TheBook.setBorrowing_id("");
                                     }

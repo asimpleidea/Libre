@@ -230,6 +230,7 @@
     <string name="bookDetail_terminateLoanDialogTitle">Are you sure to terminate the loan?</string>
     <string name="bookDetail_terminateLoanDialogMessage">Ensure that the borrower returned back your book</string>
     <string name="bookDetail_errorTerminatingLoan">An error occurred terminating the loan</string>
+    <string name="bookDetail_bookReturned">Book returned to the owner!</string>
 
     <!-- Fragments toolbar -->
     <string name="chat">Chat</string>
