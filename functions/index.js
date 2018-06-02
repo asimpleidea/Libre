@@ -167,6 +167,65 @@ exports.updateAvailability = functions.database.ref('/books/{book_id}/borrowing_
     return Promise.all(promises);
 });
 
+//  Update rating inserted by owner
+exports.addRatingByOwner = functions.database.ref('/borrowings/{book_id}/{borrowing_id}/owner_rating').onCreate((snap, context) => 
+{
+    //  Get the data
+    const original = snap.val(),
+    
+            //  Get the stars
+            stars = original.stars,
+    
+            //  What book are we talking about?
+            book_id = context.params.book_id,
+
+            //  What is the borrowing id?
+            borrowing_id = context.params.borrowing_id;
+
+    //  Get the user we want to rate.
+    return admin.database().ref("/borrowings/" + book_id + "/" + borrowing_id).once("value").then(result =>
+    {
+        if(result === null) return console.log("the value was null!");
+
+        //  Get the data
+        const user = result.val().to;
+
+        return updateRating(user, stars);
+    });
+});
+
+//  Update rating inserted by borrower
+exports.addRatingByBorrower = functions.database.ref('/borrowings/{book_id}/{borrowing_id}/borrower_rating').onCreate((snap, context) => 
+{
+    //  Get the data
+    const original = snap.val(),
+
+    //  The book
+    book_id = context.params.book_id,
+
+    //  The borrowing id
+    borrowing_id = context.params.borrowing_id,
+
+    //  How many stars
+    stars = original.stars;
+
+    //  Get the owner that I am rating
+    return admin.database().ref("/borrowings/" + book_id + "/" + borrowing_id).once("value").then(result =>
+    {
+        if(result === null) return console.log("the value was null!");
+
+        const owner = result.val().from;
+
+        return updateRating(owner, stars);
+    })
+});
+
+function updateRating(userToUpdate, stars)
+{
+    console.log("Going to rate", userToUpdate);
+    return console.log("with stars:", stars);
+}
+
 exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
 {
     // Get an object representing the document
