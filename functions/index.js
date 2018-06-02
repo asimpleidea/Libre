@@ -226,7 +226,10 @@ function updateRating(userToUpdate, stars)
     return admin.database().ref("users/" + userToUpdate).transaction(u =>
     {   
         //  Sometimes it just is null, so I have to do this!
-        if(u === null) return undefined;
+        if(u === null)
+        {
+            return {transaction: null};
+        }
 
         //  Update the stars (with reset in case they had no rating)
         if(!("rating" in u)) u.rating = 0;        
