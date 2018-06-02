@@ -222,8 +222,22 @@ exports.addRatingByBorrower = functions.database.ref('/borrowings/{book_id}/{bor
 
 function updateRating(userToUpdate, stars)
 {
-    console.log("Going to rate", userToUpdate);
-    return console.log("with stars:", stars);
+    //  Do it in a transaction
+    return admin.database().ref("users/" + userToUpdate).transaction(u =>
+    {   
+        //  Sometimes it just is null, so I have to do this!
+        if(u === null) return undefined;
+
+        //  Update the stars (with reset in case they had no rating)
+        if(!("rating" in u)) u.rating = 0;        
+        u.rating += parseInt(stars);
+        
+        //  Update how many rated them
+        if(!("raters" in u)) u.raters = 0;
+        u.raters = parseInt(u.raters) +1;
+
+        return u;
+    });
 }
 
 exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
