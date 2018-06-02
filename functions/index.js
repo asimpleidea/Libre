@@ -106,7 +106,8 @@ exports.updateAvailability = functions.database.ref('/books/{book_id}/borrowing_
 
     //  Start
     let available = true,
-        borrowing_id = "";
+        borrowing_id = ""
+        returned_at = 0;
     const original = change.after.val(),
         book_id = context.params.book_id;
     
@@ -121,7 +122,11 @@ exports.updateAvailability = functions.database.ref('/books/{book_id}/borrowing_
     {
         //  The value before
         const before = change.before.val();
-        if(before.length > 0) borrowing_id = before.split('/')[1];
+        if(before.length > 0)
+        {
+            borrowing_id = before.split('/')[1];
+            returned_at = (new Date()).getTime();
+        }
     }
     
     //  The promises
@@ -142,14 +147,21 @@ exports.updateAvailability = functions.database.ref('/books/{book_id}/borrowing_
     if(borrowing_id.length > 0)
     {
         const update_borrowed =  admin.database().ref("borrowings/" + book_id + "/" + borrowing_id).once("value").then(result =>
-            {
-                const data = result.val(),
-                        update = {};
-                        update[book_id] = !available ? borrowing_id : null;                
-        
-                return admin.database().ref("users/" + data.to + "/borrowed_books").update(update);
-            });
-        promises.push(update_borrowed);    
+        {
+            const data = result.val(),
+                    update = {};
+                    update[book_id] = !available ? borrowing_id : null;                
+    
+            return admin.database().ref("users/" + data.to + "/borrowed_books").update(update);
+        });
+        promises.push(update_borrowed);
+
+        //  Borrowing ended?
+        if(returned_at > 0)
+        {
+            const update_returned_at = admin.database().ref("borrowings/" + book_id + "/" + borrowing_id).update({returned_at : returned_at});
+            promises.push(update_returned_at);
+        }
     }
 
     return Promise.all(promises);
