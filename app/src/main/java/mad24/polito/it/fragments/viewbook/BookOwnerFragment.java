@@ -160,17 +160,13 @@ public class BookOwnerFragment extends Fragment
         //to avoid division by 0
         if(User.getRaters() > 0) {
             ratingStars = (float) User.getRating() / (float) User.getRaters();
-            ratingStarsString = String.format("%.1f", ratingStars);
+            ratingStarsString = Float.valueOf(ratingStars).toString();
         }
 
         stars.setText(ratingStarsString);
         ratingBar.setRating(ratingStars);
 
-        if(Locale.getDefault().getLanguage().equals(Locale.ITALIAN.getLanguage()))
-            ratingNumber.setText(User.getRaters() +" valutazioni");
-        else
-            ratingNumber.setText(User.getRaters() +" ratings");
-
+        ratingNumber.setText(String.format(getString(R.string.user_ratings_count), User.getRaters()));
     }
 
     @Override

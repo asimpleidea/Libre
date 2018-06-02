@@ -121,7 +121,7 @@
             android:gravity="fill_vertical"
             android:textSize="20sp" />
 
-        <TextView
+        <!--<TextView
             android:id="@+id/textView18"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -226,7 +226,7 @@
 
             </LinearLayout>
 
-        </LinearLayout>
+        </LinearLayout>-->
     </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>
