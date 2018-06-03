@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -65,6 +66,7 @@ public class BookOwnerFragment extends Fragment
     private TextView stars = null;
     private me.zhanghai.android.materialratingbar.MaterialRatingBar ratingBar;
     private TextView ratingNumber = null;
+    private Button commentsButton = null;
 
     //private OnFragmentInteractionListener mListener;
 
@@ -160,13 +162,31 @@ public class BookOwnerFragment extends Fragment
         //to avoid division by 0
         if(User.getRaters() > 0) {
             ratingStars = (float) User.getRating() / (float) User.getRaters();
-            ratingStarsString = Float.valueOf(ratingStars).toString();
+            ratingStarsString = String.format("%.1f", ratingStars);
         }
 
         stars.setText(ratingStarsString);
         ratingBar.setRating(ratingStars);
 
         ratingNumber.setText(String.format(getString(R.string.user_ratings_count), User.getRaters()));
+
+        commentsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(UID == null)
+                    return;
+
+                //create dialog to rate the other user
+                CommentDialog commentDialog = new CommentDialog(getActivity(), UID, User.getName());
+
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(commentDialog.getWindow().getAttributes());
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+                commentDialog.show();
+                commentDialog.getWindow().setAttributes(lp);
+            }
+        });
     }
 
     @Override
@@ -178,6 +198,7 @@ public class BookOwnerFragment extends Fragment
         stars = (TextView) RootView.findViewById(R.id.bookOwner_stars);
         ratingBar = (me.zhanghai.android.materialratingbar.MaterialRatingBar) RootView.findViewById(R.id.bookOwner_ratingBar);
         ratingNumber = (TextView) RootView.findViewById(R.id.bookOwner_ratingNumber);
+        commentsButton = (Button) RootView.findViewById(R.id.bookOwner_comments);
 
         if(User == null) loadAndInjectUser();
         else injectUser();

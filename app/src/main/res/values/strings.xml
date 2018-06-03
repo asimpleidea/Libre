@@ -231,7 +231,10 @@
     <string name="bookDetail_terminateLoanDialogMessage">Ensure that the borrower returned back your book</string>
     <string name="bookDetail_errorTerminatingLoan">An error occurred terminating the loan</string>
     <string name="bookDetail_bookReturned">Book returned to the owner!</string>
+    <string name="bookDetail_comments">See comments</string>
     <string name="user_ratings_count">%1$d ratings</string>
+    <string name="bookDetail_titleComment">Ratings about %1$s</string>
+    <string name="bookDetail_noRatings">No ratings</string>
 
     <!-- Fragments toolbar -->
     <string name="chat">Chat</string>

@@ -208,6 +208,10 @@
     <string name="bookDetail_terminateLoanDialogMessage">Assicurati che il libro ti sia stato restituito</string>
     <string name="bookDetail_errorTerminatingLoan">Si è verificato un errore durante la terminazione del prestito</string>
     <string name="bookDetail_bookReturned">Libro restituito al proprietario!</string>
+    <string name="bookDetail_comments">Vedi i commenti</string>
+    <string name="bookDetail_titleComment">Valutazioni riguardo %1$s</string>
+    <string name="bookDetail_noRatings">Nessuna valutazione</string>
+
     <string name="user_ratings_count">%1$d valutazioni</string>
     <string name="action_settings">Impostazioni</string>
 

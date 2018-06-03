@@ -75,6 +75,7 @@ public class BookBorrowerFragment extends Fragment
     private TextView stars = null;
     private me.zhanghai.android.materialratingbar.MaterialRatingBar ratingBar;
     private TextView ratingNumber = null;
+    private Button commentsButton = null;
 
     private OnFragmentInteractionListener mListener;
 
@@ -183,9 +184,9 @@ public class BookBorrowerFragment extends Fragment
                         final String borrowingId = TheBook.getBorrowing_id();
                         String temp;
                         if(TheBook.getUser_id().equals(FirebaseAuth.getInstance().getUid()))
-                            temp = "borrower";
-                        else
                             temp = "owner";
+                        else
+                            temp = "borrower";
 
                         final String borrowerOrOwner = temp;
 
@@ -230,7 +231,7 @@ public class BookBorrowerFragment extends Fragment
 
                                         borrowerLayout.setVisibility(View.GONE);
 
-                                        if(borrowerOrOwner.equals("owner"))
+                                        if(borrowerOrOwner.equals("borrower"))
                                             textInYourPossession.setText(getResources().getString(R.string.bookDetail_bookReturned));
 
                                         textInYourPossession.setVisibility(View.VISIBLE);
@@ -345,11 +346,25 @@ public class BookBorrowerFragment extends Fragment
 
         stars.setText(ratingStarsString);
         ratingBar.setRating(ratingStars);
+        ratingNumber.setText(String.format(getString(R.string.user_ratings_count), User.getRaters()));
 
-        if(Locale.getDefault().getLanguage().equals(Locale.ITALIAN.getLanguage()))
-            ratingNumber.setText(User.getRaters() +" valutazioni");
-        else
-            ratingNumber.setText(User.getRaters() +" ratings");
+        commentsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(UID == null)
+                    return;
+
+                //create dialog to rate the other user
+                CommentDialog commentDialog = new CommentDialog(getActivity(), UID, User.getName());
+
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(commentDialog.getWindow().getAttributes());
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+                commentDialog.show();
+                commentDialog.getWindow().setAttributes(lp);
+            }
+        });
     }
 
     @Override
@@ -368,6 +383,7 @@ public class BookBorrowerFragment extends Fragment
         stars = (TextView) RootView.findViewById(R.id.borrowerStars);
         ratingBar = (me.zhanghai.android.materialratingbar.MaterialRatingBar) RootView.findViewById(R.id.borrowerMaterialRatingBar);
         ratingNumber = (TextView) RootView.findViewById(R.id.borrowerRatingNumber);
+        commentsButton = (Button) RootView.findViewById(R.id.borrowerComments);
 
         if(User == null) {
             loadAndInjectBorrowing();

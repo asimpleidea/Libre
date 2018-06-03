@@ -70,7 +70,7 @@
             android:textColor="@color/cardview_dark_background"
             android:textSize="30sp" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -85,11 +85,14 @@
                 android:numStars="5"
                 android:rating="0"
                 android:stepSize=".1"
-                app:mrb_progressTint="#f7ec1d" />
+                app:mrb_progressTint="#f7ec1d"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                />
 
             <TextView
                 android:id="@+id/bookOwner_ratingNumber"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/opensans_light"
                 android:shadowColor="@color/black"
@@ -97,8 +100,30 @@
                 android:shadowDy="1"
                 android:shadowRadius="1"
                 android:text="0 ratings"
-                android:textColor="@color/cardview_dark_background" />
-        </LinearLayout>
+                android:textColor="@color/cardview_dark_background"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                />
+
+            <Button
+                android:id="@+id/bookOwner_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/opensans_light"
+                android:shadowColor="@color/black"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"
+                android:text="@string/bookDetail_comments"
+                android:background="@null"
+                android:textAllCaps="false"
+                android:textColor="@color/cardview_dark_background"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:textSize="14dp"
+                />
+
+        </RelativeLayout>
 
     </LinearLayout>
 
