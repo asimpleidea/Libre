@@ -190,6 +190,10 @@ exports.addRatingByOwner = functions.database.ref('/borrowings/{book_id}/{borrow
         //  Get the data
         const user = result.val().to;
 
+        const owner = result.val().from;
+        const comment = original.comment;
+        updateComments(user, borrowing_id, owner, stars, comment);
+
         return updateRating(user, stars);
     });
 });
@@ -216,6 +220,10 @@ exports.addRatingByBorrower = functions.database.ref('/borrowings/{book_id}/{bor
 
         const owner = result.val().from;
 
+        const borrower = result.val().to;
+        const comment = original.comment;
+        updateComments(owner, borrowing_id, borrower, stars, comment);
+
         return updateRating(owner, stars);
     })
 });
@@ -224,7 +232,7 @@ function updateRating(userToUpdate, stars)
 {
     //  Do it in a transaction
     return admin.database().ref("users/" + userToUpdate).transaction(u =>
-    {   
+    {
         //  Sometimes it just is null, so I have to do this!
         if(u === null)
         {
@@ -232,15 +240,24 @@ function updateRating(userToUpdate, stars)
         }
 
         //  Update the stars (with reset in case they had no rating)
-        if(!("rating" in u)) u.rating = 0;        
+        if(!("rating" in u)) u.rating = 0;
         u.rating += parseInt(stars);
-        
+
         //  Update how many rated them
         if(!("raters" in u)) u.raters = 0;
         u.raters = parseInt(u.raters) +1;
 
         return u;
     });
+}
+
+function updateComments(userToUpdate, borrowingId, commentWriter, stars, comment)
+{
+    //  Do it in a transaction
+    return admin.database().ref("comments/" + userToUpdate + "/" + borrowingId).set({"user": commentWriter,
+                                                                                "stars": stars,
+                                                                                "comment": comment
+                                                                                });
 }
 
 exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
