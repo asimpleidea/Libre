@@ -23,10 +23,10 @@
 
     <!--slider intro>
     <!- Screens background color-->
-    <color name="bg_screen1">#f64c73</color>
-    <color name="bg_screen2">#20d2bb</color>
-    <color name="bg_screen3">#3395ff</color>
-    <color name="bg_screen4">#c873f4</color>
+    <color name="bg_screen1">#cd98a5</color>
+    <color name="bg_screen2">#798aa0</color>
+    <color name="bg_screen3">#9b87c5</color>
+    <color name="bg_screen4">#a3a593</color>
 
     <!-- dots inactive colors -->
     <color name="dot_dark_screen1">#d1395c</color>

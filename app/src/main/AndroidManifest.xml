@@ -37,6 +37,20 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDI-s1kInkq07sXnu8haNisg-ZLlGW9IoE" />
 
+
+        <!-- Slider welcome -->
+        <activity android:name=".WelcomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_welcome"
+            android:theme="@style/AppTheme"></activity>
+
         <activity
             android:name=".ShowProfileActivity"
             android:theme="@style/AppTheme">
@@ -168,21 +182,16 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
         <!-- /Notifications -->
-       <!-- <activity android:name=".WelcomeActivity"></activity> -->
+        <!-- <activity android:name=".WelcomeActivity"></activity> -->
 
 
-        <!-- Slider welcome -->
-        <activity android:name=".WelcomeActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <!--<activity
-            android:name="info.androidhive.introslider.MainActivity"
+        <!--
+             <activity
+            android:name="mad24.polito.it.ShowProfileActivity"
             android:label="@string/title_activity_welcome"
-            android:theme="@style/AppTheme.NoActionBar"></activity>-->
+            android:theme="@style/AppTheme"></activity>
+        -->
+        <!-- <activity android:name=".MainActivity"></activity> -->
     </application>
 
 </manifest>

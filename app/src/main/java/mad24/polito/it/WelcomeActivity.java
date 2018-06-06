@@ -18,23 +18,15 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import mad24.polito.it.registrationmail.LoginActivity;
+
 public class WelcomeActivity extends AppCompatActivity {
 
     private ViewPager viewPager;
     private MyViewPagerAdapter myViewPagerAdapter;
     private LinearLayout dotsLayout;
     private TextView[] dots;
-
-
-    // layouts of all welcome sliders
-
-
-    // add few more layouts if you want
-    private int[] layouts = new int[]{
-            R.layout.welcome_side1,
-            R.layout.welcome_side2,
-            R.layout.welcome_side3,
-            R.layout.welcome_side4};
+    private int[] layouts;
     private Button btnSkip, btnNext;
     private PrefManager prefManager;
 
@@ -61,6 +53,14 @@ public class WelcomeActivity extends AppCompatActivity {
         btnSkip = (Button) findViewById(R.id.btn_skip);
         btnNext = (Button) findViewById(R.id.btn_next);
 
+
+        // layouts of all welcome sliders
+        // add few more layouts if you want
+        layouts = new int[]{
+                R.layout.welcome_side1,
+                R.layout.welcome_side2,
+                R.layout.welcome_side3,
+                R.layout.welcome_side4};
 
         // adding bottom dots
         addBottomDots(0);
@@ -119,7 +119,7 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void launchHomeScreen() {
-        prefManager.setFirstTimeLaunch(false);
+        //prefManager.setFirstTimeLaunch(false);
         startActivity(new Intent(WelcomeActivity.this, MainActivity.class));
         finish();
     }

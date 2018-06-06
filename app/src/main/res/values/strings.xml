@@ -272,7 +272,7 @@
     <string name="slide_3_title">Great Discounts</string>
     <string name="slide_3_desc">You can find the best offers!</string>
 
-    <string name="slide_4_title">Find your location</string>
+    <string name="slide_4_title">Find your own location</string>
     <string name="slide_4_desc">Enter your location and find your favorite book!</string>
 
     <string name="play_again_desc">To see the welcome slider again, goto Settings -> apps -> welcome slider -> clear data</string>
