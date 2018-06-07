@@ -550,3 +550,48 @@ exports.generateThumbnail = functions.storage.bucket().object().onFinalize(objec
             return console.log("thumbUrl: " + thumbFileUrl + ", fileUrl: " + fileUrl);
         })*/;
 });
+
+//  Update rating inserted by the borrower
+exports.removeBook = functions.database.ref('/books/{book_id}').onDelete((snap, context) => {
+
+    //  Get book to remove
+    const original = snap.val(),
+
+    //  get book id
+    book_id = context.params.book_id,
+
+    //  get owner id
+    owner = original.user_id;
+
+    //remove book location
+    admin.database().ref("/locationBooks/"+ book_id).remove();
+
+    //remove book from books array
+    admin.database().ref("/users/"+ owner +"/books/"+ book_id).remove();
+
+    //remove book cover --> non funziona per ora
+    gcs.bucket("gs://mad24-ac626.appspot.com").file("/bookCovers/"+ book_id +".jpg").delete();
+    gcs.bucket("gs://mad24-ac626.appspot.com").file("/bookCovers/thumb_"+ book_id +".jpg").delete();
+
+    //remove book from books_to_rate array --> non funziona per ora
+    //.ref("/users/").orderByChild("books_to_rate").equalTo(book_id)
+    /*admin.database().once('value').then(function(snapshot) {
+        snapshot.forEach(function(childSnapshot) {
+            //get user
+            user = childSnapshot.val();
+
+            user.books_to_rate.forEach(function(book) {
+                b = book.val();
+
+                if(b == book_id)
+                    book.ref.remove();
+
+                return;
+            });
+        });
+
+        return;
+    });*/
+
+    return;
+});
