@@ -205,6 +205,10 @@
     <string name="noBooks">Nothing to show, add a new book in the home page</string>
     <string name="borrowedBooks">Borrowed books</string>
     <string name="noBorrowedBooks">You don\'t have any borrowed book</string>
+    <string name="myBooks_cantRemoveBookOnLoan">You can\'t remove a book on loan</string>
+    <string name="myBooks_bookRemoved">Book removed!</string>
+    <string name="myBooks_errorRemovingBook">Error removing the book</string>
+    <string name="myBooks_sureRemoveBook">Are you sure to remove the book?</string>
 
     <!-- View Book -->
     <string name="read_more">More…</string>

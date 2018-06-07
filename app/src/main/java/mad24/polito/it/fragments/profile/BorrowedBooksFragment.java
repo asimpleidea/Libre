@@ -158,19 +158,19 @@ public class BorrowedBooksFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final HashMap<String, String> borrowedBooks = new HashMap<>();
-                final List<Boolean> booksToRate = new LinkedList<>();
-                final List<String> borrowingIds = new LinkedList<>();
+                final HashMap<String, Boolean> booksToRate = new HashMap<>();
+                final HashMap<String, String> borrowingIds = new HashMap<>();
 
                 boolean flag = false;
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                     if(nodeId == null) {
                         borrowedBooks.put(bookSnapshot.getKey(), (String) bookSnapshot.getValue());
-                        booksToRate.add(false);
-                        borrowingIds.add("");
+                        booksToRate.put(bookSnapshot.getKey(), false);
+                        borrowingIds.put(bookSnapshot.getKey(), "");
                     }else if(flag) {
                         borrowedBooks.put(bookSnapshot.getKey(), (String) bookSnapshot.getValue());
-                        booksToRate.add(false);
-                        borrowingIds.add("");
+                        booksToRate.put(bookSnapshot.getKey(), false);
+                        borrowingIds.put(bookSnapshot.getKey(), "");
                     }
                     flag = true;
                 }
@@ -195,8 +195,8 @@ public class BorrowedBooksFragment extends Fragment {
                         for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
                             if (nodeId == null) {
                                 borrowedBooks.put(bookSnapshot.getKey(), (String) bookSnapshot.getValue());
-                                booksToRate.add(true);
-                                borrowingIds.add(bookSnapshot.getKey()+"/"+bookSnapshot.getValue()); //"-LC0OVG4MuFY-qtOAU_b/-LEGYI5vwOTB9YN1TjvK");
+                                booksToRate.put(bookSnapshot.getKey(), true);
+                                borrowingIds.put(bookSnapshot.getKey(), bookSnapshot.getKey()+"/"+bookSnapshot.getValue());
                             }
                         }
 

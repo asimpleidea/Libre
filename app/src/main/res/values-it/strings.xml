@@ -185,6 +185,11 @@
     <string name="noBooks">Non hai ancora postato nessun libro, aggiungine uno dalla home page!</string>
     <string name="borrowedBooks">Libri presi in prestito</string>
     <string name="noBorrowedBooks">Non hai nessun libro preso in prestito</string>
+    <string name="myBooks_cantRemoveBookOnLoan">Non puoi rimuovere un libro in prestito</string>
+    <string name="myBooks_bookRemoved">Libro rimosso!</string>
+    <string name="myBooks_errorRemovingBook">Errore durante la rimozione del libro</string>
+    <string name="myBooks_sureRemoveBook">Sei sicuro di rimuovere il libro?</string>
+
     <!-- View Book -->
     <string name="read_more">Altro…</string>
     <string name="book_by">Di %1$s</string>

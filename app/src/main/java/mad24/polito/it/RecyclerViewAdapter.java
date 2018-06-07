@@ -3,11 +3,13 @@ package mad24.polito.it;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,6 +27,7 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,6 +45,7 @@ import org.w3c.dom.Text;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,8 +61,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     Context mContext;
     List<Book> mData;
     HashSet<String> mDataId;
-
-    int positionToRate = 0;
 
     View v;
 
@@ -144,7 +146,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         //--------------------------------------
 
         BooksActivity myActivity = (BooksActivity) v.getContext();
-        if(myActivity.getCurrentFragment().equals("ProfileFragment")) {
+        if(myActivity.getCurrentFragment().equals("ProfileFragment") && mData.get(position).getUser_id().equals(FirebaseAuth.getInstance().getUid())) {
             final int p = position;
             holder.dots_menu.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -152,6 +154,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     showPopupMenu(holder.dots_menu, p);
                 }
             });
+        } else {
+            holder.dots_menu.setVisibility(View.GONE);
         }
 
         if(holder.itemView.hasOnClickListeners()) return;
@@ -245,7 +249,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    public void retrieveBooksAndToRate(List<String> books_id, final List<Boolean> isToRate, final List<String> borrowingIds) {
+    public void retrieveBooksAndToRate(List<String> books_id, final HashMap<String, Boolean> isToRate, final HashMap<String, String> borrowingIds) {
         //this.isToRate = isToRate;
         //this.borrowingIds = borrowingIds;
 
@@ -268,16 +272,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 
                     Book book = dataSnapshot.getValue(Book.class);
-                    /*for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
-                        books.add(bookSnapshot.getValue(Book.class));
-                    }*/
+
+                    if(book == null)
+                        return;
 
                     //Log.d("booksfragment", "adding "+books.size()+" books");
-                    if(isToRate != null && isToRate.get(positionToRate)) {
+                    if(isToRate.get(book.getBook_id()) != null && isToRate.get(book.getBook_id()).booleanValue() == true) {
                         book.setToRate(true);
-                        book.setBorrowing_id(borrowingIds.get(positionToRate));
+                        book.setBorrowing_id(borrowingIds.get(book.getBook_id()));
                     }
-                    positionToRate++;
 
                     mData.add(book);
                     notifyItemInserted(mData.size());
@@ -362,7 +365,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public boolean onMenuItemClick(MenuItem item) {
             switch(item.getItemId()){
                 case R.id.remove_book:
-                    // TODO: actual code for book removing from DataBase
+                    removeBook(position);
                     return true;
             }
             return false;
@@ -403,6 +406,73 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
             else dots_menu.setVisibility(View.GONE);
         }
+    }
+
+    private void removeBook(final int position) {
+        if(mData.get(position).getBorrowing_id() != null && !mData.get(position).getBorrowing_id().isEmpty()) {
+            showDialog(v.getResources().getString(R.string.myBooks_cantRemoveBookOnLoan));
+            return;
+        }
+
+        //create the AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+
+        //  Set title and message
+        builder.setTitle(R.string.myBooks_sureRemoveBook);
+
+        //  Set negative button
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int which) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        //  Set positive button
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int which) {
+                final Book b = mData.get(position);
+
+                Task task = FirebaseDatabase.getInstance().getReference()
+                        .child(FIREBASE_DATABASE_LOCATION_BOOKS)
+                        .child(b.getBook_id())
+                        .removeValue();
+
+                task.addOnSuccessListener(new OnSuccessListener() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        showDialog(v.getResources().getString(R.string.myBooks_bookRemoved));
+
+                        mData.remove(position);
+                        mDataId.remove(b.getBook_id());
+                        notifyItemRemoved(position);
+                    }
+                });
+
+                task.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        showDialog(v.getResources().getString(R.string.myBooks_errorRemovingBook));
+                    }
+                });
+            }
+        });
+
+        //show the AlertDialog on the screen
+        builder.show();
+    }
+
+    private void showDialog(String title) {
+        new AlertDialog.Builder(v.getContext())
+                .setTitle(title)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
 }

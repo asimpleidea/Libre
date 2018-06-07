@@ -175,7 +175,7 @@ public class RatingDialog extends Dialog {
     private void showThanksDialog(String title) {
         new AlertDialog.Builder(getContext())
                 .setTitle(title)
-                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
