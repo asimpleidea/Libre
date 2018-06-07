@@ -36,6 +36,8 @@ import com.google.firebase.storage.StorageReference;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import mad24.polito.it.BooksActivity;
 import mad24.polito.it.R;

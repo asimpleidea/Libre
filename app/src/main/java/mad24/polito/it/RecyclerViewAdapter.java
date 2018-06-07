@@ -58,6 +58,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     List<Book> mData;
     HashSet<String> mDataId;
 
+    int positionToRate = 0;
+
     View v;
 
     public RecyclerViewAdapter(Context mContext, List<Book> mData) {
@@ -97,6 +99,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             holder.tv_onloan.setText(R.string.bookDetail_bookOnLoan);
         else
             holder.tv_onloan.setText(R.string.bookDetail_bookAvailable);
+
+        if(mData.get(position).isToRate()) {
+            holder.tv_onloan.setText(R.string.bookDetail_bookReturnedRate);
+        }
 
         String bookID = mData.get(position).getBook_id();
         Log.d("bookid", "I'm trying to get this book img: "+bookID);
@@ -226,6 +232,53 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 
                     //Log.d("booksfragment", "adding "+books.size()+" books");
+                    mData.add(book);
+                    notifyItemInserted(mData.size());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+        }
+    }
+
+    public void retrieveBooksAndToRate(List<String> books_id, final List<Boolean> isToRate, final List<String> borrowingIds) {
+        //this.isToRate = isToRate;
+        //this.borrowingIds = borrowingIds;
+
+        Query query;
+
+        final int position = 0;
+        for(String b : books_id){
+            if(mDataId.contains(b))
+                continue;
+            else
+                mDataId.add(b);
+
+            query = FirebaseDatabase.getInstance().getReference()
+                    .child(FIREBASE_DATABASE_LOCATION_BOOKS)
+                    .child(b);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+
+                    Book book = dataSnapshot.getValue(Book.class);
+                    /*for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
+                        books.add(bookSnapshot.getValue(Book.class));
+                    }*/
+
+                    //Log.d("booksfragment", "adding "+books.size()+" books");
+                    if(isToRate != null && isToRate.get(positionToRate)) {
+                        book.setToRate(true);
+                        book.setBorrowing_id(borrowingIds.get(positionToRate));
+                    }
+                    positionToRate++;
+
                     mData.add(book);
                     notifyItemInserted(mData.size());
                 }

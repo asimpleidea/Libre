@@ -137,12 +137,12 @@ public class BorrowedBooksFragment extends Fragment {
 
         Query query;
 
-        if(nodeId == null) {
+        //if(nodeId == null) {
             query = FirebaseDatabase.getInstance().getReference()
                     .child(FIREBASE_DATABASE_LOCATION_USERS)
                     .child(FirebaseAuth.getInstance().getUid())
-                    .child("borrowed_books")
-                    .orderByKey()
+                    .child("borrowed_books");
+                    /*.orderByKey()
                     .limitToFirst(mBooksPerPage);
         }else{
             query = FirebaseDatabase.getInstance().getReference()
@@ -152,19 +152,26 @@ public class BorrowedBooksFragment extends Fragment {
                     .orderByKey()
                     .startAt(nodeId)
                     .limitToFirst(mBooksPerPage);
-        }
+        }*/
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                HashMap<String, String> borrowedBooks = new HashMap<>();
+                final HashMap<String, String> borrowedBooks = new HashMap<>();
+                final List<Boolean> booksToRate = new LinkedList<>();
+                final List<String> borrowingIds = new LinkedList<>();
+
                 boolean flag = false;
                 for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
-                    if(nodeId == null)
-                        borrowedBooks.put(bookSnapshot.getKey(), (String)bookSnapshot.getValue());
-                    else
-                    if(flag)
-                        borrowedBooks.put(bookSnapshot.getKey(), (String)bookSnapshot.getValue());
+                    if(nodeId == null) {
+                        borrowedBooks.put(bookSnapshot.getKey(), (String) bookSnapshot.getValue());
+                        booksToRate.add(false);
+                        borrowingIds.add("");
+                    }else if(flag) {
+                        borrowedBooks.put(bookSnapshot.getKey(), (String) bookSnapshot.getValue());
+                        booksToRate.add(false);
+                        borrowingIds.add("");
+                    }
                     flag = true;
                 }
 
@@ -176,7 +183,41 @@ public class BorrowedBooksFragment extends Fragment {
                     tv.setVisibility(View.INVISIBLE);
                     rv.setVisibility(View.VISIBLE);
                 }
-                recyclerViewAdapter.retrieveBooks(new LinkedList<String>(borrowedBooks.keySet() ));
+
+                Query queryToRate = FirebaseDatabase.getInstance().getReference()
+                        .child(FIREBASE_DATABASE_LOCATION_USERS)
+                        .child(FirebaseAuth.getInstance().getUid())
+                        .child("books_to_rate");
+
+                queryToRate.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot bookSnapshot : dataSnapshot.getChildren()) {
+                            if (nodeId == null) {
+                                borrowedBooks.put(bookSnapshot.getKey(), (String) bookSnapshot.getValue());
+                                booksToRate.add(true);
+                                borrowingIds.add(bookSnapshot.getKey()+"/"+bookSnapshot.getValue()); //"-LC0OVG4MuFY-qtOAU_b/-LEGYI5vwOTB9YN1TjvK");
+                            }
+                        }
+
+                        Log.d("borrowed books", "adding " + borrowedBooks.size() + " books to rate");
+                        if (borrowedBooks.size() == 0 && recyclerViewAdapter.getItemCount() == 0) {
+                            tv.setVisibility(View.VISIBLE);
+                            rv.setVisibility(View.INVISIBLE);
+                        } else {
+                            tv.setVisibility(View.INVISIBLE);
+                            rv.setVisibility(View.VISIBLE);
+                        }
+
+                        recyclerViewAdapter.retrieveBooksAndToRate(new LinkedList<String>(borrowedBooks.keySet() ), booksToRate, borrowingIds);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        mIsLoading = false;
+                    }
+                });
+
             }
 
             @Override

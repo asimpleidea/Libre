@@ -23,6 +23,8 @@ public class Book {
 
     private ArrayList<Integer> genres;
 
+    private boolean isToRate = false;
+
     public Book() {
     }
 
@@ -163,4 +165,11 @@ public class Book {
 
     public void setBorrowing_id(String borrowing_id) { this.borrowing_id = borrowing_id; }
 
+    public boolean isToRate() {
+        return isToRate;
+    }
+
+    public void setToRate(boolean toRate) {
+        isToRate = toRate;
+    }
 }

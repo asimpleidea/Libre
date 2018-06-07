@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 import mad24.polito.it.BooksActivity;
@@ -27,6 +28,7 @@ import mad24.polito.it.R;
 
 public class RatingDialog extends Dialog {
     private static final String FIREBASE_DATABASE_LOCATION_BORROWINGS = BooksActivity.FIREBASE_DATABASE_LOCATION_BORROWINGS;
+    private static final String FIREBASE_DATABASE_LOCATION_USERS = BooksActivity.FIREBASE_DATABASE_LOCATION_USERS;
 
     public Activity c;
     public Dialog dialog;
@@ -39,9 +41,10 @@ public class RatingDialog extends Dialog {
 
     private String bookBorrowingId;
     private String borrowerOrOwner;
+    private String bookId;
 
 
-    public RatingDialog(Activity a, String bookBorrowingId, String borrowerOrOwner) {
+    public RatingDialog(Activity a, String bookBorrowingId, String borrowerOrOwner, String bookId) {
         super(a);
 
         this.c = a;
@@ -53,6 +56,7 @@ public class RatingDialog extends Dialog {
         else
             this.borrowerOrOwner = "owner_rating";
 
+        this.bookId = bookId;
     }
 
     @Override
@@ -140,7 +144,30 @@ public class RatingDialog extends Dialog {
         negativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dismiss();
+                if(borrowerOrOwner.equals("borrower_rating")) {
+                    Task task = FirebaseDatabase.getInstance().getReference()
+                            .child(FIREBASE_DATABASE_LOCATION_USERS)
+                            .child(FirebaseAuth.getInstance().getUid())
+                            .child("books_to_rate")
+                            .child(bookId)
+                            .removeValue();
+
+                    task.addOnSuccessListener(new OnSuccessListener() {
+                        @Override
+                        public void onSuccess(Object o) {
+                            dismiss();
+                        }
+                    });
+
+                    task.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            dismiss();
+                        }
+                    });
+                } else {
+                    dismiss();
+                }
             }
         });
     }

@@ -3,5 +3,5 @@
 
     <item
         android:id="@+id/remove_book"
-        android:title="Remove book"/> <!-- TODO: string value -->
+        android:title="@string/bookLayout_removeBook"/>
 </menu>

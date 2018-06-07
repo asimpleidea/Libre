@@ -201,6 +201,7 @@
     <string name="books_noResults">Non ci sono libri disponibili</string>
     <string name="bookDetail_bookOnLoan">In prestito</string>
     <string name="bookDetail_bookAvailable">Disponibile</string>
+    <string name="bookDetail_bookReturnedRate">Restituito al proprietario! Valuta la tua esperienza</string>
     <string name="bookDetail_bookInYourPossession">Il libro è in tuo possesso</string>
     <string name="bookDetail_bookInYourPossessionRemember">Il libro è in tuo possesso, ricorda di restituirlo a:</string>
     <string name="bookDetail_terminateLoan">Termina prestito</string>
@@ -211,6 +212,7 @@
     <string name="bookDetail_comments">Vedi i commenti</string>
     <string name="bookDetail_titleComment">Valutazioni riguardo %1$s</string>
     <string name="bookDetail_noRatings">Nessuna valutazione</string>
+    <string name="bookDetail_rateUser">Valuta l\'utente</string>
 
     <string name="user_ratings_count">%1$d valutazioni</string>
     <string name="action_settings">Impostazioni</string>
@@ -248,7 +250,7 @@
     <!-- rating dialog-->
     <string name="ratingDialog_title">Valuta l\'utente</string>
     <string name="ratingDialog_comment">Inserisci un commento</string>
-    <string name="ratingDialog_negativeButton">Annulla</string>
+    <string name="ratingDialog_negativeButton">Non valutare</string>
     <string name="ratingDialog_positiveButton">Invia valutazione</string>
     <string name="ratingDialog_1star">Molto male</string>
     <string name="ratingDialog_2stars">Male</string>
@@ -256,4 +258,6 @@
     <string name="ratingDialog_4stars">Bene</string>
     <string name="ratingDialog_5stars">Molto bene</string>
     <string name="ratingDialog_thanks">Grazie per la tua valutazione</string>
+
+    <string name="bookLayout_removeBook">Rimuovi libro</string>
 </resources>

@@ -142,6 +142,9 @@ public class BookBorrowerFragment extends Fragment
                     UID = borrowing.getTo();
                 }
 
+                if(TheBook.isToRate())
+                    textLoan.setText(R.string.bookDetail_bookReturned);
+
                 DB = FirebaseDatabase.getInstance().getReference()
                         .child(FIREBASE_DATABASE_LOCATION_USERS + "/" + UID);
                 TheBook = new Gson().fromJson(getArguments().getString("book"), Book.class);
@@ -178,82 +181,55 @@ public class BookBorrowerFragment extends Fragment
                     }
                 });
 
-                buttonTerminateLoan.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        final String borrowingId = TheBook.getBorrowing_id();
-                        String temp;
-                        if(TheBook.getUser_id().equals(FirebaseAuth.getInstance().getUid()))
-                            temp = "owner";
-                        else
-                            temp = "borrower";
+                if(TheBook.getUser_id().equals(FirebaseAuth.getInstance().getUid()) || TheBook.isToRate()) {
+                    buttonTerminateLoan.setVisibility(View.VISIBLE);
 
-                        final String borrowerOrOwner = temp;
-
-                        //create the AlertDialog
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        //builder.setTitle("Add Photo!");
-                        //  Set title and message
-                        builder.setMessage(R.string.bookDetail_terminateLoanDialogMessage)
-                                .setTitle(R.string.bookDetail_terminateLoanDialogTitle);
-
-                        //  Set negative button
-                        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int which) {
-                                dialogInterface.dismiss();
+                    buttonTerminateLoan.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            final String borrowingId = TheBook.getBorrowing_id();
+                            String temp;
+                            if (TheBook.getUser_id().equals(FirebaseAuth.getInstance().getUid()))
+                                temp = "owner";
+                            else {
+                                temp = "borrower";
                             }
-                        });
 
-                        //  Set positive button
-                        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int which) {
-                                Task task = FirebaseDatabase.getInstance().getReference()
-                                        .child(FIREBASE_DATABASE_LOCATION_BOOKS)
-                                        .child(TheBook.getBook_id())
-                                        .child("borrowing_id")
-                                        .setValue(new String(""));
+                            final String borrowerOrOwner = temp;
 
-                                task.addOnSuccessListener(new OnSuccessListener() {
+                            if(borrowerOrOwner.equals("owner")) {
+                                //create the AlertDialog
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                //builder.setTitle("Add Photo!");
+                                //  Set title and message
+                                builder.setMessage(R.string.bookDetail_terminateLoanDialogMessage)
+                                        .setTitle(R.string.bookDetail_terminateLoanDialogTitle);
+
+                                //  Set negative button
+                                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                                     @Override
-                                    public void onSuccess(Object o) {
-                                        //create dialog to rate the other user
-                                        RatingDialog ratingDialog = new RatingDialog(getActivity(), borrowingId, borrowerOrOwner);
-
-                                        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                                        lp.copyFrom(ratingDialog.getWindow().getAttributes());
-                                        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-                                        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
-                                        ratingDialog.show();
-                                        ratingDialog.getWindow().setAttributes(lp);
-
-
-                                        borrowerLayout.setVisibility(View.GONE);
-
-                                        if(borrowerOrOwner.equals("borrower"))
-                                            textInYourPossession.setText(getResources().getString(R.string.bookDetail_bookReturned));
-
-                                        textInYourPossession.setVisibility(View.VISIBLE);
-                                        TheBook.setBorrowing_id("");
+                                    public void onClick(DialogInterface dialogInterface, int which) {
+                                        dialogInterface.dismiss();
                                     }
                                 });
 
-                                task.addOnFailureListener(new OnFailureListener() {
+                                //  Set positive button
+                                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                                     @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        //show error dialog
-                                        showErrorDialog(getResources().getString(R.string.bookDetail_errorTerminatingLoan));
+                                    public void onClick(DialogInterface dialogInterface, int which) {
+                                        createRatingDialog(borrowingId, borrowerOrOwner, TheBook.getBook_id());
                                     }
                                 });
+
+                                //show the AlertDialog on the screen
+                                builder.show();
+                            } else {
+                                createRatingDialog(borrowingId, borrowerOrOwner, TheBook.getBook_id());
                             }
-                        });
+                        }
+                    });
 
-                        //show the AlertDialog on the screen
-                        builder.show();
-                    }
-                });
-
+                }
 
 
                 loadAndInjectUser();
@@ -385,6 +361,9 @@ public class BookBorrowerFragment extends Fragment
         ratingNumber = (TextView) RootView.findViewById(R.id.borrowerRatingNumber);
         commentsButton = (Button) RootView.findViewById(R.id.borrowerComments);
 
+        if(TheBook.isToRate())
+            buttonTerminateLoan.setText(R.string.bookDetail_rateUser);
+
         if(User == null) {
             loadAndInjectBorrowing();
         } else {
@@ -438,5 +417,46 @@ public class BookBorrowerFragment extends Fragment
                     }
                 })
                 .show();
+    }
+
+    private void createRatingDialog(final String borrowingId, final String borrowerOrOwner, final String bookId) {
+        Task task = FirebaseDatabase.getInstance().getReference()
+                .child(FIREBASE_DATABASE_LOCATION_BOOKS)
+                .child(TheBook.getBook_id())
+                .child("borrowing_id")
+                .setValue(new String(""));
+
+        task.addOnSuccessListener(new OnSuccessListener() {
+            @Override
+            public void onSuccess(Object o) {
+                //create dialog to rate the other user
+                RatingDialog ratingDialog = new RatingDialog(getActivity(), borrowingId, borrowerOrOwner, bookId);
+
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(ratingDialog.getWindow().getAttributes());
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+                ratingDialog.show();
+                ratingDialog.getWindow().setAttributes(lp);
+
+
+                borrowerLayout.setVisibility(View.GONE);
+
+                if (borrowerOrOwner.equals("borrower"))
+                    textInYourPossession.setText(getResources().getString(R.string.bookDetail_bookReturned));
+
+                textInYourPossession.setVisibility(View.VISIBLE);
+                TheBook.setBorrowing_id("");
+            }
+        });
+
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                //show error dialog
+                showErrorDialog(getResources().getString(R.string.bookDetail_errorTerminatingLoan));
+            }
+        });
+
     }
 }

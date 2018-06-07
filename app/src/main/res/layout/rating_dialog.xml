@@ -57,7 +57,7 @@
             android:layout_height="wrap_content"
             android:text="@string/ratingDialog_negativeButton"
             android:background="@null"
-            android:layout_toLeftOf="@id/ratingDialog_positiveButton"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentBottom="true"
             />
 

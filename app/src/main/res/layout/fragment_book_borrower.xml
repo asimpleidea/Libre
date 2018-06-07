@@ -165,6 +165,7 @@
                 android:textSize="18sp"
                 android:textColor="@color/colorWhite"
                 android:background="@drawable/roundedbutton_red"
+                android:visibility="gone"
                 />
 
         </LinearLayout>

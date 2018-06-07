@@ -224,6 +224,7 @@
     <string name="books_noResults">There are no books available</string>
     <string name="bookDetail_bookOnLoan">On loan</string>
     <string name="bookDetail_bookAvailable">Available</string>
+    <string name="bookDetail_bookReturnedRate">Returned to the owner! Rate your experience</string>
     <string name="bookDetail_bookInYourPossession">The book is in your possession</string>
     <string name="bookDetail_bookInYourPossessionRemember">The book is in your possession, remember to return it to:</string>
     <string name="bookDetail_terminateLoan">Terminate loan</string>
@@ -235,6 +236,7 @@
     <string name="user_ratings_count">%1$d ratings</string>
     <string name="bookDetail_titleComment">Ratings about %1$s</string>
     <string name="bookDetail_noRatings">No ratings</string>
+    <string name="bookDetail_rateUser">Rate the user</string>
 
     <!-- Fragments toolbar -->
     <string name="chat">Chat</string>
@@ -276,7 +278,7 @@
     <!-- rating dialog-->
     <string name="ratingDialog_title">Evaluate the user</string>
     <string name="ratingDialog_comment">Insert a comment</string>
-    <string name="ratingDialog_negativeButton">Cancel</string>
+    <string name="ratingDialog_negativeButton">Don\'t evaluate</string>
     <string name="ratingDialog_positiveButton">Send evaluation</string>
     <string name="ratingDialog_1star">Very bad</string>
     <string name="ratingDialog_2stars">Bad</string>
@@ -284,5 +286,7 @@
     <string name="ratingDialog_4stars">Good</string>
     <string name="ratingDialog_5stars">Very good</string>
     <string name="ratingDialog_thanks">Thanks for your evaluation</string>
+
+    <string name="bookLayout_removeBook">Remove book</string>
 
 </resources>
