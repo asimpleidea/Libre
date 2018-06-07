@@ -161,13 +161,22 @@ exports.updateAvailability = functions.database.ref('/books/{book_id}/borrowing_
         {
             const update_returned_at = admin.database().ref("borrowings/" + book_id + "/" + borrowing_id).update({returned_at : returned_at});
             promises.push(update_returned_at);
+
+            const update_borrowed =  admin.database().ref("borrowings/" + book_id + "/" + borrowing_id).once("value").then(result =>
+            {
+                const data = result.val(),
+                        update = {};
+                        update[book_id] = !available ? borrowing_id : null;
+
+                return admin.database().ref("users/" + data.to + "/books_to_rate/"+ book_id).set(borrowing_id);
+            });
         }
     }
 
     return Promise.all(promises);
 });
 
-//  Update rating inserted by owner
+//  Update rating inserted by the owner
 exports.addRatingByOwner = functions.database.ref('/borrowings/{book_id}/{borrowing_id}/owner_rating').onCreate((snap, context) => 
 {
     //  Get the data
@@ -198,7 +207,7 @@ exports.addRatingByOwner = functions.database.ref('/borrowings/{book_id}/{borrow
     });
 });
 
-//  Update rating inserted by borrower
+//  Update rating inserted by the borrower
 exports.addRatingByBorrower = functions.database.ref('/borrowings/{book_id}/{borrowing_id}/borrower_rating').onCreate((snap, context) => 
 {
     //  Get the data
@@ -223,6 +232,7 @@ exports.addRatingByBorrower = functions.database.ref('/borrowings/{book_id}/{bor
         const borrower = result.val().to;
         const comment = original.comment;
         updateComments(owner, borrowing_id, borrower, stars, comment);
+        removeBookToRate(borrower, book_id);
 
         return updateRating(owner, stars);
     })
@@ -258,6 +268,12 @@ function updateComments(userToUpdate, borrowingId, commentWriter, stars, comment
                                                                                 "stars": stars,
                                                                                 "comment": comment
                                                                                 });
+}
+
+function removeBookToRate(borrowerId, bookId)
+{
+    //  Do it in a transaction
+    return admin.database().ref("users/" + borrowerId + "/books_to_rate/" + bookId).remove();
 }
 
 exports.replicateStatus = functions.firestore.document('/chat_messages/{chatId}/partecipants/{userId}').onUpdate((change, context) => 
