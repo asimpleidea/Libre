@@ -96,8 +96,11 @@ exports.createChat = functions.firestore.document('/chat_messages/{chatId}/parte
 
     const otherUser = user === users[0] ? users[1] : users[0];
 
-    return admin.firestore().doc("chats/" + user + "/conversations/" + chatId).set({chat_id : chatId, partner_id: otherUser, book_id : book_id});
-});
+    const chat_promise = admin.firestore().doc("chats/" + user + "/conversations/" + chatId).set({chat_id : chatId, partner_id: otherUser, book_id : book_id}),
+            book_chat = admin.firestore().doc("book_chats/" + book_id + "/conversations/" + chatId).set({id: chatId});
+
+    return Promise.all([ chat_promise, book_chat ]);
+        });
 
 exports.updateAvailability = functions.database.ref('/books/{book_id}/borrowing_id').onWrite((change, context) => 
 {
@@ -568,20 +571,96 @@ exports.removeBook = functions.database.ref('/booksTest/{book_id}').onDelete((sn
     
     //  Set the user books promise
     owner_book = admin.database().ref("/users/" + owner + "/books/" + book_id).remove(),
-
+    
     //  The storage bucket 
     bucket = gcs.bucket("mad24-ac626.appspot.com"),
 
     //  Set the images references
     //  Note: not all of our books have a has_image field. So I can't check that, unfortunately
-    image_delete = bucket.file("bookCovers/" + book_id + ".jpg").delete(),
-    thumb_delete = bucket.file("bookCovers/thumb_" + book_id + ".jpg").delete();
+/*    image_delete = bucket.file("bookCovers/" + book_id + ".jpg").delete(),
+    thumb_delete = bucket.file("bookCovers/thumb_" + book_id + ".jpg").delete(),
+*/
+    //  Get all the chats about this book
+    //  NOTE: Unfortunately, firebase (and firestore) has no concept of soft delete (or logical delete).
+    //  So, I have to delete what's inside an object before actually deleting that object. 
+    //  Feels bad, man.
+    chat_book = admin.firestore().collection("book_chats/" + book_id + "/conversations/").get().then(results => 
+    {
+        //  Chats messages promises
+        const chats_messages = [],
+
+        //  Chats promises
+        chats = [],
+
+        //  Books promise
+        book_collection = [],
+
+        doc_ids = [];
+
+        results.forEach( doc => 
+        {
+            let users = doc.id.split(":")[1].split("&");
+
+            //  Get the ids
+            doc_ids.push(doc.id);
+
+            //  Delete what's inside the book collection
+            book_collection.push(admin.firestore().doc("book_chats/" + book_id + "/conversations/" + doc.id).delete());
+
+            //  Delete the partecipants object
+            chats_messages.push(admin.firestore().doc("chat_messages/" + doc.id + "/partecipants/" + users[0]).delete());
+            chats_messages.push(admin.firestore().doc("chat_messages/" + doc.id + "/partecipants/" + users[1]).delete());
+
+            //  Delete the conversations
+            chats.push(admin.firestore().doc("chats/" + users[0] + "/conversations/" + doc.id).delete());
+            chats.push(admin.firestore().doc("chats/" + users[1] + "/conversations/" + doc.id).delete());
+        });
+
+        return Promise.all([chats_messages, chats, book_collection, doc_ids]);    
+    }).then(results => 
+    {
+        //  Get the ids from the previous promise
+        const ids = results[3],
+
+        //  The queries
+        queries = [];
+
+        if(!Array.isArray(ids) || (Array.isArray(ids) && ids.length < 1)) 
+        {
+            console.log("error while trying to query messages to delete");
+            return null;
+        }
+        
+        ids.forEach(id => 
+        {
+            queries.push(admin.firestore().collection("chat_messages/" + id + "/messages").get());
+        });
+
+        return Promise.all(queries);
+    }).then(results => 
+    {
+        if(results === null) return console.log("exiting removeBook because results is null");
+
+        //  The messages promises
+        const messages = [];
+
+        results.forEach(r => 
+        {
+            r.forEach(d => 
+            {
+                messages.push(d.ref.delete());
+            });            
+        });
+
+        return Promise.all(messages);
+    });
 
     //  Ok now do the actual stuff, all asynchronously
     return Promise.all([    location_book, 
                             owner_book,
-                            image_delete,
-                            thumb_delete    ]);
+                            /*image_delete,
+                            thumb_delete,*/
+                            chat_book   ]);
 
     //remove book from books array
     /*admin.database().ref("/users/"+ owner +"/books/"+ book_id).remove();
