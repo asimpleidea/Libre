@@ -1,6 +1,7 @@
 package mad24.polito.it.fragments.viewbook;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -480,5 +481,21 @@ public class ViewBookFragment extends Fragment implements FragmentWithLoadingLis
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if(fragment == 1)
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if(fragment == 1)
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 }
