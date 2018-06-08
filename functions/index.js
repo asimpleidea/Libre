@@ -552,7 +552,7 @@ exports.generateThumbnail = functions.storage.bucket().object().onFinalize(objec
 });
 
 //  Update rating inserted by the borrower
-exports.removeBook = functions.database.ref('/books/{book_id}').onDelete((snap, context) => {
+exports.removeBook = functions.database.ref('/booksTest/{book_id}').onDelete((snap, context) => {
 
     //  Get book to remove
     const original = snap.val(),
@@ -561,21 +561,38 @@ exports.removeBook = functions.database.ref('/books/{book_id}').onDelete((snap, 
     book_id = context.params.book_id,
 
     //  get owner id
-    owner = original.user_id;
+    owner = original.user_id,
 
-    //remove book location
-    admin.database().ref("/locationBooks/"+ book_id).remove();
+    //  Set the location books promise
+    location_book = admin.database().ref("/locationBooksTest/" + book_id).remove(),
+    
+    //  Set the user books promise
+    owner_book = admin.database().ref("/users/" + owner + "/books/" + book_id).remove(),
+
+    //  The storage bucket 
+    bucket = gcs.bucket("mad24-ac626.appspot.com"),
+
+    //  Set the images references
+    //  Note: not all of our books have a has_image field. So I can't check that, unfortunately
+    image_delete = bucket.file("bookCovers/" + book_id + ".jpg").delete(),
+    thumb_delete = bucket.file("bookCovers/thumb_" + book_id + ".jpg").delete();
+
+    //  Ok now do the actual stuff, all asynchronously
+    return Promise.all([    location_book, 
+                            owner_book,
+                            image_delete,
+                            thumb_delete    ]);
 
     //remove book from books array
-    admin.database().ref("/users/"+ owner +"/books/"+ book_id).remove();
+    /*admin.database().ref("/users/"+ owner +"/books/"+ book_id).remove();
 
     //remove book cover --> non funziona per ora
     gcs.bucket("gs://mad24-ac626.appspot.com").file("/bookCovers/"+ book_id +".jpg").delete();
-    gcs.bucket("gs://mad24-ac626.appspot.com").file("/bookCovers/thumb_"+ book_id +".jpg").delete();
+    gcs.bucket("gs://mad24-ac626.appspot.com").file("/bookCovers/thumb_"+ book_id +".jpg").delete();*/
 
-    //remove book from books_to_rate array --> non funziona per ora
+    /*//remove book from books_to_rate array --> non funziona per ora
     //.ref("/users/").orderByChild("books_to_rate").equalTo(book_id)
-    /*admin.database().once('value').then(function(snapshot) {
+    admin.database().once('value').then(function(snapshot) {
         snapshot.forEach(function(childSnapshot) {
             //get user
             user = childSnapshot.val();
@@ -592,6 +609,4 @@ exports.removeBook = functions.database.ref('/books/{book_id}').onDelete((snap, 
 
         return;
     });*/
-
-    return;
 });
