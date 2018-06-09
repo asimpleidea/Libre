@@ -577,9 +577,10 @@ exports.removeBook = functions.database.ref('/booksTest/{book_id}').onDelete((sn
 
     //  Set the images references
     //  Note: not all of our books have a has_image field. So I can't check that, unfortunately
-/*    image_delete = bucket.file("bookCovers/" + book_id + ".jpg").delete(),
+    //  Note: this will throw an error if the image does not exist. And who cares? Just don't do anything then.
+    image_delete = bucket.file("bookCovers/" + book_id + ".jpg").delete(),
     thumb_delete = bucket.file("bookCovers/thumb_" + book_id + ".jpg").delete(),
-*/
+
     //  Get all the chats about this book
     //  NOTE: Unfortunately, firebase (and firestore) has no concept of soft delete (or logical delete).
     //  So, I have to delete what's inside an object before actually deleting that object. 
@@ -658,8 +659,8 @@ exports.removeBook = functions.database.ref('/booksTest/{book_id}').onDelete((sn
     //  Ok now do the actual stuff, all asynchronously
     return Promise.all([    location_book, 
                             owner_book,
-                            /*image_delete,
-                            thumb_delete,*/
+                            image_delete,
+                            thumb_delete,
                             chat_book   ]);
 
     //remove book from books array
