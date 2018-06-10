@@ -203,8 +203,14 @@ exports.addRatingByOwner = functions.database.ref('/borrowings/{book_id}/{borrow
         const user = result.val().to;
 
         const owner = result.val().from;
-        const comment = original.comment;
+
+        if(original.comment)
+            comment = original.comment;
+        else
+            comment = "";
+
         updateComments(user, borrowing_id, owner, stars, comment);
+
 
         return updateRating(user, stars);
     });
@@ -233,8 +239,13 @@ exports.addRatingByBorrower = functions.database.ref('/borrowings/{book_id}/{bor
         const owner = result.val().from;
 
         const borrower = result.val().to;
-        const comment = original.comment;
+
+        if(original.comment)
+            comment = original.comment;
+        else
+            comment = "";
         updateComments(owner, borrowing_id, borrower, stars, comment);
+
         removeBookToRate(borrower, book_id);
 
         return updateRating(owner, stars);
